@@ -11,7 +11,7 @@ struct Vehicle: Identifiable, Hashable {
     var make: String
     var model: String
     var year: String
-    var trim: String
+    var color: String
 }
 
 struct ContentView: View {
@@ -20,7 +20,7 @@ struct ContentView: View {
     @State private var make: String = ""
     @State private var model: String = ""
     @State private var year: String = ""
-    @State private var trim: String = ""
+    @State private var color: String = ""
     @State private var showPartsDropdown: Bool = false
     
     // list of relavantParts shown later with showRelavantParts
@@ -56,7 +56,7 @@ struct ContentView: View {
                             .foregroundColor(.white)
                         //FIXME: keep as one line or seperate?
                         
-                        Text("\(vehicle.year) \(vehicle.make) \(vehicle.model) \(vehicle.trim)")
+                        Text("\(vehicle.year) \(vehicle.make) \(vehicle.model) \(vehicle.color)")
                         /*
                         Text("Make: \(vehicle.make)")
                         Text("Model: \(vehicle.model)")
@@ -168,7 +168,7 @@ struct ContentView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .padding(.horizontal)
 
-                        TextField("Trim", text: $trim)
+                        TextField("Color", text: $color)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .padding(.horizontal)
                     }
@@ -176,14 +176,14 @@ struct ContentView: View {
 
                     // Save Vehicle Button
                     Button(action: {
-                        if !make.isEmpty && !model.isEmpty && !year.isEmpty && !trim.isEmpty {
-                            let newVehicle = Vehicle(make: make, model: model, year: year, trim: trim)
+                        if !make.isEmpty && !model.isEmpty && !year.isEmpty && !color.isEmpty {
+                            let newVehicle = Vehicle(make: make, model: model, year: year, color: color)
                             vehicles.append(newVehicle) // Save new vehicle
                             selectedVehicle = newVehicle // Select the newly added vehicle
                             make = ""
                             model = ""
                             year = ""
-                            trim = ""
+                            color = ""
                         }
                     }) {
                         // allow user to save vehicle information
