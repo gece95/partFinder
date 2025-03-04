@@ -54,15 +54,9 @@ struct ContentView: View {
                         Text("Selected Vehicle:")
                             .font(.title2)
                             .foregroundColor(.white)
-                        //FIXME: keep as one line or seperate?
-                        
+                       
+                       //displays vehicle information once inputted
                         Text("\(vehicle.year) \(vehicle.make) \(vehicle.model) \(vehicle.trim)")
-                        /*
-                        Text("Make: \(vehicle.make)")
-                        Text("Model: \(vehicle.model)")
-                        Text("Year: \(vehicle.year)")
-                        Text("Color: \(vehicle.color)")
-                         */
                     }
                     
                     .foregroundColor(.blue)
