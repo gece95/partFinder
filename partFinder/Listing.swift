@@ -4,7 +4,7 @@
 //
 //  Created by Zoe Hazan on 3/4/25.
 //
-
+/*
 import Foundation
 
 class Listing {
@@ -43,3 +43,4 @@ let dummyListings: [Listing] = [
     
     Listing(title: "Supercharged V6", partType: "Engine", make: "Jaguar", model: "F-Type", year: "2018", trim: "R-Dynamic", price: 5000.0, description: "Powerful supercharged V6 engine, ready for installation.", city: "Chicago", phoneNumber: "111-222-3333")
 ]
+*/
