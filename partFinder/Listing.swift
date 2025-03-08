@@ -4,7 +4,7 @@
 //
 //  Created by Zoe Hazan on 3/4/25.
 //
-
+/*
 import Foundation
 
 class Listing {
@@ -16,10 +16,11 @@ class Listing {
     var trim = ""
     var price = 0.0
     var description = ""
+    var sellerFullName = ""
     var city = ""
     var phoneNumber = ""
     
-    init(title: String, partType: String, make: String, model: String, year: String, trim: String, price: Double, description: String, city: String, phoneNumber: String) {
+    init(title: String, partType: String, make: String, model: String, year: String, trim: String, price: Double, description: String, sellerFullName: String, city: String, phoneNumber: String) {
         self.title = title
         self.partType = partType // Battery, brakes, etc.
         self.make = make
@@ -28,6 +29,7 @@ class Listing {
         self.trim = trim
         self.price = price
         self.description = description
+        self.sellerFullName = sellerFullName
         self.city = city
         self.phoneNumber = phoneNumber
     }
@@ -43,3 +45,4 @@ let dummyListings: [Listing] = [
     
     Listing(title: "Supercharged V6", partType: "Engine", make: "Jaguar", model: "F-Type", year: "2018", trim: "R-Dynamic", price: 5000.0, description: "Powerful supercharged V6 engine, ready for installation.", city: "Chicago", phoneNumber: "111-222-3333")
 ]
+*/
