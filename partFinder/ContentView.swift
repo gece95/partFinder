@@ -230,6 +230,7 @@ struct VehicleSelectionView: View {
 
 struct PartListingsView: View {
     var partType: String
+    @State private var priceFilter: Double = 5000.0
     
     var body: some View {
         ScrollView {
@@ -238,47 +239,65 @@ struct PartListingsView: View {
                     .font(.title2)
                     .foregroundColor(.white)
                     .padding(.top, 50)
-                
-                ForEach(dummyListings.filter { $0.partType == partType }, id: \.id) { listing in
-                    VStack(alignment: .leading) {
-                        Text("\(listing.title) - $\(listing.price, specifier: "%.2f")")
-                            .font(.headline)
-                            .bold()
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color.white)
-
-                        Text("Make: \(listing.make), Model: \(listing.model), Year: \(listing.year), Trim: \(listing.trim)")
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color.white)
-
-                        Text("City: \(listing.city)")
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color.white)
-
-                        Text("Contact: \(listing.phoneNumber)")
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color.white)
-
-                        Text("Description: \(listing.description)")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color.white)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.black.opacity(0.3))
-                    .cornerRadius(10)
                     .padding(.horizontal)
+                
+                VStack {
+                    Text("\nFilter by Maximum Price: $\(priceFilter, specifier: "%.2f")")
+                        .foregroundColor(.white)
+                        .padding(.top, 20)
+                    
+                    
+                    Slider(value: $priceFilter, in: 0...5000, step: 50)
+                        .padding(.horizontal)
+                        .padding(.top, 5)
+                }
+                .padding(.horizontal)
+                
+                LazyVStack(spacing: 15) {
+                    ForEach(dummyListings.filter { $0.partType == partType && $0.price <= priceFilter }, id: \.id) { listing in
+                        VStack(alignment: .leading) {
+                            Text("\(listing.title) - $\(listing.price, specifier: "%.2f")")
+                                .font(.headline)
+                                .bold()
+                                .padding(.bottom, 5)
+                                .foregroundColor(Color.white)
+                            
+                            Text("Make: \(listing.make), Model: \(listing.model), Year: \(listing.year), Trim: \(listing.trim)")
+                                .padding(.bottom, 5)
+                                .foregroundColor(Color.white)
+                            
+                            Text("City: \(listing.city)")
+                                .padding(.bottom, 5)
+                                .foregroundColor(Color.white)
+                            
+                            Text("Contact: \(listing.phoneNumber)")
+                                .padding(.bottom, 5)
+                                .foregroundColor(Color.white)
+                            
+                            Text("Description: \(listing.description)")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.leading)
+                                .foregroundColor(Color.white)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.bottom, 10)
+                        }
+                        .padding()
+                        .background(Color.black.opacity(0.3))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                    }
+                    .padding(.bottom, 10)
                 }
             }
             .frame(maxWidth: .infinity)
+            .foregroundColor(.white)
         }
         .background(Color.black)
         .ignoresSafeArea()
     }
 }
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
