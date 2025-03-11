@@ -7,7 +7,10 @@
 import SwiftUI
 import Foundation
 
+// Defines a Vehicle struct that conforms to Identifiable and Hashable
+// Used to store vehicle details such as make, model, year, and trim
 struct Vehicle: Identifiable, Hashable {
+    // Unique identifier for each vehicle
     let id = UUID()
     var make: String
     var model: String
@@ -15,49 +18,18 @@ struct Vehicle: Identifiable, Hashable {
     var trim: String
 }
 
-class Listing: Identifiable {
-    let id = UUID()
-    var title: String
-    var partType: String
-    var make: String
-    var model: String
-    var year: String
-    var trim: String
-    var price: Double
-    var description: String
-    var city: String
-    var phoneNumber: String
-    
-    init(title: String, partType: String, make: String, model: String, year: String, trim: String, price: Double, description: String, city: String, phoneNumber: String) {
-        self.title = title
-        self.partType = partType
-        self.make = make
-        self.model = model
-        self.year = year
-        self.trim = trim
-        self.price = price
-        self.description = description
-        self.city = city
-        self.phoneNumber = phoneNumber
-    }
-}
-
-let dummyListings: [Listing] = [
-    Listing(title: "V8 Engine", partType: "Engine", make: "Ford", model: "Mustang", year: "2019", trim: "GT", price: 3500.0, description: "High-performance V8 engine in excellent condition.", city: "Los Angeles", phoneNumber: "123-456-7890"),
-    Listing(title: "Turbocharged Engine", partType: "Engine", make: "Subaru", model: "WRX", year: "2020", trim: "STI", price: 4200.0, description: "Low-mileage turbocharged engine, perfect for performance builds.", city: "Denver", phoneNumber: "987-654-3210"),
-    Listing(title: "Hybrid Engine", partType: "Engine", make: "Toyota", model: "Prius", year: "2021", trim: "LE", price: 2800.0, description: "Eco-friendly hybrid engine, great for fuel efficiency.", city: "San Francisco", phoneNumber: "555-123-4567"),
-    Listing(title: "Supercharged V6", partType: "Engine", make: "Jaguar", model: "F-Type", year: "2018", trim: "R-Dynamic", price: 5000.0, description: "Powerful supercharged V6 engine, ready for installation.", city: "Chicago", phoneNumber: "111-222-3333"),
-    Listing(title: "V8 Engine", partType: "Engine", make: "Ford", model: "Mustang", year: "2019", trim: "GT", price: 3500.0, description: "High-performance V8 engine in excellent condition.", city: "Los Angeles", phoneNumber: "123-456-7890"),
-    Listing(title: "Turbocharged Engine", partType: "Engine", make: "Subaru", model: "WRX", year: "2020", trim: "STI", price: 4200.0, description: "Low-mileage turbocharged engine, perfect for performance builds.", city: "Denver", phoneNumber: "987-654-3210"),
-    Listing(title: "Hybrid Engine", partType: "Engine", make: "Toyota", model: "Prius", year: "2021", trim: "LE", price: 2800.0, description: "Eco-friendly hybrid engine, great for fuel efficiency.", city: "San Francisco", phoneNumber: "555-123-4567"),
-    Listing(title: "Supercharged V6", partType: "Engine", make: "Jaguar", model: "F-Type", year: "2018", trim: "R-Dynamic", price: 5000.0, description: "Powerful supercharged V6 engine, ready for installation.", city: "Chicago", phoneNumber: "111-222-3333")
-]
-
+// Main ContentView displaying vehicle selection and available parts
 struct ContentView: View {
+    // Stores a list of vehicles
     @State private var vehicles: [Vehicle] = []
-    @State private var savedVehicles: [Vehicle] = []  // Stores multiple vehicles
+    // Stores multiple vehicles
+    @State private var savedVehicles: [Vehicle] = []
+    // Tracks the selected vehicle
     @State private var selectedVehicle: Vehicle? = nil
-    @State private var showingVehicleSelection: Bool = false  // Controls vehicle selection popup
+    // Controls vehicle selection popup
+    @State private var showingVehicleSelection: Bool = false
+    
+    // User input fields for vehicle details
     @State private var make: String = ""
     @State private var model: String = ""
     @State private var year: String = ""
@@ -65,8 +37,9 @@ struct ContentView: View {
     @State private var selectedPart: String = "Select a Part"
     @State private var navigate: Bool = false
     
-    // modified to only include the engine button for demo purposes 
-    var relevantParts = ["Engine"] //, "Battery", "Oil Filter", "Brake Pads", "Spark Plugs", "Air Filter", "Tires"]
+    // modified to only include the engine button for demo purposes FIXME: add more later
+    // "Battery", "Oil Filter", "Brake Pads", "Spark Plugs", "Air Filter", "Tires"]
+    var relevantParts = ["Engine"]
     
     var body: some View {
         NavigationView {
@@ -74,6 +47,7 @@ struct ContentView: View {
                 Spacer().frame(height: 100)
                 
                 VStack {
+                    // App title button (acts as a reset)
                     Button(action: {
                         selectedVehicle = nil
                     }) {
@@ -85,6 +59,7 @@ struct ContentView: View {
                 }
                 .padding(.bottom, 50)
 
+                // Displays selected vehicle information if available
                 if let vehicle = selectedVehicle {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Selected Vehicle:")
@@ -121,6 +96,7 @@ struct ContentView: View {
                                 .foregroundColor(.white)
                                 .padding(.top, 20)
                             
+                            // Displays available parts as navigation links
                             ForEach(relevantParts, id: \.self) { part in
                                 NavigationLink(destination: PartListingsView(partType: part)) {
                                     Text(part)
@@ -136,6 +112,7 @@ struct ContentView: View {
                         }
                     }
                 } else {
+                    // Vehicle input fields for new vehicle entry
                     VStack(spacing: 20) {
                         TextField("Make", text: $make)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -152,6 +129,7 @@ struct ContentView: View {
                     }
                     .padding(.bottom, 10)
                     
+                    // "Save vehicle" button
                     Button(action: {
                         if !make.isEmpty && !model.isEmpty && !year.isEmpty && !trim.isEmpty {
                             let newVehicle = Vehicle(make: make, model: model, year: year, trim: trim)
@@ -186,6 +164,7 @@ struct VehicleSelectionView: View {
     @Binding var selectedVehicle: Vehicle?
     @Binding var isPresented: Bool  // Controls closing the view
 
+    // View for selecting a saved vehicle
     var body: some View {
         VStack {
             Text("Select a Vehicle")
@@ -210,6 +189,7 @@ struct VehicleSelectionView: View {
                 }
             }
 
+            // Button to add a new vehicle
             Button(action: {
                 selectedVehicle = nil
                 isPresented = false // Dismiss view
@@ -228,57 +208,93 @@ struct VehicleSelectionView: View {
 }
 
 
+// View for displaying part listings
 struct PartListingsView: View {
     var partType: String
-    
+    @State private var priceFilter: Double = 5000.0
+
+    // Compute the filtered list separately
+    var filteredListings: [Listing] {
+        dummyListings.filter { listing in
+            listing.partType == partType && listing.price <= priceFilter
+        }
+    }
+    // Defines the body of the view
     var body: some View {
+        // Enables vertical scrolling
         ScrollView {
             VStack {
+                // Title for the listings
                 Text("Available \(partType) Listings:")
                     .font(.title2)
                     .foregroundColor(.white)
                     .padding(.top, 50)
-                
-                ForEach(dummyListings.filter { $0.partType == partType }, id: \.id) { listing in
-                    VStack(alignment: .leading) {
-                        Text("\(listing.title) - $\(listing.price, specifier: "%.2f")")
-                            .font(.headline)
-                            .bold()
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color.white)
-
-                        Text("Make: \(listing.make), Model: \(listing.model), Year: \(listing.year), Trim: \(listing.trim)")
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color.white)
-
-                        Text("City: \(listing.city)")
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color.white)
-
-                        Text("Contact: \(listing.phoneNumber)")
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color.white)
-
-                        Text("Description: \(listing.description)")
-                            .font(.subheadline)
-                            .foregroundColor(.gray)
-                            .multilineTextAlignment(.leading)
-                            .foregroundColor(Color.white)
-                            .fixedSize(horizontal: false, vertical: true)
-                    }
-                    .padding()
-                    .frame(maxWidth: .infinity)
-                    .background(Color.black.opacity(0.3))
-                    .cornerRadius(10)
                     .padding(.horizontal)
+
+                // Section for price filtering
+                VStack {
+                    Text("\nFilter by Maximum Price: $\(priceFilter, specifier: "%.2f")")
+                        .foregroundColor(.white)
+                        .padding(.top, 20)
+
+                    // Slider for adjusting the price filter dynamically
+                    Slider(value: $priceFilter, in: 0...5000, step: 50)
+                        .padding(.horizontal)
+                        .padding(.top, 5)
+                }
+                .padding(.horizontal)
+
+                // LazyVStack for displaying the filtered listings efficiently
+                LazyVStack(spacing: 15) {
+                    // Iterates through the filtered listings and displays each one
+                    ForEach(filteredListings, id: \.id) { listing in
+                        VStack(alignment: .leading) {
+                            // Displays the part title and price
+                            Text("\(listing.title) - $\(listing.price, specifier: "%.2f")")
+                                .font(.headline)
+                                .bold()
+                                .padding(.bottom, 5)
+                                .foregroundColor(Color.white)
+
+                            // Displays vehicle make, model, year, and trim associated with the part
+                            Text("Make: \(listing.make), Model: \(listing.model), Year: \(listing.year), Trim: \(listing.trim)")
+                                .padding(.bottom, 5)
+                                .foregroundColor(Color.white)
+                            
+                            // Displays the city where the part is located
+                            Text("City: \(listing.city)")
+                                .padding(.bottom, 5)
+                                .foregroundColor(Color.white)
+                            
+                            // Displays the seller's contact phone number
+                            Text("Contact: \(listing.phoneNumber)")
+                                .padding(.bottom, 5)
+                                .foregroundColor(Color.white)
+
+                            // Displays a description of the listing
+                            Text("Description: \(listing.description)")
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                                .multilineTextAlignment(.leading)
+                                .fixedSize(horizontal: false, vertical: true)
+                                .padding(.bottom, 10)
+                        }
+                        .padding()
+                        .background(Color.black.opacity(0.3))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                    }
+                    .padding(.bottom, 10)
                 }
             }
             .frame(maxWidth: .infinity)
+            .foregroundColor(.white)
         }
         .background(Color.black)
         .ignoresSafeArea()
     }
 }
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
