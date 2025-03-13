@@ -5,103 +5,74 @@
  Created by Gerardo Cervantes on 2/4/25
  */
 import SwiftUI
+import Foundation
 
+// Defines a Vehicle struct that conforms to Identifiable and Hashable
+// Used to store vehicle details such as make, model, year, and trim
 struct Vehicle: Identifiable, Hashable {
+    // Unique identifier for each vehicle
     let id = UUID()
     var make: String
     var model: String
     var year: String
-    var color: String
+    var trim: String
 }
 
+// Main ContentView displaying vehicle selection and available parts
 struct ContentView: View {
+    // Stores a list of vehicles
     @State private var vehicles: [Vehicle] = []
+    // Stores multiple vehicles
+    @State private var savedVehicles: [Vehicle] = []
+    // Tracks the selected vehicle
     @State private var selectedVehicle: Vehicle? = nil
+    // Controls vehicle selection popup
+    @State private var showingVehicleSelection: Bool = false
+    
+    // User input fields for vehicle details
     @State private var make: String = ""
     @State private var model: String = ""
     @State private var year: String = ""
-    @State private var color: String = ""
-    @State private var showPartsDropdown: Bool = false
+    @State private var trim: String = ""
+    @State private var selectedPart: String = "Select a Part"
+    @State private var navigate: Bool = false
     
-    // list of relavantParts shown later with showRelavantParts
-    var relevantParts = ["Battery", "Oil Filter", "Brake Pads", "Spark Plugs", "Air Filter", "Tires", "FIXME: add more options?"]
-
+    // modified to only include the engine button for demo purposes FIXME: add more later
+    // "Battery", "Oil Filter", "Brake Pads", "Spark Plugs", "Air Filter", "Tires"]
+    var relevantParts = ["Engine"]
+    
     var body: some View {
         NavigationView {
             VStack {
-                // ensures font begins under "dynamic island"
                 Spacer().frame(height: 100)
                 
-                // title with centered dash & navigation to home
                 VStack {
+                    // App title button (acts as a reset)
                     Button(action: {
-                        // reset selection to show vehicle list
                         selectedVehicle = nil
                     }) {
                         Text("partFinder")
-                            // font style: cursive
-                            .font(.custom("SnellRoundhand-Bold", size: 45))
-                            // font color
-                            .foregroundColor(Color.blue.opacity(500))
+                            .font(.custom("SnellRoundhand-Bold", size: 55))
+                            .foregroundColor(Color.blue.opacity(0.9))
                             .underline()
                     }
                 }
-                .padding(.bottom, 110)
+                .padding(.bottom, 50)
 
+                // Displays selected vehicle information if available
                 if let vehicle = selectedVehicle {
-                    // display selected vehicle info
                     VStack(alignment: .leading, spacing: 10) {
                         Text("Selected Vehicle:")
                             .font(.title2)
                             .foregroundColor(.white)
-                        //FIXME: keep as one line or seperate?
-                        
-                        Text("\(vehicle.year) \(vehicle.make) \(vehicle.model) \(vehicle.color)")
-                        /*
-                        Text("Make: \(vehicle.make)")
-                        Text("Model: \(vehicle.model)")
-                        Text("Year: \(vehicle.year)")
-                        Text("Color: \(vehicle.color)")
-                         */
+                        Text("\(vehicle.year) \(vehicle.make) \(vehicle.model) \(vehicle.trim)")
                     }
-                    
                     .foregroundColor(.blue)
                     .padding()
-
-                    // dropdown for relevant parts
-                    VStack {
-                        Button(action: {
-                            showPartsDropdown.toggle()
-                        }) {
-                            Text("Show Relevant Parts")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.blue.opacity(0.9))
-                                .cornerRadius(10)
-                                .padding(.horizontal)
-                        }
-
-                        if showPartsDropdown {
-                            VStack {
-                                ForEach(relevantParts, id: \.self) { part in
-                                    Text(part)
-                                        .font(.body)
-                                        .foregroundColor(.white)
-                                        .padding(5)
-                                        .frame(maxWidth: .infinity)
-                                        .background(Color.gray.opacity(0.3))
-                                        .cornerRadius(5)
-                                }
-                            }
-                            .padding(.horizontal)
-                        }
-                    }
-
-                    // option to go back and select another vehicle
+                    
+                    // Moved the "Select Another Vehicle" button here
                     Button(action: {
-                        selectedVehicle = nil
+                        showingVehicleSelection.toggle()
                     }) {
                         Text("Select Another Vehicle")
                             .font(.headline)
@@ -112,106 +83,132 @@ struct ContentView: View {
                             .cornerRadius(10)
                             .padding(.horizontal)
                     }
-                    Button(action: {
-                    // option to remove a vehicle FIXME: need to add functionality
-                    }) {
-                        Text("Remove Vehicle")
-                            .font(.headline)
-                            .foregroundColor(.red)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.white.opacity(0.8))
-                            .cornerRadius(10)
-                            .padding(.horizontal)
+                    .sheet(isPresented: $showingVehicleSelection) {
+                        VehicleSelectionView(savedVehicles: $savedVehicles, selectedVehicle: $selectedVehicle, isPresented: $showingVehicleSelection)
                     }
-                } else {
-                    if !vehicles.isEmpty {
-                        // show list of stored vehicles for selection and give option to add new vehicle
-                        Text("Select a Vehicle or Add a New One:")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .padding(.bottom, 5)
 
-                        ForEach(vehicles, id: \.self) { vehicle in
-                            Button(action: {
-                                selectedVehicle = vehicle
-                            }) {
-                                Text(vehicle.model)
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding()
-                                    .frame(maxWidth: .infinity)
-                                    .background(Color.blue.opacity(0.8))
-                                    .cornerRadius(10)
-                                    .padding(.horizontal)
+
+                    // Display the list of parts directly
+                    ScrollView {
+                        VStack {
+                            Text("Available Parts:")
+                                .font(.title2)
+                                .foregroundColor(.white)
+                                .padding(.top, 20)
+                            
+                            // Displays available parts as navigation links
+                            ForEach(relevantParts, id: \.self) { part in
+                                NavigationLink(destination: PartListingsView(partType: part)) {
+                                    Text(part)
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                        .padding()
+                                        .frame(maxWidth: .infinity)
+                                        .background(Color.blue.opacity(0.9))
+                                        .cornerRadius(10)
+                                        .padding(.horizontal)
+                                }
                             }
                         }
-                        // allows users to add multiple vehicles
-                        // FIXME: store vehicle information once profiles can be set
-                        Text("Or Add a New Vehicle:")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .padding(.top, 10)
                     }
-
-                    // Vehicle Info Inputs
+                } else {
+                    // Vehicle input fields for new vehicle entry
                     VStack(spacing: 20) {
                         TextField("Make", text: $make)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .padding(.horizontal)
-
                         TextField("Model", text: $model)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .padding(.horizontal)
-
-                        TextField("Year", text:$year)
+                        TextField("Year", text: $year)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .padding(.horizontal)
-
-                        TextField("Color", text: $color)
+                        TextField("Trim", text: $trim)
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .padding(.horizontal)
                     }
                     .padding(.bottom, 10)
-
-                    // Save Vehicle Button
+                    
+                    // "Save vehicle" button
                     Button(action: {
-                        if !make.isEmpty && !model.isEmpty && !year.isEmpty && !color.isEmpty {
-                            let newVehicle = Vehicle(make: make, model: model, year: year, color: color)
-                            vehicles.append(newVehicle) // Save new vehicle
-                            selectedVehicle = newVehicle // Select the newly added vehicle
+                        if !make.isEmpty && !model.isEmpty && !year.isEmpty && !trim.isEmpty {
+                            let newVehicle = Vehicle(make: make, model: model, year: year, trim: trim)
+                            savedVehicles.append(newVehicle)
+                            selectedVehicle = newVehicle
                             make = ""
                             model = ""
                             year = ""
-                            color = ""
+                            trim = ""
                         }
                     }) {
-                        // allow user to save vehicle information
                         Text("Save Vehicle")
                             .font(.headline)
                             .foregroundColor(.white)
                             .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue.opacity(0.8))
+                            .background(Color.blue)
                             .cornerRadius(10)
-                            .padding(.horizontal)
                     }
                 }
 
                 Spacer()
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // black background
             .background(Color.black)
-            // extends background to full screen
             .ignoresSafeArea()
         }
     }
 }
-// allows us to view app demo via iphone or ipad in content view
+
+struct VehicleSelectionView: View {
+    @Binding var savedVehicles: [Vehicle]
+    @Binding var selectedVehicle: Vehicle?
+    @Binding var isPresented: Bool  // Controls closing the view
+
+    // View for selecting a saved vehicle
+    var body: some View {
+        VStack {
+            Text("Select a Vehicle")
+                .font(.title2)
+                .padding()
+
+            if savedVehicles.isEmpty {
+                Text("No saved vehicles. Add a new one.")
+                    .padding()
+            } else {
+                List(savedVehicles, id: \.self) { vehicle in
+                    Button(action: {
+                        selectedVehicle = vehicle
+                        isPresented = false // Dismiss view when a vehicle is selected
+                    }) {
+                        HStack {
+                            Text("\(vehicle.year) \(vehicle.make) \(vehicle.model) \(vehicle.trim)")
+                            Spacer()
+                        }
+                        .padding()
+                    }
+                }
+            }
+
+            // Button to add a new vehicle
+            Button(action: {
+                selectedVehicle = nil
+                isPresented = false // Dismiss view
+            }) {
+                Text("Add New Vehicle")
+                    .font(.headline)
+                    .foregroundColor(.white)
+                    .padding()
+                    .frame(maxWidth: .infinity)
+                    .background(Color.red.opacity(0.8))
+                    .cornerRadius(10)
+                    .padding()
+            }
+        }
+    }
+}
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
     }
 }
-
