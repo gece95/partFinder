@@ -1,6 +1,6 @@
-
-//  HomeViewModel.swift
 //
+//  HomeViewModel.swift
+//  schoolProject
 //
 //  Created by Emily marrufo on 3/24/25.
 //
