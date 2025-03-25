@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B16C92CB2D934CFE00768072 /* HomeViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16C92C12D934CF800768072 /* HomeViewModel.swift */; };
+		B16C93292D934DEC00768072 /* Category.swift in Sources */ = {isa = PBXBuildFile; fileRef = B16C931F2D934DE400768072 /* Category.swift */; };
 		CC2101832D6BEA0700A15EF7 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101822D6BEA0700A15EF7 /* FirebaseAnalytics */; };
 		CC2101852D6BEA0C00A15EF7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101842D6BEA0C00A15EF7 /* FirebaseAuth */; };
 		CC2101872D6BEA1000A15EF7 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101862D6BEA1000A15EF7 /* FirebaseDatabase */; };
@@ -33,6 +35,10 @@
 		5390BE412D542AD800B85CB5 /* partFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = partFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5390BE512D542ADA00B85CB5 /* partFinderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = partFinderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5390BE5B2D542ADA00B85CB5 /* partFinderUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = partFinderUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		B16C929F2D934CEB00768072 /* schoolProject.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = schoolProject.xcodeproj; sourceTree = "<group>"; };
+		B16C92C12D934CF800768072 /* HomeViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewModel.swift; sourceTree = "<group>"; };
+		B16C92FD2D934DDB00768072 /* schoolProject.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = schoolProject.xcodeproj; sourceTree = "<group>"; };
+		B16C931F2D934DE400768072 /* Category.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Category.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -84,6 +90,8 @@
 		5390BE382D542AD800B85CB5 = {
 			isa = PBXGroup;
 			children = (
+				B16C931F2D934DE400768072 /* Category.swift */,
+				B16C92C12D934CF800768072 /* HomeViewModel.swift */,
 				5390BE432D542AD800B85CB5 /* partFinder */,
 				5390BE542D542ADA00B85CB5 /* partFinderTests */,
 				5390BE5E2D542ADA00B85CB5 /* partFinderUITests */,
@@ -98,6 +106,20 @@
 				5390BE412D542AD800B85CB5 /* partFinder.app */,
 				5390BE512D542ADA00B85CB5 /* partFinderTests.xctest */,
 				5390BE5B2D542ADA00B85CB5 /* partFinderUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B16C92A22D934CEB00768072 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		B16C93002D934DDB00768072 /* Products */ = {
+			isa = PBXGroup;
+			children = (
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -221,6 +243,16 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5390BE422D542AD800B85CB5 /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = B16C92A22D934CEB00768072 /* Products */;
+					ProjectRef = B16C929F2D934CEB00768072 /* schoolProject.xcodeproj */;
+				},
+				{
+					ProductGroup = B16C93002D934DDB00768072 /* Products */;
+					ProjectRef = B16C92FD2D934DDB00768072 /* schoolProject.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				5390BE402D542AD800B85CB5 /* partFinder */,
@@ -259,6 +291,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B16C92CB2D934CFE00768072 /* HomeViewModel.swift in Sources */,
+				B16C93292D934DEC00768072 /* Category.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
