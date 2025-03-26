@@ -15,11 +15,9 @@ struct Vehicle: Identifiable, Equatable {
     var year: String
 
     var displayName: String {
-        "\(year) \(make) \(model) \(trim)"
+        "\(year)\(make)\(model)\(trim)"
     }
 }
-
-
 // MARK: - ContentView
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
@@ -71,7 +69,7 @@ struct ContentView: View {
                                 Spacer()
 
                                 Text("partFinder")
-                                    .font(.title3)
+                                    .font(.title2)
                                     .fontWeight(.bold)
                                     .foregroundColor(.blue)
 
@@ -203,15 +201,6 @@ struct ContentView: View {
                     .background(Color.black)
                     .foregroundColor(.gray)
                 }
-
-                // MARK: - Hidden NavigationLink
-                NavigationLink(
-                    destination: ListingListView(title: selectedCategoryLabel, listings: selectedCategoryListings),
-                    isActive: $showListings
-                ) {
-                    EmptyView()
-                }
-                .hidden()
             }
             .navigationBarHidden(true)
         }
