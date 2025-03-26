@@ -35,6 +35,7 @@
 		5390BE5B2D542ADA00B85CB5 /* partFinderUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = partFinderUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B16C929F2D934CEB00768072 /* schoolProject.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = schoolProject.xcodeproj; sourceTree = "<group>"; };
 		B16C92FD2D934DDB00768072 /* schoolProject.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = schoolProject.xcodeproj; sourceTree = "<group>"; };
+		B1B04ECB2D93684E0027AA65 /* schoolProject.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = schoolProject.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -118,6 +119,15 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+
+		B1B04ECE2D93684E0027AA65 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+
 		CC2101812D6BEA0700A15EF7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -246,6 +256,12 @@
 					ProductGroup = B16C93002D934DDB00768072 /* Products */;
 					ProjectRef = B16C92FD2D934DDB00768072 /* schoolProject.xcodeproj */;
 				},
+
+				{
+					ProductGroup = B1B04ECE2D93684E0027AA65 /* Products */;
+					ProjectRef = B1B04ECB2D93684E0027AA65 /* schoolProject.xcodeproj */;
+				},
+
 			);
 			projectRoot = "";
 			targets = (

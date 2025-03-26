@@ -19,6 +19,7 @@ struct Vehicle: Identifiable, Equatable {
     }
 }
 // MARK: - ContentView
+
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @StateObject private var viewModel = HomeViewModel()
@@ -31,6 +32,7 @@ struct ContentView: View {
     @State private var showListings = false
     @State private var selectedCategoryLabel: String = ""
 
+    // Layout for category grid: 3 columns
     let columns = [
         GridItem(.flexible()),
         GridItem(.flexible()),
@@ -163,7 +165,6 @@ struct ContentView: View {
                                 }
                                 .padding(.horizontal)
                             }
-
                             Spacer().frame(height: 100)
                         }
                         .padding(.top)
@@ -232,3 +233,4 @@ struct CategoryItem: View {
         .cornerRadius(12)
     }
 }
+
