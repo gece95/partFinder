@@ -9,7 +9,7 @@ import Foundation
 // ListingView.swift
 import SwiftUI
 
-struct ListingView: View {
+struct ListingViewDetail: View {
     var listing: Listing
 
     var body: some View {
