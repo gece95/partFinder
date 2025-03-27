@@ -48,61 +48,63 @@ struct vendorView: View {
     var body: some View {
         // Use NavigationView to allow for navigation (e.g., in a larger app)
         NavigationView {
-            // Use VStack to organize the layout vertically with some spacing
-            VStack(spacing: 20) {
-                
-                // Phone Number input field
-                TextField("Phone-Number", text: $phoneNumber)
-                    .textFieldStyle(RoundedBorderTextFieldStyle()) // Rounded style for the text field
-                    .keyboardType(.phonePad) // Use phone keypad for the phone number input
-                    .padding(.horizontal)
-                
-                // Description input field
-                TextField("Description", text: $Description)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
-                
-                // Price input field
-                TextField("Price", text: $Price)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .keyboardType(.decimalPad) // Use decimal pad for price input
-                    .padding(.horizontal)
-                
-                // Condition input field (e.g., New/Used)
-                TextField("Condition: New/Used", text: $Condition)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
-                
-                // Type of Part input field
-                TextField("Type of Part", text: $TypeOfPart)
-                    .textFieldStyle(RoundedBorderTextFieldStyle())
-                    .padding(.horizontal)
-                
-                // Show error message if any field is empty
-                if !errorMessage.isEmpty {
-                    Text(errorMessage)
-                        .foregroundColor(.red) // Make the error message red for visibility
-                        .padding(.top, 10)
+            BaseView {
+                // Use VStack to organize the layout vertically with some spacing
+                VStack(spacing: 20) {
+                    
+                    // Phone Number input field
+                    TextField("Phone-Number", text: $phoneNumber)
+                        .textFieldStyle(RoundedBorderTextFieldStyle()) // Rounded style for the text field
+                        .keyboardType(.phonePad) // Use phone keypad for the phone number input
+                        .padding(.horizontal)
+                    
+                    // Description input field
+                    TextField("Description", text: $Description)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                    
+                    // Price input field
+                    TextField("Price", text: $Price)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .keyboardType(.decimalPad) // Use decimal pad for price input
+                        .padding(.horizontal)
+                    
+                    // Condition input field (e.g., New/Used)
+                    TextField("Condition: New/Used", text: $Condition)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                    
+                    // Type of Part input field
+                    TextField("Type of Part", text: $TypeOfPart)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                    
+                    // Show error message if any field is empty
+                    if !errorMessage.isEmpty {
+                        Text(errorMessage)
+                            .foregroundColor(.red) // Make the error message red for visibility
+                            .padding(.top, 10)
+                    }
+                    
+                    // Submit Button
+                    Button(action: {
+                        checking() // Call the checking function when the button is tapped
+                    }) {
+                        Text("Submit Listing") // Button text
+                            .padding()
+                            .background(Color.blue) // Blue background color for the button
+                            .foregroundColor(.white) // White text color
+                            .cornerRadius(8) // Rounded corners for the button
+                    }
+                    .padding(.top, 20) // Add some space above the button
                 }
-                
-                // Submit Button
-                Button(action: {
-                    checking() // Call the checking function when the button is tapped
-                }) {
-                    Text("Submit Listing") // Button text
-                        .padding()
-                        .background(Color.blue) // Blue background color for the button
-                        .foregroundColor(.white) // White text color
-                        .cornerRadius(8) // Rounded corners for the button
-                }
-                .padding(.top, 20) // Add some space above the button
+                .padding() // Add some padding around the VStack
+                .background(Color.gray.opacity(0.2)) // Set a light gray background for the form
+                .cornerRadius(12) // Rounded corners for the form container
+                .frame(maxWidth: .infinity, maxHeight: .infinity) // Make the view fill the available space
+                .background(Color.gray) // Dark grey background for the entire screen
+                .edgesIgnoringSafeArea(.all) // Make the background color extend to the edges of the screen
             }
-            .padding() // Add some padding around the VStack
-            .background(Color.gray.opacity(0.2)) // Set a light gray background for the form
-            .cornerRadius(12) // Rounded corners for the form container
-            .frame(maxWidth: .infinity, maxHeight: .infinity) // Make the view fill the available space
-            .background(Color.gray) // Dark grey background for the entire screen
-            .edgesIgnoringSafeArea(.all) // Make the background color extend to the edges of the screen
         }
     }
 }

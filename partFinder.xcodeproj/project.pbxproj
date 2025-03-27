@@ -33,9 +33,6 @@
 		5390BE412D542AD800B85CB5 /* partFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = partFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5390BE512D542ADA00B85CB5 /* partFinderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = partFinderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5390BE5B2D542ADA00B85CB5 /* partFinderUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = partFinderUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		B16C929F2D934CEB00768072 /* schoolProject.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = schoolProject.xcodeproj; sourceTree = "<group>"; };
-		B16C92FD2D934DDB00768072 /* schoolProject.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = schoolProject.xcodeproj; sourceTree = "<group>"; };
-		B1B04ECB2D93684E0027AA65 /* schoolProject.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = schoolProject.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
@@ -105,29 +102,6 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B16C92A22D934CEB00768072 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		B16C93002D934DDB00768072 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-
-		B1B04ECE2D93684E0027AA65 /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-
 		CC2101812D6BEA0700A15EF7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -247,22 +221,6 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5390BE422D542AD800B85CB5 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = B16C92A22D934CEB00768072 /* Products */;
-					ProjectRef = B16C929F2D934CEB00768072 /* schoolProject.xcodeproj */;
-				},
-				{
-					ProductGroup = B16C93002D934DDB00768072 /* Products */;
-					ProjectRef = B16C92FD2D934DDB00768072 /* schoolProject.xcodeproj */;
-				},
-
-				{
-					ProductGroup = B1B04ECE2D93684E0027AA65 /* Products */;
-					ProjectRef = B1B04ECB2D93684E0027AA65 /* schoolProject.xcodeproj */;
-				},
-
-			);
 			projectRoot = "";
 			targets = (
 				5390BE402D542AD800B85CB5 /* partFinder */,
