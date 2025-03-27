@@ -48,7 +48,7 @@ struct PartListingsView: View {
                     LazyVStack(spacing: 15) {
                         // Iterates through the filtered listings and displays each one
                         ForEach(filteredListings, id: \.id) { listing in
-                            NavigationLink(destination: ListingView(listing: listing)) { // Clicking navigates to ListingView
+                            NavigationLink(destination: ListingViewDetail(listing: listing)) { // Clicking navigates to ListingView
                                 VStack(alignment: .leading) {
                                     // Displays the part title and price
                                     Text("\(listing.title) - $\(listing.price, specifier: "%.2f")")
