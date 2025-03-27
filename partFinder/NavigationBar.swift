@@ -19,11 +19,13 @@ struct BottomNavBar: View {
                 }
             }
             Spacer()
-            VStack(spacing: 4) {
-                Image(systemName: "house")
-                    .font(.system(size: 20))
-                Text("Home")
-                    .font(.caption)
+            NavigationLink(destination: ContentView()) {
+                VStack(spacing: 4) {
+                    Image(systemName: "house")
+                        .font(.system(size: 20))
+                    Text("Home")
+                        .font(.caption)
+                }
             }
             Spacer()
             VStack(spacing: 4) {
