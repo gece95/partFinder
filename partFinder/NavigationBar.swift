@@ -28,11 +28,13 @@ struct BottomNavBar: View {
                 }
             }
             Spacer()
-            VStack(spacing: 4) {
-                Image(systemName: "person")
-                    .font(.system(size: 20))
-                Text("Profile")
-                    .font(.caption)
+            NavigationLink(destination: ProfileView()) {
+                VStack(spacing: 4) {
+                    Image(systemName: "person")
+                        .font(.system(size: 20))
+                    Text("Profile")
+                        .font(.caption)
+                }
             }
             Spacer()
         }
