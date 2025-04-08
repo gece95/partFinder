@@ -99,10 +99,10 @@ struct vendorView: View {
                     .padding(.top, 20) // Add some space above the button
                 }
                 .padding() // Add some padding around the VStack
-                .background(Color.gray.opacity(0.2)) // Set a light gray background for the form
+                .background(Color.black.opacity(0.2)) // Set a light gray background for the form
                 .cornerRadius(12) // Rounded corners for the form container
                 .frame(maxWidth: .infinity, maxHeight: .infinity) // Make the view fill the available space
-                .background(Color.gray) // Dark grey background for the entire screen
+                .background(Color.black) // Dark grey background for the entire screen
                 .edgesIgnoringSafeArea(.all) // Make the background color extend to the edges of the screen
             }
         }

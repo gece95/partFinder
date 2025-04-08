@@ -1,11 +1,14 @@
 /*
  Welcome to partFinder team
- 
+
  ContentView.swift
  Created by Emily Marrufo
  */
+
 import SwiftUI
 import Foundation
+import CoreLocation // For location access
+
 // MARK: - Vehicle Struct
 struct Vehicle: Identifiable, Equatable {
     let id = UUID()
@@ -18,158 +21,170 @@ struct Vehicle: Identifiable, Equatable {
         "\(year)\(make)\(model)\(trim)"
     }
 }
-// MARK: - ContentView
 
+// MARK: - ContentView
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @StateObject private var viewModel = HomeViewModel()
-    
+    @StateObject private var locationManager = LocationManager() // Access to ZIP code
+
     @State private var newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
     @State private var vehicles: [Vehicle] = []
     @State private var selectedVehicle: Vehicle?
-    
+
     @State private var selectedCategoryListings: [Listing] = []
     @State private var showListings = false
     @State private var selectedCategoryLabel: String = ""
-    
-    // Layout for category grid: 3 columns
+
     let columns = [
         GridItem(.flexible()),
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
-    
+
     var body: some View {
         NavigationStack {
-            BaseView {
+            ZStack { // Replaced BaseView for simplicity
                 GeometryReader { geometry in
                     ZStack(alignment: .bottom) {
                         (colorScheme == .dark ? Color("DarkBackground") : Color.black)
                             .edgesIgnoringSafeArea(.all)
-                    
-                    VStack(spacing: 0) {
-                        ScrollView {
-                            VStack(spacing: 20) {
-                                
-                                // MARK: - Header
-                                HStack {
-                                    Menu {
-                                        ForEach(viewModel.cities, id: \.self) { city in
-                                            Button(city) {
-                                                viewModel.selectedCity = city
+
+                        VStack(spacing: 0) {
+                            ScrollView {
+                                VStack(spacing: 20) {
+
+
+                                        // City dropdown
+                                    
+                                        Menu {
+                                            ForEach(viewModel.cities, id: \.self) { city in
+                                                Button(city) {
+                                                    locationManager.requestLocation()
+                                                     viewModel.selectedCity = city
+                                                }
+                                            }
+                                        } label: {
+                                            HStack {
+                                                Image(systemName: "line.3.horizontal.decrease.circle")
+                                                    .font(.title2)
+                                                    .foregroundColor(.gray)
+                                                Text(viewModel.selectedCity)
+                                                    .font(.subheadline)
+                                                    .foregroundColor(.gray)
                                             }
                                         }
-                                    } label: {
+
+                                        Spacer()
+
+                                        Text("partFinder")
+                                            .font(.title2)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.blue)
+
+                                        Spacer()
+                                    }
+                                    .padding(.horizontal)
+
+                                    // Show ZIP code if available
+                                    if let zip = locationManager.zipCode {
+                                        Text("ZIP Code: \(zip)")
+                                            .font(.caption)
+                                            .foregroundColor(.gray)
+                                            .padding(.horizontal)
+                                    }
+
+                                    // MARK: - Vehicle Input
+                                    VStack(spacing: 10) {
+                                        TextField("Make", text: $newVehicle.make)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                                        TextField("Model", text: $newVehicle.model)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                                        TextField("Trim", text: $newVehicle.trim)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                                        TextField("Year", text: $newVehicle.year)
+                                            .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                                        Button("Add Vehicle") {
+                                            guard !newVehicle.make.isEmpty,
+                                                  !newVehicle.model.isEmpty,
+                                                  !newVehicle.year.isEmpty else { return }
+
+                                            vehicles.append(newVehicle)
+                                            selectedVehicle = newVehicle
+                                            newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
+                                        }
+                                        .frame(maxWidth: .infinity)
+                                        .padding()
+                                        .background(Color.blue)
+                                        .foregroundColor(.white)
+                                        .cornerRadius(10)
+                                    }
+                                    .padding(.horizontal)
+
+                                    // MARK: - Vehicle Selector
+                                    if !vehicles.isEmpty {
+                                        Menu {
+                                            ForEach(vehicles) { vehicle in
+                                                Button(vehicle.displayName) {
+                                                    selectedVehicle = vehicle
+                                                }
+                                            }
+                                        } label: {
+                                            ZStack {
+                                                RoundedRectangle(cornerRadius: 10)
+                                                    .fill(Color(.systemGray6))
+                                                HStack {
+                                                    Text(selectedVehicle?.displayName ?? "Select Vehicle")
+                                                        .foregroundColor(.primary)
+                                                        .padding(.leading)
+                                                    Spacer()
+                                                    Image(systemName: "chevron.down")
+                                                        .foregroundColor(.gray)
+                                                        .padding(.trailing)
+                                                }
+                                            }
+                                            .frame(height: 45)
+                                            .padding(.horizontal)
+                                        }
+                                    }
+
+                                    // MARK: - Categories
+                                    VStack(alignment: .leading) {
                                         HStack {
-                                            Image(systemName: "line.3.horizontal.decrease.circle")
-                                                .font(.title2)
+                                            Text("Categories")
+                                                .font(.headline)
                                                 .foregroundColor(.gray)
-                                            Text(viewModel.selectedCity)
+                                            Spacer()
+                                            Text("Show All")
                                                 .font(.subheadline)
                                                 .foregroundColor(.gray)
                                         }
-                                    }
-                                    
-                                    Spacer()
-                                    
-                                    Text("partFinder")
-                                        .font(.title2)
-                                        .fontWeight(.bold)
-                                        .foregroundColor(.blue)
-                                    
-                                    Spacer()
-                                }
-                                .padding(.horizontal)
-                                
-                                // MARK: - Vehicle Input
-                                VStack(spacing: 10) {
-                                    TextField("Make", text: $newVehicle.make)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    
-                                    TextField("Model", text: $newVehicle.model)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    
-                                    TextField("Trim", text: $newVehicle.trim)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    
-                                    TextField("Year", text: $newVehicle.year)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                                    
-                                    Button("Add Vehicle") {
-                                        guard !newVehicle.make.isEmpty,
-                                              !newVehicle.model.isEmpty,
-                                              !newVehicle.year.isEmpty else { return }
-                                        
-                                        vehicles.append(newVehicle)
-                                        selectedVehicle = newVehicle
-                                        newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
-                                    }
-                                    .frame(maxWidth: .infinity)
-                                    .padding()
-                                    .background(Color.blue)
-                                    .foregroundColor(.white)
-                                    .cornerRadius(10)
-                                }
-                                .padding(.horizontal)
-                                
-                                // MARK: - Vehicle Selector
-                                if !vehicles.isEmpty {
-                                    Menu {
-                                        ForEach(vehicles) { vehicle in
-                                            Button(vehicle.displayName) {
-                                                selectedVehicle = vehicle
+                                        .padding(.horizontal)
+
+                                        LazyVGrid(columns: columns, spacing: 20) {
+                                            ForEach(viewModel.categories) { category in
+                                                Button(action: {
+                                                    if category.label == "Engine" {
+                                                        selectedCategoryLabel = category.label
+                                                        selectedCategoryListings = dummyListings.filter { $0.partType == category.label }
+                                                        showListings = true
+                                                    }
+                                                }) {
+                                                    CategoryItem(icon: category.icon, label: category.label)
+                                                }
                                             }
                                         }
-                                    } label: {
-                                        ZStack {
-                                            RoundedRectangle(cornerRadius: 10)
-                                                .fill(Color(.systemGray6))
-                                            HStack {
-                                                Text(selectedVehicle?.displayName ?? "Select Vehicle")
-                                                    .foregroundColor(.primary)
-                                                    .padding(.leading)
-                                                Spacer()
-                                                Image(systemName: "chevron.down")
-                                                    .foregroundColor(.gray)
-                                                    .padding(.trailing)
-                                            }
-                                        }
-                                        .frame(height: 45)
                                         .padding(.horizontal)
                                     }
+
+                                    Spacer().frame(height: geometry.safeAreaInsets.bottom)
                                 }
-                                
-                                // MARK: - Categories
-                                VStack(alignment: .leading) {
-                                    HStack {
-                                        Text("Categories")
-                                            .font(.headline)
-                                            .foregroundColor(.gray)
-                                        Spacer()
-                                        Text("Show All")
-                                            .font(.subheadline)
-                                            .foregroundColor(.gray)
-                                    }
-                                    .padding(.horizontal)
-                                    
-                                    LazyVGrid(columns: columns, spacing: 20) {
-                                        ForEach(viewModel.categories) { category in
-                                            Button(action: {
-                                                if category.label == "Engine" {
-                                                    selectedCategoryLabel = category.label
-                                                    selectedCategoryListings = dummyListings.filter { $0.partType == category.label }
-                                                    showListings = true
-                                                }
-                                            }) {
-                                                CategoryItem(icon: category.icon, label: category.label)
-                                            }
-                                        }
-                                    }
-                                    .padding(.horizontal)
-                                }
-                                Spacer().frame(height: geometry.safeAreaInsets.bottom)
+                                .padding(.top)
                             }
-                            .padding(.top)
                         }
                     }
                 }
@@ -177,23 +192,22 @@ struct ContentView: View {
             }
         }
     }
-}
-    // MARK: - Category Tile
 
+    // MARK: - Category Tile
     struct CategoryItem: View {
         let icon: String
         let label: String
-        
+
         var body: some View {
             VStack(spacing: 8) {
-                Image(systemName: icon)
+                Image(icon)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 30, height: 30)
                     .padding(8)
                     .background(Color.white)
                     .cornerRadius(10)
-                
+
                 Text(label)
                     .font(.caption)
                     .foregroundColor(.primary)
@@ -204,11 +218,11 @@ struct ContentView: View {
             .cornerRadius(12)
         }
     }
-}
+
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
-        ContentView() // Preview
-        
+        ContentView()
     }
 }
+
