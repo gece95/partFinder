@@ -82,22 +82,8 @@ struct ProfileView: View {
                                     }
                                     .padding(.horizontal)
                                     
-                                    ForEach(listings) { listing in
-                                        VStack(alignment: .leading, spacing: 5) {
-                                            Text(listing.title)
-                                                .font(.subheadline)
-                                                .foregroundColor(.primary)
-                                                .lineLimit(1)
-                                            Text("\(listing.make) \(listing.model) (\(listing.year)) - $\(listing.price, specifier: "%.2f")")
-                                                .font(.caption)
-                                                .foregroundColor(.gray)
-                                                .lineLimit(1)
-                                        }
-                                        .padding()
-                                        .frame(maxWidth: .infinity, minHeight: 80, alignment: .leading)
-                                        .background(Color(.systemGray5))
-                                        .cornerRadius(10)
-                                        .padding(.horizontal)
+                                    if !listings.isEmpty {
+                                        showMyListings()
                                     }
                                 }
                                 
@@ -111,7 +97,29 @@ struct ProfileView: View {
             }
         }
     }
+    
+    private func showMyListings() -> some View {
+        ForEach(listings) { listing in
+            VStack(alignment: .leading, spacing: 5) {
+                Text(listing.title)
+                    .font(.subheadline)
+                    .foregroundColor(.primary)
+                    .lineLimit(1)
+                Text("\(listing.make) \(listing.model) (\(listing.year)) - $\(listing.price, specifier: "%.2f")")
+                    .font(.caption)
+                    .foregroundColor(.gray)
+                    .lineLimit(1)
+            }
+            .padding()
+            .frame(maxWidth: .infinity, minHeight: 80, alignment: .leading)
+            .background(Color(.systemGray5))
+            .cornerRadius(10)
+            .padding(.horizontal)
+        }
+    }
 }
+
+
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
