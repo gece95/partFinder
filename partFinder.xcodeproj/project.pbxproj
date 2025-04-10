@@ -33,13 +33,10 @@
 		5390BE412D542AD800B85CB5 /* partFinder.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = partFinder.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		5390BE512D542ADA00B85CB5 /* partFinderTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = partFinderTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		5390BE5B2D542ADA00B85CB5 /* partFinderUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = partFinderUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		B1544C572D9EF7880028A41E /* schoolProject.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = schoolProject.xcodeproj; sourceTree = "<group>"; };
-		B18DE5BE2DA4B2050046B57F /* schoolProject.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = schoolProject.xcodeproj; sourceTree = "<group>"; };
-		B1FF92512D9CB4F900A437CC /* schoolProject.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = schoolProject.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		B18DE5DF2DA4BA030046B57F /* Exceptions for "partFinder" folder in "partFinder" target */ = {
+		CC77743C2DA759D600A0E3DE /* Exceptions for "partFinder" folder in "partFinder" target */ = {
 			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
 			membershipExceptions = (
 				Info.plist,
@@ -52,7 +49,7 @@
 		5390BE432D542AD800B85CB5 /* partFinder */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
 			exceptions = (
-				B18DE5DF2DA4BA030046B57F /* Exceptions for "partFinder" folder in "partFinder" target */,
+				CC77743C2DA759D600A0E3DE /* Exceptions for "partFinder" folder in "partFinder" target */,
 			);
 			path = partFinder;
 			sourceTree = "<group>";
@@ -114,27 +111,6 @@
 				5390BE412D542AD800B85CB5 /* partFinder.app */,
 				5390BE512D542ADA00B85CB5 /* partFinderTests.xctest */,
 				5390BE5B2D542ADA00B85CB5 /* partFinderUITests.xctest */,
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		B1544C5A2D9EF7880028A41E /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		B18DE5C12DA4B2050046B57F /* Products */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = Products;
-			sourceTree = "<group>";
-		};
-		B1FF92542D9CB4F900A437CC /* Products */ = {
-			isa = PBXGroup;
-			children = (
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -258,20 +234,6 @@
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 5390BE422D542AD800B85CB5 /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = B18DE5C12DA4B2050046B57F /* Products */;
-					ProjectRef = B18DE5BE2DA4B2050046B57F /* schoolProject.xcodeproj */;
-				},
-				{
-					ProductGroup = B1FF92542D9CB4F900A437CC /* Products */;
-					ProjectRef = B1FF92512D9CB4F900A437CC /* schoolProject.xcodeproj */;
-				},
-				{
-					ProductGroup = B1544C5A2D9EF7880028A41E /* Products */;
-					ProjectRef = B1544C572D9EF7880028A41E /* schoolProject.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				5390BE402D542AD800B85CB5 /* partFinder */,
@@ -473,15 +435,9 @@
 				DEVELOPMENT_TEAM = 3H7686WHGY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = partFinder/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "";
-				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMainStoryboardFile = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -508,15 +464,9 @@
 				DEVELOPMENT_TEAM = 3H7686WHGY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = partFinder/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = "";
-				INFOPLIST_KEY_LSApplicationCategoryType = "";
-				INFOPLIST_KEY_NSHumanReadableCopyright = "";
-				INFOPLIST_KEY_NSMainStoryboardFile = "";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
-				INFOPLIST_KEY_UIStatusBarStyle = UIStatusBarStyleDefault;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				LD_RUNPATH_SEARCH_PATHS = (
