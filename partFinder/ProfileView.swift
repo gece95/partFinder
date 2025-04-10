@@ -1,26 +1,5 @@
-//
-//  ProfileView.swift
-//  partFinder
-//
-//  Created by Zoe Hazan on 3/27/25.
-//
 /*
-import Foundation
-//
-//  ProfileView.swift
-//  partFinder
-//
-//  Created by Zoe Hazan on 3/26/25.
-//
-
-//
-//  ProfileView.swift
-//  partFinder
-//
-//  Created by Zoe Hazan on 3/27/25.
-//
-
-import SwiftUI
+ import SwiftUI
 
 struct ProfileView: View {
     @Environment(\.colorScheme) var colorScheme

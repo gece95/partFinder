@@ -1,13 +1,4 @@
-//
-//  partFinderApp.swift
-//  partFinder
-//
-//  Created by Gerardo Cervantes on 2/5/25.
-//
-
-// Imports SwiftUI framework for building the app's UI
 import SwiftUI
-// Imports FirebaseCore to initialize Firebase services
 import FirebaseCore
 
       
@@ -16,7 +7,6 @@ import FirebaseCore
 struct partFinderApp: App {
     // Initializes Firebase when the app launches
     init() {
-        // Configures Firebase services for use in the app
         FirebaseApp.configure()
         
     }

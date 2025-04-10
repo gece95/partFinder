@@ -1,10 +1,3 @@
-//
-//  ListingViewDetail.swift
-//  partFinder
-//
-//  Created by Salma Ramirez on 3/9/25.
-//
-
 import Foundation
 // ListingView.swift
 import SwiftUI
@@ -22,23 +15,19 @@ struct ListingViewDetail: View {
                 .cornerRadius(10)
                 .padding(.bottom, 10)
 
-            // Title of the listing
             Text(listing.title)
                 .font(.title)
                 .bold()
                 .foregroundColor(.white)
 
-            // Price
             Text("Price: $\(listing.price, specifier: "%.2f")")
                 .font(.headline)
                 .foregroundColor(.green)
 
-            // Make, Model, Year, Trim
             Text("Make: \(listing.make), Model: \(listing.model), Year: \(listing.year), Trim: \(listing.trim)")
                 .font(.subheadline)
                 .foregroundColor(.white)
 
-            // Description section
             Text("Description:")
                 .font(.headline)
                 .foregroundColor(.white)
@@ -48,12 +37,10 @@ struct ListingViewDetail: View {
                 .foregroundColor(.gray)
                 .multilineTextAlignment(.leading)
 
-            // Location
             Text("Location: \(listing.city)")
                 .font(.subheadline)
                 .foregroundColor(.white)
 
-            // Contact
             Text("Contact: \(listing.phoneNumber)")
                 .font(.subheadline)
                 .foregroundColor(.white)

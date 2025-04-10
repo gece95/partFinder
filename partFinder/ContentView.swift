@@ -1,16 +1,8 @@
-/*
- Welcome to partFinder team
-
- ContentView.swift
- Created by Emily Marrufo
- */
-
 import SwiftUI
 import Foundation
 import CoreLocation
 import FirebaseAuth
 import FirebaseDatabase
-
 
 struct Vehicle: Identifiable, Equatable {
     let id = UUID()
@@ -23,7 +15,6 @@ struct Vehicle: Identifiable, Equatable {
         "\(year) \(make) \(model) \(trim)"
     }
 }
-
 
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
@@ -96,7 +87,6 @@ struct ContentView: View {
                                         .padding(.horizontal)
                                 }
 
-                                // Vehicle Input
                                 VStack(spacing: 10) {
                                     TextField("Make", text: $newVehicle.make)
                                         .textFieldStyle(RoundedBorderTextFieldStyle())
@@ -127,7 +117,6 @@ struct ContentView: View {
                                 }
                                 .padding(.horizontal)
 
-                                // Vehicle Selector
                                 if !vehicles.isEmpty {
                                     Menu {
                                         ForEach(vehicles) { vehicle in
@@ -154,7 +143,6 @@ struct ContentView: View {
                                     }
                                 }
 
-                                // Categories
                                 VStack(alignment: .leading) {
                                     HStack {
                                         Text("Categories")
@@ -202,7 +190,7 @@ struct ContentView: View {
                                 .cornerRadius(8)
                         }
                     } else {
-                        NavigationLink(destination: RegisterView()) {
+                        NavigationLink(destination: AuthView()) {
                             Text("Login")
                                 .padding(.horizontal, 12)
                                 .padding(.vertical, 6)
@@ -238,79 +226,6 @@ struct ContentView: View {
             .padding()
             .background(Color(.systemGray5))
             .cornerRadius(12)
-        }
-    }
-}
-
-struct RegisterView: View {
-    @Environment(\.dismiss) var dismiss
-    @AppStorage("isLoggedIn") var isLoggedIn = false
-    @AppStorage("userName") var userName = ""
-    @AppStorage("userEmail") var userEmail = ""
-
-    @State private var email = ""
-    @State private var password = ""
-    @State private var name = ""
-    @State private var message = ""
-
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-
-            VStack(spacing: 20) {
-                Text("Create Account")
-                    .font(.title)
-                    .bold()
-                    .foregroundColor(.white)
-
-                TextField("Name", text: $name)
-                    .textFieldStyle(.roundedBorder)
-                    .background(Color.white)
-                    .cornerRadius(5)
-                    .padding(.horizontal)
-
-                TextField("Email", text: $email)
-                    .keyboardType(.emailAddress)
-                    .textFieldStyle(.roundedBorder)
-                    .background(Color.white)
-                    .cornerRadius(5)
-                    .padding(.horizontal)
-
-                SecureField("Password", text: $password)
-                    .textFieldStyle(.roundedBorder)
-                    .background(Color.white)
-                    .cornerRadius(5)
-                    .padding(.horizontal)
-
-                Button("Create Account") {
-                    UserManager().registerUser(email: email, password: password, name: name) { result in
-                        switch result {
-                        case .success:
-                            userName = name
-                            userEmail = email
-                            isLoggedIn = true
-                            message = "✅ Account created!"
-                            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                                dismiss()
-                            }
-                        case .failure(let error):
-                            message = "❌ \(error.localizedDescription)"
-                        }
-                    }
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color.blue)
-                .foregroundColor(.white)
-                .cornerRadius(10)
-
-                Text(message)
-                    .foregroundColor(.red)
-                    .multilineTextAlignment(.center)
-
-                Spacer()
-            }
-            .padding(.top)
         }
     }
 }
