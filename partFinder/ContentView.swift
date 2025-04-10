@@ -338,11 +338,8 @@ struct ProfileView: View {
                         .font(.title)
                         .fontWeight(.bold)
                         .foregroundColor(.blue)
-                    
-                    Text("Name: \(userName)")
-                        .foregroundColor(.white)
-                    
-                    Text("Email: \(userEmail)")
+
+                    Text("\(userEmail)")
                         .foregroundColor(.white)
                     
                     Button("Logout") {
@@ -352,7 +349,7 @@ struct ProfileView: View {
                         userEmail = ""
                     }
                     .padding()
-                    .background(Color.white)
+                    .background(Color.blue)
                     .foregroundColor(.black)
                     .cornerRadius(10)
                     
