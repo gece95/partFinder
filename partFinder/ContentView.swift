@@ -4,6 +4,8 @@ import CoreLocation
 import FirebaseAuth
 import FirebaseDatabase
 
+
+
 struct Vehicle: Identifiable, Equatable {
     let id = UUID()
     var make: String
@@ -15,6 +17,7 @@ struct Vehicle: Identifiable, Equatable {
         "\(year) \(make) \(model) \(trim)"
     }
 }
+
 
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
