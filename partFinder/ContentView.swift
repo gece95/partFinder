@@ -331,9 +331,9 @@ struct ProfileView: View {
 
             VStack(spacing: 20) {
                 Text("Profile")
-                    .font(.largeTitle)
-                    .bold()
-                    .foregroundColor(.white)
+                    .font(.title)
+                    .fontWeight(.bold)
+                    .foregroundColor(.blue)
 
                 Text("Name: \(userName)")
                     .foregroundColor(.white)
