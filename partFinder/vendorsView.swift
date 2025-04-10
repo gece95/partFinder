@@ -50,7 +50,13 @@ struct vendorView: View {
         NavigationView {
             BaseView {
                 // Use VStack to organize the layout vertically with some spacing
+                
                 VStack(spacing: 20) {
+                    
+                    Text("Sell")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(.blue)
                     
                     // Phone Number input field
                     TextField("Phone-Number", text: $phoneNumber)
