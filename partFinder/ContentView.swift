@@ -1,10 +1,9 @@
+
 import SwiftUI
 import Foundation
 import CoreLocation
 import FirebaseAuth
 import FirebaseDatabase
-
-
 
 struct Vehicle: Identifiable, Equatable {
     let id = UUID()
@@ -17,7 +16,6 @@ struct Vehicle: Identifiable, Equatable {
         "\(year) \(make) \(model) \(trim)"
     }
 }
-
 
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
@@ -35,6 +33,7 @@ struct ContentView: View {
     @State private var selectedCategoryListings: [Listing] = []
     @State private var showListings = false
     @State private var selectedCategoryLabel: String = ""
+    @State private var showFilterSheet = false
 
     let columns = [
         GridItem(.flexible()),
@@ -53,25 +52,6 @@ struct ContentView: View {
                         VStack(spacing: 0) {
                             ScrollView {
                                 VStack(spacing: 20) {
-                                    // City dropdown
-                                    Menu {
-                                        ForEach(viewModel.cities, id: \.self) { city in
-                                            Button(city) {
-                                                locationManager.requestLocation()
-                                                viewModel.selectedCity = city
-                                            }
-                                        }
-                                    } label: {
-                                        HStack {
-                                            Image(systemName: "line.3.horizontal.decrease.circle")
-                                                .font(.title2)
-                                                .foregroundColor(.gray)
-                                            Text(viewModel.selectedCity)
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
-                                        }
-                                    }
-
                                     Spacer()
 
                                     Text("partFinder")
@@ -182,6 +162,17 @@ struct ContentView: View {
             }
             .navigationTitle("partFinder")
             .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
+                    Button(action: {
+                        showFilterSheet = true
+                    }) {
+                        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+                            .labelStyle(IconOnlyLabelStyle())
+                            .font(.title2)
+                            .foregroundColor(.blue)
+                    }
+                }
+
                 ToolbarItem(placement: .navigationBarTrailing) {
                     if isLoggedIn {
                         NavigationLink(destination: ProfileView()) {
@@ -204,32 +195,91 @@ struct ContentView: View {
                     }
                 }
             }
-        }
-    }
+            .sheet(isPresented: $showFilterSheet) {
+                VStack(spacing: 20) {
+                    Text("Filter Listings")
+                        .font(.headline)
+                        .padding(.top)
 
-    struct CategoryItem: View {
-        let icon: String
-        let label: String
+                    TextField("Make", text: $newVehicle.make)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
 
-        var body: some View {
-            VStack(spacing: 8) {
-                Image(icon)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(width: 30, height: 30)
-                    .padding(8)
-                    .background(Color.white)
+                    TextField("Model", text: $newVehicle.model)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                    TextField("Trim", text: $newVehicle.trim)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                    TextField("Year", text: $newVehicle.year)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                    Menu {
+                        ForEach(viewModel.cities, id: \.self) { city in
+                            Button(city) {
+                                locationManager.requestLocation()
+                                viewModel.selectedCity = city
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Text("Location: \(viewModel.selectedCity)")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.down")
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                    }
+
+                    Button("Apply Filters") {
+                        // Sample filter logic
+                        selectedCategoryListings = dummyListings.filter {
+                            ($0.make == newVehicle.make || newVehicle.make.isEmpty) &&
+                            ($0.model == newVehicle.model || newVehicle.model.isEmpty) &&
+                            ($0.trim == newVehicle.trim || newVehicle.trim.isEmpty) &&
+                            ($0.year == newVehicle.year || newVehicle.year.isEmpty) &&
+                            ($0.city == viewModel.selectedCity)
+                        }
+                        showListings = true
+                        showFilterSheet = false
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.black)
                     .cornerRadius(10)
 
-                Text(label)
-                    .font(.caption)
-                    .foregroundColor(.primary)
+                    Spacer()
+                }
+                .padding()
             }
-            .frame(maxWidth: .infinity)
-            .padding()
-            .background(Color(.systemGray5))
-            .cornerRadius(12)
         }
+    }
+}
+
+struct CategoryItem: View {
+    let icon: String
+    let label: String
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(icon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 30)
+                .padding(8)
+                .background(Color.white)
+                .cornerRadius(10)
+
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.primary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color(.systemGray5))
+        .cornerRadius(12)
     }
 }
 
@@ -277,3 +327,4 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
+
