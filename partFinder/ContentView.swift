@@ -329,35 +329,37 @@ struct ProfileView: View {
     @AppStorage("isLoggedIn") var isLoggedIn = false
 
     var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-
-            VStack(spacing: 20) {
-                Text("Profile")
-                    .font(.title)
-                    .fontWeight(.bold)
-                    .foregroundColor(.blue)
-
-                Text("Name: \(userName)")
-                    .foregroundColor(.white)
-
-                Text("Email: \(userEmail)")
-                    .foregroundColor(.white)
-
-                Button("Logout") {
-                    try? Auth.auth().signOut()
-                    isLoggedIn = false
-                    userName = ""
-                    userEmail = ""
+        BaseView {
+            ZStack {
+                Color.black.ignoresSafeArea()
+                
+                VStack(spacing: 20) {
+                    Text("Profile")
+                        .font(.title)
+                        .fontWeight(.bold)
+                        .foregroundColor(.blue)
+                    
+                    Text("Name: \(userName)")
+                        .foregroundColor(.white)
+                    
+                    Text("Email: \(userEmail)")
+                        .foregroundColor(.white)
+                    
+                    Button("Logout") {
+                        try? Auth.auth().signOut()
+                        isLoggedIn = false
+                        userName = ""
+                        userEmail = ""
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .foregroundColor(.black)
+                    .cornerRadius(10)
+                    
+                    Spacer()
                 }
                 .padding()
-                .background(Color.white)
-                .foregroundColor(.black)
-                .cornerRadius(10)
-
-                Spacer()
             }
-            .padding()
         }
     }
 }
