@@ -1,214 +1,327 @@
-/*
- Welcome to partFinder team
- 
- ContentView.swift
- Created by Gerardo Cervantes on 2/4/25
- */
-import SwiftUI
 
-struct Vehicle: Identifiable, Hashable {
+import SwiftUI
+import Foundation
+import CoreLocation
+import FirebaseAuth
+import FirebaseDatabase
+
+struct Vehicle: Identifiable, Equatable {
     let id = UUID()
     var make: String
     var model: String
+    var trim: String
     var year: String
-    var color: String
+
+    var displayName: String {
+        "\(year) \(make) \(model) \(trim)"
+    }
 }
 
 struct ContentView: View {
+    @Environment(\.colorScheme) var colorScheme
+    @StateObject private var viewModel = HomeViewModel()
+    @StateObject private var locationManager = LocationManager()
+
+    @AppStorage("isLoggedIn") var isLoggedIn = false
+    @AppStorage("userName") var userName = ""
+    @AppStorage("userEmail") var userEmail = ""
+
+    @State private var newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
     @State private var vehicles: [Vehicle] = []
-    @State private var selectedVehicle: Vehicle? = nil
-    @State private var make: String = ""
-    @State private var model: String = ""
-    @State private var year: String = ""
-    @State private var color: String = ""
-    @State private var showPartsDropdown: Bool = false
-    
-    // list of relavantParts shown later with showRelavantParts
-    var relevantParts = ["Battery", "Oil Filter", "Brake Pads", "Spark Plugs", "Air Filter", "Tires", "FIXME: add more options?"]
+    @State private var selectedVehicle: Vehicle?
+
+    @State private var selectedCategoryListings: [Listing] = []
+    @State private var showListings = false
+    @State private var selectedCategoryLabel: String = ""
+    @State private var showFilterSheet = false
+
+    let columns = [
+        GridItem(.flexible()),
+        GridItem(.flexible()),
+        GridItem(.flexible())
+    ]
 
     var body: some View {
-        NavigationView {
-            VStack {
-                // ensures font begins under "dynamic island"
-                Spacer().frame(height: 100)
-                
-                // title with centered dash & navigation to home
-                VStack {
-                    Button(action: {
-                        // reset selection to show vehicle list
-                        selectedVehicle = nil
-                    }) {
-                        Text("partFinder")
-                            // font style: cursive
-                            .font(.custom("SnellRoundhand-Bold", size: 45))
-                            // font color
-                            .foregroundColor(Color.blue.opacity(500))
-                            .underline()
-                    }
-                }
-                .padding(.bottom, 110)
+        NavigationStack {
+            ZStack {
+                GeometryReader { geometry in
+                    ZStack(alignment: .bottom) {
+                        (colorScheme == .dark ? Color("DarkBackground") : Color.black)
+                            .edgesIgnoringSafeArea(.all)
 
-                if let vehicle = selectedVehicle {
-                    // display selected vehicle info
-                    VStack(alignment: .leading, spacing: 10) {
-                        Text("Selected Vehicle:")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                        //FIXME: keep as one line or seperate?
-                        
-                        Text("\(vehicle.year) \(vehicle.make) \(vehicle.model) \(vehicle.color)")
-                        /*
-                        Text("Make: \(vehicle.make)")
-                        Text("Model: \(vehicle.model)")
-                        Text("Year: \(vehicle.year)")
-                        Text("Color: \(vehicle.color)")
-                         */
-                    }
-                    
-                    .foregroundColor(.blue)
-                    .padding()
+                        VStack(spacing: 0) {
+                            ScrollView {
+                                VStack(spacing: 20) {
+                                    Spacer()
 
-                    // dropdown for relevant parts
-                    VStack {
-                        Button(action: {
-                            showPartsDropdown.toggle()
-                        }) {
-                            Text("Show Relevant Parts")
-                                .font(.headline)
-                                .foregroundColor(.white)
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .background(Color.blue.opacity(0.9))
-                                .cornerRadius(10)
-                                .padding(.horizontal)
-                        }
+                                    Text("partFinder")
+                                        .font(.title2)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.blue)
 
-                        if showPartsDropdown {
-                            VStack {
-                                ForEach(relevantParts, id: \.self) { part in
-                                    Text(part)
-                                        .font(.body)
-                                        .foregroundColor(.white)
-                                        .padding(5)
-                                        .frame(maxWidth: .infinity)
-                                        .background(Color.gray.opacity(0.3))
-                                        .cornerRadius(5)
+                                    Spacer()
                                 }
-                            }
-                            .padding(.horizontal)
-                        }
-                    }
+                                .padding(.horizontal)
 
-                    // option to go back and select another vehicle
-                    Button(action: {
-                        selectedVehicle = nil
-                    }) {
-                        Text("Select Another Vehicle")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.green.opacity(0.8))
-                            .cornerRadius(10)
-                            .padding(.horizontal)
-                    }
-                    Button(action: {
-                    // option to remove a vehicle FIXME: need to add functionality
-                    }) {
-                        Text("Remove Vehicle")
-                            .font(.headline)
-                            .foregroundColor(.red)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.white.opacity(0.8))
-                            .cornerRadius(10)
-                            .padding(.horizontal)
-                    }
-                } else {
-                    if !vehicles.isEmpty {
-                        // show list of stored vehicles for selection and give option to add new vehicle
-                        Text("Select a Vehicle or Add a New One:")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .padding(.bottom, 5)
+                                if let zip = locationManager.zipCode {
+                                    Text("ZIP Code: \(zip)")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                        .padding(.horizontal)
+                                }
 
-                        ForEach(vehicles, id: \.self) { vehicle in
-                            Button(action: {
-                                selectedVehicle = vehicle
-                            }) {
-                                Text(vehicle.model)
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-                                    .padding()
+                                VStack(spacing: 10) {
+                                    TextField("Make", text: $newVehicle.make)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                                    TextField("Model", text: $newVehicle.model)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                                    TextField("Trim", text: $newVehicle.trim)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                                    TextField("Year", text: $newVehicle.year)
+                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                                    Button("Add Vehicle") {
+                                        guard !newVehicle.make.isEmpty,
+                                              !newVehicle.model.isEmpty,
+                                              !newVehicle.year.isEmpty else { return }
+
+                                        vehicles.append(newVehicle)
+                                        selectedVehicle = newVehicle
+                                        newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
+                                    }
                                     .frame(maxWidth: .infinity)
-                                    .background(Color.blue.opacity(0.8))
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
                                     .cornerRadius(10)
+                                }
+                                .padding(.horizontal)
+
+                                if !vehicles.isEmpty {
+                                    Menu {
+                                        ForEach(vehicles) { vehicle in
+                                            Button(vehicle.displayName) {
+                                                selectedVehicle = vehicle
+                                            }
+                                        }
+                                    } label: {
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(Color(.systemGray6))
+                                            HStack {
+                                                Text(selectedVehicle?.displayName ?? "Select Vehicle")
+                                                    .foregroundColor(.primary)
+                                                    .padding(.leading)
+                                                Spacer()
+                                                Image(systemName: "chevron.down")
+                                                    .foregroundColor(.gray)
+                                                    .padding(.trailing)
+                                            }
+                                        }
+                                        .frame(height: 45)
+                                        .padding(.horizontal)
+                                    }
+                                }
+
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        Text("Categories")
+                                            .font(.headline)
+                                            .foregroundColor(.gray)
+                                        Spacer()
+                                        Text("Show All")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                    }
                                     .padding(.horizontal)
+
+                                    LazyVGrid(columns: columns, spacing: 20) {
+                                        ForEach(viewModel.categories) { category in
+                                            Button(action: {
+                                                if category.label == "Engine" {
+                                                    selectedCategoryLabel = category.label
+                                                    selectedCategoryListings = dummyListings.filter { $0.partType == category.label }
+                                                    showListings = true
+                                                }
+                                            }) {
+                                                CategoryItem(icon: category.icon, label: category.label)
+                                            }
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                }
+
+                                Spacer().frame(height: geometry.safeAreaInsets.bottom)
                             }
                         }
-                        // allows users to add multiple vehicles
-                        // FIXME: store vehicle information once profiles can be set
-                        Text("Or Add a New Vehicle:")
-                            .font(.title2)
-                            .foregroundColor(.white)
-                            .padding(.top, 10)
                     }
-
-                    // Vehicle Info Inputs
-                    VStack(spacing: 20) {
-                        TextField("Make", text: $make)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
-
-                        TextField("Model", text: $model)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
-
-                        TextField("Year", text:$year)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
-
-                        TextField("Color", text: $color)
-                            .textFieldStyle(RoundedBorderTextFieldStyle())
-                            .padding(.horizontal)
-                    }
-                    .padding(.bottom, 10)
-
-                    // Save Vehicle Button
+                }
+            }
+            .navigationTitle("partFinder")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarLeading) {
                     Button(action: {
-                        if !make.isEmpty && !model.isEmpty && !year.isEmpty && !color.isEmpty {
-                            let newVehicle = Vehicle(make: make, model: model, year: year, color: color)
-                            vehicles.append(newVehicle) // Save new vehicle
-                            selectedVehicle = newVehicle // Select the newly added vehicle
-                            make = ""
-                            model = ""
-                            year = ""
-                            color = ""
-                        }
+                        showFilterSheet = true
                     }) {
-                        // allow user to save vehicle information
-                        Text("Save Vehicle")
-                            .font(.headline)
-                            .foregroundColor(.white)
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.blue.opacity(0.8))
-                            .cornerRadius(10)
-                            .padding(.horizontal)
+                        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
+                            .labelStyle(IconOnlyLabelStyle())
+                            .font(.title2)
+                            .foregroundColor(.blue)
                     }
                 }
 
-                Spacer()
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    if isLoggedIn {
+                        NavigationLink(destination: ProfileView()) {
+                            Text("Profile")
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.black)
+                                .foregroundColor(.white)
+                                .cornerRadius(8)
+                        }
+                    } else {
+                        NavigationLink(destination: AuthView()) {
+                            Text("Login")
+                                .padding(.horizontal, 12)
+                                .padding(.vertical, 6)
+                                .background(Color.black)
+                                .foregroundColor(.blue)
+                                .cornerRadius(8)
+                        }
+                    }
+                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            // black background
-            .background(Color.black)
-            // extends background to full screen
-            .ignoresSafeArea()
+            .sheet(isPresented: $showFilterSheet) {
+                VStack(spacing: 20) {
+                    Text("Filter Listings")
+                        .font(.headline)
+                        .padding(.top)
+
+                    TextField("Make", text: $newVehicle.make)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                    TextField("Model", text: $newVehicle.model)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                    TextField("Trim", text: $newVehicle.trim)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                    TextField("Year", text: $newVehicle.year)
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+
+                    Menu {
+                        ForEach(viewModel.cities, id: \.self) { city in
+                            Button(city) {
+                                locationManager.requestLocation()
+                                viewModel.selectedCity = city
+                            }
+                        }
+                    } label: {
+                        HStack {
+                            Text("Location: \(viewModel.selectedCity)")
+                                .foregroundColor(.primary)
+                            Spacer()
+                            Image(systemName: "chevron.down")
+                        }
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .cornerRadius(10)
+                    }
+
+                    Button("Apply Filters") {
+                        // Sample filter logic
+                        selectedCategoryListings = dummyListings.filter {
+                            ($0.make == newVehicle.make || newVehicle.make.isEmpty) &&
+                            ($0.model == newVehicle.model || newVehicle.model.isEmpty) &&
+                            ($0.trim == newVehicle.trim || newVehicle.trim.isEmpty) &&
+                            ($0.year == newVehicle.year || newVehicle.year.isEmpty) &&
+                            ($0.city == viewModel.selectedCity)
+                        }
+                        showListings = true
+                        showFilterSheet = false
+                    }
+                    .frame(maxWidth: .infinity)
+                    .padding()
+                    .background(Color.blue)
+                    .foregroundColor(.black)
+                    .cornerRadius(10)
+
+                    Spacer()
+                }
+                .padding()
+            }
         }
     }
 }
-// allows us to view app demo via iphone or ipad in content view
+
+struct CategoryItem: View {
+    let icon: String
+    let label: String
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(icon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 30)
+                .padding(8)
+                .background(Color.white)
+                .cornerRadius(10)
+
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.primary)
+        }
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color(.systemGray5))
+        .cornerRadius(12)
+    }
+}
+
+struct ProfileView: View {
+    @AppStorage("userName") var userName = ""
+    @AppStorage("userEmail") var userEmail = ""
+    @AppStorage("isLoggedIn") var isLoggedIn = false
+
+    var body: some View {
+        ZStack {
+            Color.black.ignoresSafeArea()
+
+            VStack(spacing: 20) {
+                Text("Profile")
+                    .font(.largeTitle)
+                    .bold()
+                    .foregroundColor(.white)
+
+                Text("Name: \(userName)")
+                    .foregroundColor(.white)
+
+                Text("Email: \(userEmail)")
+                    .foregroundColor(.white)
+
+                Button("Logout") {
+                    try? Auth.auth().signOut()
+                    isLoggedIn = false
+                    userName = ""
+                    userEmail = ""
+                }
+                .padding()
+                .background(Color.white)
+                .foregroundColor(.black)
+                .cornerRadius(10)
+
+                Spacer()
+            }
+            .padding()
+        }
+    }
+}
+
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
