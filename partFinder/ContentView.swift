@@ -383,7 +383,7 @@ struct ContentView: View {
                 .cornerRadius(12)
             }
         }
-
+/*
 struct ProfileView: View {
     @AppStorage("userName") var userName = ""
     @AppStorage("userEmail") var userEmail = ""
@@ -392,7 +392,7 @@ struct ProfileView: View {
     var body: some View {
         BaseView {
             ZStack {
-                Color.black.ignoresSafeArea()
+               Color.black.ignoresSafeArea()
                 
                 VStack(spacing: 20) {
                     Text("Profile")
@@ -401,10 +401,10 @@ struct ProfileView: View {
                         .foregroundColor(.blue)
 
                     Text("\(userEmail)")
-                        .foregroundColor(.white)
+                     .foregroundColor(.white)
                     
                     Button("Logout") {
-                        try? Auth.auth().signOut()
+                       try? Auth.auth().signOut()
                         isLoggedIn = false
                         userName = ""
                         userEmail = ""
@@ -421,6 +421,7 @@ struct ProfileView: View {
         }
     }
 }
+ */
 
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
