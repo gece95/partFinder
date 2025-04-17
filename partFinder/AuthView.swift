@@ -6,14 +6,16 @@ struct AuthView: View {
     @AppStorage("isLoggedIn") var isLoggedIn = false
     @AppStorage("userName") var userName = ""
     @AppStorage("userEmail") var userEmail = ""
-    
+    @AppStorage("userUID") var userUID = ""  // ⬅️ Store UID for Firebase paths
+
     @State private var email = ""
     @State private var password = ""
     @State private var name = ""
     @State private var message = ""
     @State private var isLoginMode = true
     @State private var showResetPassword = false
-    
+    @State private var isSuccessMessage = false
+
     var body: some View {
         ZStack {
             Color.black.ignoresSafeArea()
@@ -73,7 +75,7 @@ struct AuthView: View {
                 .foregroundColor(.gray)
                 
                 Text(message)
-                    .foregroundColor(.red)
+                    .foregroundColor(isSuccessMessage ? .green : .red)
                     .multilineTextAlignment(.center)
                 
                 Spacer()
@@ -89,15 +91,20 @@ struct AuthView: View {
         UserManager().registerUser(email: email, password: password, name: name) { result in
             switch result {
             case .success:
-                userName = name
-                userEmail = email
-                isLoggedIn = true
-                message = "Account created!"
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    dismiss()
+                if let currentUser = Auth.auth().currentUser {
+                    userUID = currentUser.uid  // Save UID for future DB access
+                    userName = name
+                    userEmail = email
+                    isLoggedIn = true
+                    message = "Account created!"
+                    isSuccessMessage = true
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        dismiss()
+                    }
                 }
             case .failure(let error):
                 message = "\(error.localizedDescription)"
+                isSuccessMessage = false
             }
         }
     }
@@ -159,6 +166,11 @@ struct AuthView: View {
         Auth.auth().signIn(withEmail: email, password: password) { result, error in
             if let error = error {
                 message = "\(error.localizedDescription)"
+                isSuccessMessage = false
+            } else if let user = result?.user {
+                userEmail = email
+                userName = user.displayName ?? ""
+                userUID = user.uid  // Save UID for future DB access
             } else {
                 print("Firebase signIn success — waiting for currentUser to be set...")
                 waitForUser(retries: 10)
@@ -172,7 +184,9 @@ struct AuthView: View {
                 print("currentUser available: \(user.email ?? "no email")")
                 userEmail = user.email ?? ""
                 userName = user.displayName ?? ""
+
                 isLoggedIn = true
+                isSuccessMessage = true
                 dismiss()
             } else if retries > 0 {
                 print("Waiting for currentUser... \(retries) tries left")
