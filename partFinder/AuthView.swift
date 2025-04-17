@@ -6,6 +6,7 @@ struct AuthView: View {
     @AppStorage("isLoggedIn") var isLoggedIn = false
     @AppStorage("userName") var userName = ""
     @AppStorage("userEmail") var userEmail = ""
+    @AppStorage("userUID") var userUID = ""  // ⬅️ Store UID for Firebase paths
 
     @State private var email = ""
     @State private var password = ""
@@ -89,12 +90,15 @@ struct AuthView: View {
         UserManager().registerUser(email: email, password: password, name: name) { result in
             switch result {
             case .success:
-                userName = name
-                userEmail = email
-                isLoggedIn = true
-                message = "Account created!"
-                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
-                    dismiss()
+                if let currentUser = Auth.auth().currentUser {
+                    userUID = currentUser.uid  // Save UID for future DB access
+                    userName = name
+                    userEmail = email
+                    isLoggedIn = true
+                    message = "Account created!"
+                    DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                        dismiss()
+                    }
                 }
             case .failure(let error):
                 message = "\(error.localizedDescription)"
@@ -106,9 +110,10 @@ struct AuthView: View {
         Auth.auth().signIn(withEmail: email, password: password) { result, error in
             if let error = error {
                 message = "\(error.localizedDescription)"
-            } else {
+            } else if let user = result?.user {
                 userEmail = email
-                userName = result?.user.displayName ?? ""
+                userName = user.displayName ?? ""
+                userUID = user.uid  // Save UID for future DB access
                 isLoggedIn = true
                 dismiss()
             }

@@ -24,6 +24,7 @@ struct ContentView: View {
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var locationManager = LocationManager()
     
+    @AppStorage("userUID") var userUID = ""
     @AppStorage("isLoggedIn") var isLoggedIn = false
     @AppStorage("userName") var userName = ""
     @AppStorage("userEmail") var userEmail = ""
@@ -67,94 +68,118 @@ struct ContentView: View {
     ]
     
     var body: some View {
-            BaseView {
-                ZStack {
-                    GeometryReader { geometry in
-                        ZStack(alignment: .bottom) {
-                            (colorScheme == .dark ? Color("DarkBackground") : Color.black)
-                                .edgesIgnoringSafeArea(.all)
-                            
-                            VStack(spacing: 0) {
-                                ScrollView {
-                                    HStack {
-                                        // City dropdown
-                                        Menu {
-                                            ForEach(viewModel.cities, id: \.self) { city in
-                                                Button(city) {
-                                                    locationManager.requestLocation()
-                                                    viewModel.selectedCity = city
-                                                }
+        BaseView {
+            ZStack {
+                GeometryReader { geometry in
+                    ZStack(alignment: .bottom) {
+                        (colorScheme == .dark ? Color("DarkBackground") : Color.black)
+                            .edgesIgnoringSafeArea(.all)
+                        
+                        VStack(spacing: 0) {
+                            ScrollView {
+                                HStack {
+                                    // City dropdown
+                                    Menu {
+                                        ForEach(viewModel.cities, id: \.self) { city in
+                                            Button(city) {
+                                                locationManager.requestLocation()
+                                                viewModel.selectedCity = city
                                             }
-                                        } label: {
-                                            HStack {
-                                                Image(systemName: "line.3.horizontal.decrease.circle")
-                                                    .font(.title2)
-                                                    .foregroundColor(.gray)
-                                                Text(viewModel.selectedCity)
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.gray)
-                                            }
-                                            .font(.subheadline)
                                         }
-                                        
-                                        Spacer()
-                                        
-                                        Text("partFinder")
-                                            .font(.headline)
-                                            .fontWeight(.bold)
-                                            .foregroundColor(.blue)
-                                        
-                                        Spacer()
-                                    }
-                                    .padding(.horizontal)
-                                    .padding(.vertical, 6)
-                                    
-                                    if let zip = locationManager.zipCode {
-                                        Text("ZIP Code: \(zip)")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                            .padding(.horizontal)
-                                            .padding(.bottom, 4)
+                                    } label: {
+                                        HStack {
+                                            Image(systemName: "line.3.horizontal.decrease.circle")
+                                                .font(.title2)
+                                                .foregroundColor(.gray)
+                                            Text(viewModel.selectedCity)
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
+                                        .font(.subheadline)
                                     }
                                     
-                                    VStack(spacing: 12) {
-                                        // Year Picker
-                                        Menu {
-                                            ForEach(years, id: \.self) { year in
-                                                Button(action: {
-                                                    newVehicle.year = year
-                                                }) {
-                                                    Text(year)
-                                                }
+                                    Spacer()
+                                    
+                                    Text("partFinder")
+                                        .font(.headline)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.blue)
+                                    
+                                    Spacer()
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 6)
+                                
+                                if let zip = locationManager.zipCode {
+                                    Text("ZIP Code: \(zip)")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                        .padding(.horizontal)
+                                        .padding(.bottom, 4)
+                                }
+                                
+                                VStack(spacing: 12) {
+                                    // Year Picker
+                                    Menu {
+                                        ForEach(years, id: \.self) { year in
+                                            Button(action: {
+                                                newVehicle.year = year
+                                            }) {
+                                                Text(year)
                                             }
-                                        } label: {
-                                            HStack {
-                                                Text(newVehicle.year.isEmpty ? "Year" : newVehicle.year)
-                                                    .foregroundColor(newVehicle.year.isEmpty ? .gray : .primary)
-                                                Spacer()
-                                                Image(systemName: "chevron.down")
-                                                    .foregroundColor(.gray)
-                                            }
-                                            .padding()
-                                            .background(Color(.systemGray6))
-                                            .cornerRadius(8)
                                         }
-                                        
-                                        // Make Picker
+                                    } label: {
+                                        HStack {
+                                            Text(newVehicle.year.isEmpty ? "Year" : newVehicle.year)
+                                                .foregroundColor(newVehicle.year.isEmpty ? .gray : .primary)
+                                            Spacer()
+                                            Image(systemName: "chevron.down")
+                                                .foregroundColor(.gray)
+                                        }
+                                        .padding()
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    }
+                                    
+                                    // Make Picker
+                                    Menu {
+                                        ForEach(makes, id: \.self) { make in
+                                            Button(action: {
+                                                newVehicle.make = make
+                                                newVehicle.model = ""
+                                                newVehicle.trim = ""
+                                            }) {
+                                                Text(make)
+                                            }
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Text(newVehicle.make.isEmpty ? "Make" : newVehicle.make)
+                                                .foregroundColor(newVehicle.make.isEmpty ? .gray : .primary)
+                                            Spacer()
+                                            Image(systemName: "chevron.down")
+                                                .foregroundColor(.gray)
+                                        }
+                                        .padding()
+                                        .background(Color(.systemGray6))
+                                        .cornerRadius(8)
+                                    }
+                                    
+                                    // Model Picker
+                                    if let models = modelsByMake[newVehicle.make] {
                                         Menu {
-                                            ForEach(makes, id: \.self) { make in
+                                            ForEach(models, id: \.self) { model in
                                                 Button(action: {
-                                                    newVehicle.make = make
-                                                    newVehicle.model = ""
+                                                    newVehicle.model = model
                                                     newVehicle.trim = ""
                                                 }) {
-                                                    Text(make)
+                                                    Text(model)
                                                 }
                                             }
                                         } label: {
                                             HStack {
-                                                Text(newVehicle.make.isEmpty ? "Make" : newVehicle.make)
-                                                    .foregroundColor(newVehicle.make.isEmpty ? .gray : .primary)
+                                                Text(newVehicle.model.isEmpty ? "Model" : newVehicle.model)
+                                                    .foregroundColor(newVehicle.model.isEmpty ? .gray : .primary)
                                                 Spacer()
                                                 Image(systemName: "chevron.down")
                                                     .foregroundColor(.gray)
@@ -163,71 +188,48 @@ struct ContentView: View {
                                             .background(Color(.systemGray6))
                                             .cornerRadius(8)
                                         }
-                                        
-                                        // Model Picker
-                                        if let models = modelsByMake[newVehicle.make] {
-                                            Menu {
-                                                ForEach(models, id: \.self) { model in
-                                                    Button(action: {
-                                                        newVehicle.model = model
-                                                        newVehicle.trim = ""
-                                                    }) {
-                                                        Text(model)
-                                                    }
+                                    }
+                                    
+                                    // Trim Picker
+                                    if let trims = trimsByModel[newVehicle.model] {
+                                        Menu {
+                                            ForEach(trims, id: \.self) { trim in
+                                                Button(action: {
+                                                    newVehicle.trim = trim
+                                                }) {
+                                                    Text(trim)
                                                 }
-                                            } label: {
-                                                HStack {
-                                                    Text(newVehicle.model.isEmpty ? "Model" : newVehicle.model)
-                                                        .foregroundColor(newVehicle.model.isEmpty ? .gray : .primary)
-                                                    Spacer()
-                                                    Image(systemName: "chevron.down")
-                                                        .foregroundColor(.gray)
-                                                }
-                                                .padding()
-                                                .background(Color(.systemGray6))
-                                                .cornerRadius(8)
                                             }
-                                        }
-                                        
-                                        // Trim Picker
-                                        if let trims = trimsByModel[newVehicle.model] {
-                                            Menu {
-                                                ForEach(trims, id: \.self) { trim in
-                                                    Button(action: {
-                                                        newVehicle.trim = trim
-                                                    }) {
-                                                        Text(trim)
-                                                    }
-                                                }
-                                            } label: {
-                                                HStack {
-                                                    Text(newVehicle.trim.isEmpty ? "Trim" : newVehicle.trim)
-                                                        .foregroundColor(newVehicle.trim.isEmpty ? .gray : .primary)
-                                                    Spacer()
-                                                    Image(systemName: "chevron.down")
-                                                        .foregroundColor(.gray)
-                                                }
-                                                .padding()
-                                                .background(Color(.systemGray6))
-                                                .cornerRadius(8)
+                                        } label: {
+                                            HStack {
+                                                Text(newVehicle.trim.isEmpty ? "Trim" : newVehicle.trim)
+                                                    .foregroundColor(newVehicle.trim.isEmpty ? .gray : .primary)
+                                                Spacer()
+                                                Image(systemName: "chevron.down")
+                                                    .foregroundColor(.gray)
                                             }
+                                            .padding()
+                                            .background(Color(.systemGray6))
+                                            .cornerRadius(8)
                                         }
-                                        
-                                        
-                                        Button("Add Vehicle") {
-                                            guard !newVehicle.make.isEmpty,
-                                                  !newVehicle.model.isEmpty,
+                                    }
+                                    
+                                    
+                                    Button("Add Vehicle") {
+                                        guard !newVehicle.make.isEmpty,
+                                              !newVehicle.model.isEmpty,
                                                   !newVehicle.year.isEmpty else { return }
-                                            
-                                            vehicles.append(newVehicle)
-                                            selectedVehicle = newVehicle
-                                            newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
-                                        }
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(Color.blue)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(10)
+                                                  
+                                                  vehicles.append(newVehicle)
+                                                  selectedVehicle = newVehicle
+                                                  saveVehicleToFirebase(newVehicle)
+                                                  newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
+                                              }
+                                              .frame(maxWidth: .infinity)
+                                              .padding()
+                                              .background(Color.blue)
+                                              .foregroundColor(.white)
+                                              .cornerRadius(10)
                                     }
                                     .padding(.horizontal)
                                     .padding()
@@ -289,15 +291,74 @@ struct ContentView: View {
                                     }
                                     
                                     Spacer().frame(height: geometry.safeAreaInsets.bottom)
+                                }.onAppear {
+                                    loadVehiclesFromFirebase()
                                 }
                             }
                         }
                     }
                 }
-                }
             }
         }
-        
+    func saveVehicleToFirebase(_ vehicle: Vehicle) {
+        guard !userUID.isEmpty else {
+            print("❌ User UID is empty. Cannot save vehicle.")
+            return
+        }
+        let ref = Database.database().reference()
+        let vehicleData = [
+            "make": vehicle.make,
+            "model": vehicle.model,
+            "trim": vehicle.trim,
+            "year": vehicle.year
+        ]
+        let path = "users/\(userUID)/vehicles/\(vehicle.id.uuidString)"
+            print("📍 Saving vehicle to: \(path)")
+            print("📦 Vehicle data: \(vehicleData)")
+
+            ref.child("users")
+                .child(userUID)
+                .child("vehicles")
+                .child(vehicle.id.uuidString)
+                .setValue(vehicleData) { error, _ in
+                    if let error = error {
+                        print("❌ Failed to save vehicle: \(error.localizedDescription)")
+                    } else {
+                        print("✅ Vehicle saved to Firebase")
+                    }
+                }
+        }
+    func loadVehiclesFromFirebase() {
+        guard !userUID.isEmpty else {
+            print("❌ User UID is empty. Cannot load vehicles.")
+            return
+        }
+
+        let ref = Database.database().reference()
+        ref.child("users").child(userUID).child("vehicles").observeSingleEvent(of: .value) { snapshot in
+            var loadedVehicles: [Vehicle] = []
+
+            for child in snapshot.children {
+                if let snap = child as? DataSnapshot,
+                   let value = snap.value as? [String: Any],
+                   let make = value["make"] as? String,
+                   let model = value["model"] as? String,
+                   let trim = value["trim"] as? String,
+                   let year = value["year"] as? String {
+                    
+                    let vehicle = Vehicle(make: make, model: model, trim: trim, year: year)
+                    loadedVehicles.append(vehicle)
+                }
+            }
+
+            vehicles = loadedVehicles
+            print("✅ Loaded \(vehicles.count) vehicles from Firebase.")
+        }
+    }
+    }
+
+    
+    
         struct CategoryItem: View {
             let icon: String
             let label: String
