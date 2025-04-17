@@ -1,4 +1,4 @@
-/*
+
  import SwiftUI
 
 struct ProfileView: View {
@@ -106,4 +106,4 @@ struct ProfileView_Previews: PreviewProvider {
     }
 }
 
-*/
+

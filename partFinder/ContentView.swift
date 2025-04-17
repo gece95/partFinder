@@ -1,19 +1,37 @@
 
-import SwiftUI
-import Foundation
-import CoreLocation
-import FirebaseAuth
+import Firebase
 import FirebaseDatabase
+import FirebaseStorage
+import SwiftUI
 
-struct Vehicle: Identifiable, Equatable {
-    let id = UUID()
+struct Vehicle: Identifiable, Equatable, Codable, Hashable {
+    let id: UUID
     var make: String
     var model: String
     var trim: String
     var year: String
 
+    init(id: UUID = UUID(), make: String, model: String, trim: String, year: String) {
+        self.id = id
+        self.make = make
+        self.model = model
+        self.trim = trim
+        self.year = year
+    }
+
     var displayName: String {
         "\(year) \(make) \(model) \(trim)"
+    }
+
+    static func ==(lhs: Vehicle, rhs: Vehicle) -> Bool {
+        return lhs.make == rhs.make && lhs.model == rhs.model && lhs.trim == rhs.trim && lhs.year == rhs.year
+    }
+
+    func hash(into hasher: inout Hasher) {
+        hasher.combine(make)
+        hasher.combine(model)
+        hasher.combine(trim)
+        hasher.combine(year)
     }
 }
 
@@ -33,7 +51,8 @@ struct ContentView: View {
     @State private var selectedCategoryListings: [Listing] = []
     @State private var showListings = false
     @State private var selectedCategoryLabel: String = ""
-    @State private var showFilterSheet = false
+
+    @State private var firebaseListings: [Vehicle] = []
 
     let columns = [
         GridItem(.flexible()),
@@ -41,8 +60,51 @@ struct ContentView: View {
         GridItem(.flexible())
     ]
 
+    var availableVehicles: [Vehicle] {
+        return firebaseListings
+    }
+
+    var availableMakes: [String] {
+        Set(availableVehicles.map { $0.make }).sorted()
+    }
+
+    var availableModels: [String] {
+        Set(availableVehicles.filter { $0.make == newVehicle.make }.map { $0.model }).sorted()
+    }
+
+    var availableTrims: [String] {
+        Set(availableVehicles.filter { $0.make == newVehicle.make && $0.model == newVehicle.model }.map { $0.trim }).sorted()
+    }
+
+    var availableYears: [String] {
+        Set(availableVehicles.filter { $0.make == newVehicle.make && $0.model == newVehicle.model && $0.trim == newVehicle.trim }.map { $0.year }).sorted()
+    }
+
+    func fetchVehicleJSONFromFirebase(completion: @escaping ([Vehicle]) -> Void) {
+        let ref = Database.database().reference(withPath: "vehicles")
+
+        ref.observeSingleEvent(of: .value) { snapshot in
+            var vehicles: [Vehicle] = []
+
+            for case let child as DataSnapshot in snapshot.children {
+                guard let dict = child.value as? [String: Any] else { continue }
+
+                let make = dict["brand"] as? String ?? ""
+                let model = dict["model"] as? String ?? ""
+                let trim = dict["trim"] as? String ?? ""
+                let year = String(describing: dict["year"] ?? "") // Ensure year is always a String
+
+                let vehicle = Vehicle(make: make, model: model, trim: trim, year: year)
+                vehicles.append(vehicle)
+            }
+
+            print("✅ Successfully loaded \(vehicles.count) vehicles from Realtime DB")
+            completion(vehicles)
+        }
+    }
+
     var body: some View {
-        NavigationStack {
+        BaseView {
             ZStack {
                 GeometryReader { geometry in
                     ZStack(alignment: .bottom) {
@@ -51,41 +113,110 @@ struct ContentView: View {
 
                         VStack(spacing: 0) {
                             ScrollView {
-                                VStack(spacing: 20) {
+                                HStack {
+                                    Menu {
+                                        ForEach(viewModel.cities, id: \.self) { city in
+                                            Button(city) {
+                                                locationManager.requestLocation()
+                                                viewModel.selectedCity = city
+                                            }
+                                        }
+                                    } label: {
+                                        HStack {
+                                            Image(systemName: "line.3.horizontal.decrease.circle")
+                                                .font(.title2)
+                                                .foregroundColor(.gray)
+                                            Text(viewModel.selectedCity)
+                                                .font(.subheadline)
+                                                .foregroundColor(.gray)
+                                        }
+                                    }
+
                                     Spacer()
 
                                     Text("partFinder")
-                                        .font(.title2)
+                                        .font(.headline)
                                         .fontWeight(.bold)
                                         .foregroundColor(.blue)
 
                                     Spacer()
                                 }
                                 .padding(.horizontal)
+                                .padding(.vertical, 6)
 
                                 if let zip = locationManager.zipCode {
                                     Text("ZIP Code: \(zip)")
                                         .font(.caption)
                                         .foregroundColor(.gray)
                                         .padding(.horizontal)
+                                        .padding(.bottom, 4)
                                 }
 
-                                VStack(spacing: 10) {
-                                    TextField("Make", text: $newVehicle.make)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                VStack(spacing: 12) {
+                                    if !availableYears.isEmpty {
+                                        Menu {
+                                            ForEach(availableYears, id: \.self) { year in
+                                                Button {
+                                                    newVehicle.year = year
+                                                } label: {
+                                                    Text(year)
+                                                }
+                                            }
+                                        } label: {
+                                            DropdownLabel(text: newVehicle.year, placeholder: "Year")
+                                        }
+                                    }
 
-                                    TextField("Model", text: $newVehicle.model)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    Menu {
+                                        ForEach(availableMakes, id: \.self) { make in
+                                            Button {
+                                                newVehicle.make = make
+                                                newVehicle.model = ""
+                                                newVehicle.trim = ""
+                                                newVehicle.year = ""
+                                            } label: {
+                                                Text(make)
+                                            }
+                                        }
+                                    } label: {
+                                        DropdownLabel(text: newVehicle.make, placeholder: "Make")
+                                    }
 
-                                    TextField("Trim", text: $newVehicle.trim)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    if !availableModels.isEmpty {
+                                        Menu {
+                                            ForEach(availableModels, id: \.self) { model in
+                                                Button {
+                                                    newVehicle.model = model
+                                                    newVehicle.trim = ""
+                                                    newVehicle.year = ""
+                                                } label: {
+                                                    Text(model)
+                                                }
+                                            }
+                                        } label: {
+                                            DropdownLabel(text: newVehicle.model, placeholder: "Model")
+                                        }
+                                    }
 
-                                    TextField("Year", text: $newVehicle.year)
-                                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    if !availableTrims.isEmpty {
+                                        Menu {
+                                            ForEach(availableTrims, id: \.self) { trim in
+                                                Button {
+                                                    newVehicle.trim = trim
+                                                    newVehicle.year = ""
+                                                } label: {
+                                                    Text(trim)
+                                                }
+                                            }
+                                        } label: {
+                                            DropdownLabel(text: newVehicle.trim, placeholder: "Trim")
+                                        }
+                                    }
 
                                     Button("Add Vehicle") {
                                         guard !newVehicle.make.isEmpty,
                                               !newVehicle.model.isEmpty,
+                                              !newVehicle.trim.isEmpty,
                                               !newVehicle.year.isEmpty else { return }
 
                                         vehicles.append(newVehicle)
@@ -99,6 +230,9 @@ struct ContentView: View {
                                     .cornerRadius(10)
                                 }
                                 .padding(.horizontal)
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(12)
 
                                 if !vehicles.isEmpty {
                                     Menu {
@@ -160,101 +294,30 @@ struct ContentView: View {
                     }
                 }
             }
-            .navigationTitle("partFinder")
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button(action: {
-                        showFilterSheet = true
-                    }) {
-                        Label("Filter", systemImage: "line.3.horizontal.decrease.circle")
-                            .labelStyle(IconOnlyLabelStyle())
-                            .font(.title2)
-                            .foregroundColor(.blue)
-                    }
-                }
-
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    if isLoggedIn {
-                        NavigationLink(destination: ProfileView()) {
-                            Text("Profile")
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Color.black)
-                                .foregroundColor(.white)
-                                .cornerRadius(8)
-                        }
-                    } else {
-                        NavigationLink(destination: AuthView()) {
-                            Text("Login")
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 6)
-                                .background(Color.black)
-                                .foregroundColor(.blue)
-                                .cornerRadius(8)
-                        }
-                    }
-                }
-            }
-            .sheet(isPresented: $showFilterSheet) {
-                VStack(spacing: 20) {
-                    Text("Filter Listings")
-                        .font(.headline)
-                        .padding(.top)
-
-                    TextField("Make", text: $newVehicle.make)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                    TextField("Model", text: $newVehicle.model)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                    TextField("Trim", text: $newVehicle.trim)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                    TextField("Year", text: $newVehicle.year)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-
-                    Menu {
-                        ForEach(viewModel.cities, id: \.self) { city in
-                            Button(city) {
-                                locationManager.requestLocation()
-                                viewModel.selectedCity = city
-                            }
-                        }
-                    } label: {
-                        HStack {
-                            Text("Location: \(viewModel.selectedCity)")
-                                .foregroundColor(.primary)
-                            Spacer()
-                            Image(systemName: "chevron.down")
-                        }
-                        .padding()
-                        .background(Color(.systemGray6))
-                        .cornerRadius(10)
-                    }
-
-                    Button("Apply Filters") {
-                        // Sample filter logic
-                        selectedCategoryListings = dummyListings.filter {
-                            ($0.make == newVehicle.make || newVehicle.make.isEmpty) &&
-                            ($0.model == newVehicle.model || newVehicle.model.isEmpty) &&
-                            ($0.trim == newVehicle.trim || newVehicle.trim.isEmpty) &&
-                            ($0.year == newVehicle.year || newVehicle.year.isEmpty) &&
-                            ($0.city == viewModel.selectedCity)
-                        }
-                        showListings = true
-                        showFilterSheet = false
-                    }
-                    .frame(maxWidth: .infinity)
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.black)
-                    .cornerRadius(10)
-
-                    Spacer()
-                }
-                .padding()
+        }
+        .onAppear {
+            fetchVehicleJSONFromFirebase { vehiclesFromDB in
+                firebaseListings = vehiclesFromDB
             }
         }
+    }
+}
+
+struct DropdownLabel: View {
+    let text: String
+    let placeholder: String
+
+    var body: some View {
+        HStack {
+            Text(text.isEmpty ? placeholder : text)
+                .foregroundColor(text.isEmpty ? .gray : .primary)
+            Spacer()
+            Image(systemName: "chevron.down")
+                .foregroundColor(.gray)
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
     }
 }
 
@@ -283,48 +346,12 @@ struct CategoryItem: View {
     }
 }
 
-struct ProfileView: View {
-    @AppStorage("userName") var userName = ""
-    @AppStorage("userEmail") var userEmail = ""
-    @AppStorage("isLoggedIn") var isLoggedIn = false
-
-    var body: some View {
-        ZStack {
-            Color.black.ignoresSafeArea()
-
-            VStack(spacing: 20) {
-                Text("Profile")
-                    .font(.largeTitle)
-                    .bold()
-                    .foregroundColor(.white)
-
-                Text("Name: \(userName)")
-                    .foregroundColor(.white)
-
-                Text("Email: \(userEmail)")
-                    .foregroundColor(.white)
-
-                Button("Logout") {
-                    try? Auth.auth().signOut()
-                    isLoggedIn = false
-                    userName = ""
-                    userEmail = ""
-                }
-                .padding()
-                .background(Color.white)
-                .foregroundColor(.black)
-                .cornerRadius(10)
-
-                Spacer()
-            }
-            .padding()
-        }
-    }
-}
-
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
+            .environmentObject(HomeViewModel())
+            .environmentObject(LocationManager())
+            .previewDevice("iPhone 12")
     }
 }
-
+*/

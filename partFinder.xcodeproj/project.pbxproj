@@ -10,6 +10,8 @@
 		CC2101832D6BEA0700A15EF7 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101822D6BEA0700A15EF7 /* FirebaseAnalytics */; };
 		CC2101852D6BEA0C00A15EF7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101842D6BEA0C00A15EF7 /* FirebaseAuth */; };
 		CC2101872D6BEA1000A15EF7 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101862D6BEA1000A15EF7 /* FirebaseDatabase */; };
+		CCFF4B7E2DAF00100024ED19 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CCFF4B7D2DAF00100024ED19 /* FirebaseFirestore */; };
+		CCFF4B802DAF12BE0024ED19 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = CCFF4B7F2DAF12BE0024ED19 /* FirebaseStorage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -72,7 +74,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				CC2101872D6BEA1000A15EF7 /* FirebaseDatabase in Frameworks */,
+				CCFF4B7E2DAF00100024ED19 /* FirebaseFirestore in Frameworks */,
 				CC2101832D6BEA0700A15EF7 /* FirebaseAnalytics in Frameworks */,
+				CCFF4B802DAF12BE0024ED19 /* FirebaseStorage in Frameworks */,
 				CC2101852D6BEA0C00A15EF7 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -145,6 +149,8 @@
 				CC2101822D6BEA0700A15EF7 /* FirebaseAnalytics */,
 				CC2101842D6BEA0C00A15EF7 /* FirebaseAuth */,
 				CC2101862D6BEA1000A15EF7 /* FirebaseDatabase */,
+				CCFF4B7D2DAF00100024ED19 /* FirebaseFirestore */,
+				CCFF4B7F2DAF12BE0024ED19 /* FirebaseStorage */,
 			);
 			productName = partFinder;
 			productReference = 5390BE412D542AD800B85CB5 /* partFinder.app */;
@@ -204,7 +210,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1620;
-				LastUpgradeCheck = 1620;
+				LastUpgradeCheck = 1630;
 				TargetAttributes = {
 					5390BE402D542AD800B85CB5 = {
 						CreatedOnToolsVersion = 16.2;
@@ -340,6 +346,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = 3H7686WHGY;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -403,6 +410,7 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = 3H7686WHGY;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -432,7 +440,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"partFinder/Preview Content\"";
-				DEVELOPMENT_TEAM = 3H7686WHGY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -461,7 +468,6 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"partFinder/Preview Content\"";
-				DEVELOPMENT_TEAM = 3H7686WHGY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -488,7 +494,6 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3H7686WHGY;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				MARKETING_VERSION = 1.0;
@@ -507,7 +512,6 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3H7686WHGY;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				MARKETING_VERSION = 1.0;
@@ -525,7 +529,6 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3H7686WHGY;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = driveSync.partFinderUITests;
@@ -542,7 +545,6 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = 3H7686WHGY;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = driveSync.partFinderUITests;
@@ -621,6 +623,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseDatabase;
+		};
+		CCFF4B7D2DAF00100024ED19 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		CCFF4B7F2DAF12BE0024ED19 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
