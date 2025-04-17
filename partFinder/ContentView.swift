@@ -349,9 +349,7 @@ struct CategoryItem: View {
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
-            .environmentObject(HomeViewModel())
-            .environmentObject(LocationManager())
-            .previewDevice("iPhone 12")
+            
     }
 }
-*/
+
