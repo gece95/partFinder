@@ -100,7 +100,7 @@ struct ContentView: View {
                                         Spacer()
                                         
                                         Text("partFinder")
-                                            .font(.headline)
+                                            .font(.system(size: 27))
                                             .frame(maxWidth: .infinity, alignment: .trailing)
                                             .fontWeight(.bold)
                                             .foregroundColor(.blue)
