@@ -14,6 +14,8 @@ struct AuthView: View {
     @State private var message = ""
     @State private var isLoginMode = true
     @State private var showResetPassword = false
+    @State private var isSuccessMessage = false
+
 
     var body: some View {
         ZStack {
@@ -74,7 +76,7 @@ struct AuthView: View {
                 .foregroundColor(.gray)
 
                 Text(message)
-                    .foregroundColor(.red)
+                    .foregroundColor(isSuccessMessage ? .green : .red)
                     .multilineTextAlignment(.center)
 
                 Spacer()
@@ -96,12 +98,14 @@ struct AuthView: View {
                     userEmail = email
                     isLoggedIn = true
                     message = "Account created!"
+                    isSuccessMessage = true
                     DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
                         dismiss()
                     }
                 }
             case .failure(let error):
                 message = "\(error.localizedDescription)"
+                isSuccessMessage = false
             }
         }
     }
@@ -110,11 +114,13 @@ struct AuthView: View {
         Auth.auth().signIn(withEmail: email, password: password) { result, error in
             if let error = error {
                 message = "\(error.localizedDescription)"
+                isSuccessMessage = false
             } else if let user = result?.user {
                 userEmail = email
                 userName = user.displayName ?? ""
                 userUID = user.uid  // Save UID for future DB access
                 isLoggedIn = true
+                isSuccessMessage = true
                 dismiss()
             }
         }
