@@ -101,6 +101,7 @@ struct ContentView: View {
                                         
                                         Text("partFinder")
                                             .font(.headline)
+                                            .frame(maxWidth: .infinity, alignment: .trailing)
                                             .fontWeight(.bold)
                                             .foregroundColor(.blue)
                                         
@@ -294,34 +295,34 @@ struct ContentView: View {
                         }
                     }
                 }
-                }
             }
         }
+    }
         
-        struct CategoryItem: View {
-            let icon: String
-            let label: String
+    struct CategoryItem: View {
+        let icon: String
+        let label: String
             
-            var body: some View {
-                VStack(spacing: 8) {
-                    Image(icon)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                        .padding(8)
-                        .background(Color.white)
-                        .cornerRadius(10)
+        var body: some View {
+            VStack(spacing: 8) {
+                Image(icon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 30, height: 30)
+                    .padding(8)
+                    .background(Color.white)
+                    .cornerRadius(10)
                     
-                    Text(label)
-                        .font(.caption)
-                        .foregroundColor(.primary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color(.systemGray5))
-                .cornerRadius(12)
+                Text(label)
+                    .font(.caption)
+                    .foregroundColor(.primary)
             }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color(.systemGray5))
+            .cornerRadius(12)
         }
+    }
 
 struct ProfileView: View {
     @AppStorage("isLoggedIn") var isLoggedIn = false
