@@ -324,39 +324,43 @@ struct ContentView: View {
         }
 
 struct ProfileView: View {
-    @AppStorage("userName") var userName = ""
-    @AppStorage("userEmail") var userEmail = ""
     @AppStorage("isLoggedIn") var isLoggedIn = false
+    @AppStorage("userEmail") var userEmail = ""
+    @AppStorage("userName") var userName = ""
 
     var body: some View {
-        BaseView {
-            ZStack {
-                Color.black.ignoresSafeArea()
-                
-                VStack(spacing: 20) {
-                    Text("Profile")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.blue)
+        if isLoggedIn {
+            BaseView(title: "Profile", showProfileButton: false) {
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    VStack(spacing: 20) {
+                        Text("Profile")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.blue)
 
-                    Text("\(userEmail)")
-                        .foregroundColor(.white)
-                    
-                    Button("Logout") {
-                        try? Auth.auth().signOut()
-                        isLoggedIn = false
-                        userName = ""
-                        userEmail = ""
+                        Text("\(userEmail)")
+                            .foregroundColor(.white)
+
+                        Button("Logout") {
+                            try? Auth.auth().signOut()
+                            isLoggedIn = false
+                            userName = ""
+                            userEmail = ""
+                        }
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.black)
+                        .cornerRadius(10)
+
+                        Spacer()
                     }
                     .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.black)
-                    .cornerRadius(10)
-                    
-                    Spacer()
                 }
-                .padding()
             }
+        } else {
+            
+            AuthView()
         }
     }
 }
