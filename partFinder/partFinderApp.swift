@@ -15,6 +15,7 @@ struct partFinderApp: App {
         WindowGroup {
             // Sets ContentView as the initial screen of the app
             ContentView()
+            
         }
     }
 }

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B143CC912DAEDB3400F37C02 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = B143CC902DAEDB3400F37C02 /* FirebaseFirestore */; };
+		B143CC932DAEF18700F37C02 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = B143CC922DAEF18700F37C02 /* FirebaseStorage */; };
 		CC2101832D6BEA0700A15EF7 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101822D6BEA0700A15EF7 /* FirebaseAnalytics */; };
 		CC2101852D6BEA0C00A15EF7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101842D6BEA0C00A15EF7 /* FirebaseAuth */; };
 		CC2101872D6BEA1000A15EF7 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101862D6BEA1000A15EF7 /* FirebaseDatabase */; };
@@ -74,9 +76,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				CC2101872D6BEA1000A15EF7 /* FirebaseDatabase in Frameworks */,
+<<<<<<< HEAD
 				CCFF4B7E2DAF00100024ED19 /* FirebaseFirestore in Frameworks */,
 				CC2101832D6BEA0700A15EF7 /* FirebaseAnalytics in Frameworks */,
 				CCFF4B802DAF12BE0024ED19 /* FirebaseStorage in Frameworks */,
+=======
+				B143CC912DAEDB3400F37C02 /* FirebaseFirestore in Frameworks */,
+				CC2101832D6BEA0700A15EF7 /* FirebaseAnalytics in Frameworks */,
+				B143CC932DAEF18700F37C02 /* FirebaseStorage in Frameworks */,
+>>>>>>> develop
 				CC2101852D6BEA0C00A15EF7 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -104,7 +112,7 @@
 				5390BE432D542AD800B85CB5 /* partFinder */,
 				5390BE542D542ADA00B85CB5 /* partFinderTests */,
 				5390BE5E2D542ADA00B85CB5 /* partFinderUITests */,
-				CC2101812D6BEA0700A15EF7 /* Frameworks */,
+				B143CC8F2DAEDB3400F37C02 /* Frameworks */,
 				5390BE422D542AD800B85CB5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -119,7 +127,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		CC2101812D6BEA0700A15EF7 /* Frameworks */ = {
+		B143CC8F2DAEDB3400F37C02 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 			);
@@ -149,8 +157,13 @@
 				CC2101822D6BEA0700A15EF7 /* FirebaseAnalytics */,
 				CC2101842D6BEA0C00A15EF7 /* FirebaseAuth */,
 				CC2101862D6BEA1000A15EF7 /* FirebaseDatabase */,
+<<<<<<< HEAD
 				CCFF4B7D2DAF00100024ED19 /* FirebaseFirestore */,
 				CCFF4B7F2DAF12BE0024ED19 /* FirebaseStorage */,
+=======
+				B143CC902DAEDB3400F37C02 /* FirebaseFirestore */,
+				B143CC922DAEF18700F37C02 /* FirebaseStorage */,
+>>>>>>> develop
 			);
 			productName = partFinder;
 			productReference = 5390BE412D542AD800B85CB5 /* partFinder.app */;
@@ -173,8 +186,6 @@
 				5390BE542D542ADA00B85CB5 /* partFinderTests */,
 			);
 			name = partFinderTests;
-			packageProductDependencies = (
-			);
 			productName = partFinderTests;
 			productReference = 5390BE512D542ADA00B85CB5 /* partFinderTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -196,8 +207,6 @@
 				5390BE5E2D542ADA00B85CB5 /* partFinderUITests */,
 			);
 			name = partFinderUITests;
-			packageProductDependencies = (
-			);
 			productName = partFinderUITests;
 			productReference = 5390BE5B2D542ADA00B85CB5 /* partFinderUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -609,6 +618,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		B143CC902DAEDB3400F37C02 /* FirebaseFirestore */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseFirestore;
+		};
+		B143CC922DAEF18700F37C02 /* FirebaseStorage */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
+			productName = FirebaseStorage;
+		};
 		CC2101822D6BEA0700A15EF7 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
