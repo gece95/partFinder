@@ -1,27 +1,19 @@
-//
-//  ProfileRowItem.swift
-//  partFinder
-//
-//  Created by Emily marrufo on 4/15/25.
-//
 import SwiftUI
 
 struct ProfileRowItem: View {
-    let icon: String
-    let label: String
+    var icon: String
+    var text: String
 
     var body: some View {
         HStack {
             Image(systemName: icon)
                 .foregroundColor(.blue)
-                .frame(width: 30)
-
-            Text(label)
+            Text(text)
                 .foregroundColor(.white)
-
             Spacer()
         }
-        .padding(.vertical, 8)
+        .padding()
+        .background(Color.black)
     }
 }
 

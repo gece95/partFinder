@@ -1,19 +1,15 @@
 import SwiftUI
-import FirebaseAuth
+import PhotosUI
 
 struct ProfileEditSection: View {
-    @Binding var selectedImage: UIImage?
-    @Binding var showImagePicker: Bool
-    @Binding var newEmail: String
-    @Binding var currentPassword: String
-    @Binding var errorMessage: String
-    @Binding var showAlert: Bool
-
-    var viewModel: ProfileViewModel
+    @State private var newEmail: String = ""
+    @State private var selectedItem: PhotosPickerItem? = nil
+    @State private var selectedImage: UIImage? = nil
+    @State private var isUploading: Bool = false
+    @ObservedObject var viewModel: ProfileViewModel
 
     var body: some View {
-        VStack(spacing: 15) {
-            // Profile Image Preview
+        VStack(spacing: 20) {
             if let image = selectedImage {
                 Image(uiImage: image)
                     .resizable()
@@ -21,56 +17,50 @@ struct ProfileEditSection: View {
                     .clipShape(Circle())
             }
 
-            // Select Image Button
-            Button("Select Profile Picture") {
-                showImagePicker.toggle()
-            }
-            .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(8)
-
-            // Upload Image Button
-            Button("Upload Profile Picture") {
-                if let image = selectedImage {
-                    viewModel.uploadProfileImage(image) { url in
-                        if url != nil {
-                            errorMessage = "Profile image uploaded!"
-                        } else {
-                            errorMessage = "Failed to upload image"
+            PhotosPicker("Change Profile Picture", selection: $selectedItem, matching: .images)
+                .onChange(of: selectedItem) { newItem in
+                    if let newItem = newItem {
+                        Task {
+                            do {
+                                if let data = try await newItem.loadTransferable(type: Data.self),
+                                   let uiImage = UIImage(data: data) {
+                                    selectedImage = uiImage
+                                    isUploading = true
+                                    viewModel.uploadProfileImage(uiImage, completion: { url in
+                                        isUploading = false
+                                        print("Uploaded to: \(url?.absoluteString ?? "none")")
+                                    })
+                                }
+                            } catch {
+                                print("Failed to load image data: \(error.localizedDescription)")
+                            }
                         }
-                        showAlert = true
                     }
-                } else {
-                    errorMessage = "No image selected"
-                    showAlert = true
                 }
+
+            if isUploading {
+                ProgressView("Uploading...")
             }
-            .padding()
-            .background(Color.gray.opacity(0.2))
-            .cornerRadius(8)
 
-            Divider().background(Color.white)
-
-            // Email Field (just UI — no backend logic)
-            TextField("New Email", text: $newEmail)
+            TextField("Enter new email", text: $newEmail)
                 .textFieldStyle(RoundedBorderTextFieldStyle())
                 .padding(.horizontal)
 
-            SecureField("Current Password", text: $currentPassword)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.horizontal)
-
-            // Placeholder Update Button (no backend function)
             Button("Update Email") {
-                errorMessage = "Update email feature not implemented yet."
-                showAlert = true
+                viewModel.updateEmail(to: newEmail) { error in
+                    if let error = error {
+                        print("Email update failed: \(error.localizedDescription)")
+                    } else {
+                        print("Email successfully updated")
+                    }
+                }
             }
             .padding()
             .background(Color.blue)
             .foregroundColor(.white)
             .cornerRadius(8)
         }
+        .padding()
     }
 }
 

@@ -4,6 +4,7 @@
 //
 //  Created by Zoe Hazan on 3/26/25.
 //
+
 import SwiftUI
 
 struct BottomNavBar: View {
@@ -28,7 +29,7 @@ struct BottomNavBar: View {
                 }
             }
             Spacer()
-            NavigationLink(destination: ProfileView()) {
+            NavigationLink(destination: ProfileView(viewModel: ProfileViewModel())) {
                 VStack(spacing: 4) {
                     Image(systemName: "person")
                         .font(.system(size: 20))
@@ -48,24 +49,24 @@ struct BaseView<Content: View>: View {
     var title: String
     var showProfileButton: Bool
     var content: Content
-    
+
     @AppStorage("isLoggedIn") var isLoggedIn = false
     @AppStorage("userName") var userName = ""
     @AppStorage("userEmail") var userEmail = ""
-    
+
     init(title: String = "", showProfileButton: Bool = true, @ViewBuilder content: () -> Content) {
         self.title = title
         self.showProfileButton = showProfileButton
         self.content = content()
     }
-    
+
     var body: some View {
         NavigationStack {
-            VStack(spacing: 0) {  // Ensures no extra spacing
+            VStack(spacing: 0) {
                 content
-                    .frame(maxWidth: .infinity, maxHeight: .infinity) // Fills available space
-                    .background(Color(.systemBackground)) // Ensure background fills gaps
-                
+                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    .background(Color(.systemBackground))
+
                 BottomNavBar()
                     .frame(maxWidth: .infinity)
                     .background(Color.black)
@@ -75,7 +76,7 @@ struct BaseView<Content: View>: View {
                 if showProfileButton {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         if isLoggedIn {
-                            NavigationLink(destination: ProfileView()) {
+                            NavigationLink(destination: ProfileView(viewModel: ProfileViewModel())) {
                                 Text("Profile")
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
@@ -99,10 +100,11 @@ struct BaseView<Content: View>: View {
             .navigationBarHidden(false)
         }
     }
-    
-    struct BottomNavBar_Previews: PreviewProvider {
-        static var previews: some View {
-            BottomNavBar()
-        }
+}
+
+struct BottomNavBar_Previews: PreviewProvider {
+    static var previews: some View {
+        BottomNavBar()
     }
 }
+

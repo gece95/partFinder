@@ -1,100 +1,124 @@
 import SwiftUI
-import FirebaseAuth
+import PhotosUI
 
 struct ProfileView: View {
-    @StateObject var viewModel = ProfileViewModel()
-
-    @State private var selectedImage: UIImage?
-    @State private var showImagePicker = false
-    @State private var errorMessage = ""
-    @State private var showAlert = false
+    @ObservedObject var viewModel: ProfileViewModel
+    @State private var selectedItem: PhotosPickerItem? = nil
+    @State private var showingEditSheet = false
+    @State private var isUploading = false
 
     var body: some View {
-        ScrollView {
-            VStack(spacing: 20) {
+        NavigationView {
+            ScrollView {
+                VStack(spacing: 16) {
+                    VStack(spacing: 8) {
+                        ZStack(alignment: .bottomTrailing) {
+                            if let image = viewModel.profileUIImage {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .aspectRatio(contentMode: .fill)
+                                    .frame(width: 100, height: 100)
+                                    .clipShape(Circle())
+                            } else {
+                                Circle()
+                                    .fill(Color.gray.opacity(0.3))
+                                    .frame(width: 100, height: 100)
+                            }
 
-                // Profile Header
-                VStack(spacing: 8) {
-                    ZStack(alignment: .bottomTrailing) {
-                        if let image = selectedImage {
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFill()
-                                .frame(width: 100, height: 100)
-                                .clipShape(Circle())
-                        } else {
-                            Image(systemName: "person.crop.circle.fill")
-                                .resizable()
-                                .frame(width: 100, height: 100)
-                                .foregroundColor(.gray)
+                            PhotosPicker(selection: $selectedItem, matching: .images) {
+                                Image(systemName: "camera.fill")
+                                    .foregroundColor(.white)
+                                    .padding(6)
+                                    .background(Color.blue)
+                                    .clipShape(Circle())
+                            }
+                            .offset(x: -5, y: -5)
+                            .onChange(of: selectedItem) { newItem in
+                                if let newItem = newItem {
+                                    Task {
+                                        do {
+                                            if let data = try await newItem.loadTransferable(type: Data.self),
+                                               let uiImage = UIImage(data: data) {
+                                                isUploading = true
+                                                viewModel.uploadProfileImage(uiImage) { _ in
+                                                    isUploading = false
+                                                }
+                                            }
+                                        } catch {
+                                            print("Failed to load image data: \(error.localizedDescription)")
+                                        }
+                                    }
+                                }
+                            }
                         }
 
-                        Button {
-                            showImagePicker.toggle()
-                        } label: {
-                            Image(systemName: "camera.fill")
-                                .foregroundColor(.white)
-                                .padding(6)
-                                .background(Color.blue)
-                                .clipShape(Circle())
-                        }
+                        Text(viewModel.userEmail)
+                            .font(.headline)
+                            .foregroundColor(.white)
+
+                        Text(viewModel.userLocation)
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                    }
+                    .padding(.top)
+
+                    if isUploading {
+                        ProgressView("Uploading...").padding(.bottom)
                     }
 
-                    // Dynamic email from Firebase
-                    Text(viewModel.userEmail)
-                        .font(.title3.bold())
-                        .foregroundColor(.white)
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Transactions")
+                            .foregroundColor(.white)
+                            .font(.subheadline)
+                            .padding(.horizontal)
 
-                    // Optional Location (you can delete this if you want)
-                    Text(viewModel.userLocation)
-                        .font(.subheadline)
-                        .foregroundColor(.gray)
-                }
+                        ProfileRowItem(icon: "cart.fill", text: "Purchases & Sales")
+                        ProfileRowItem(icon: "creditcard.fill", text: "Payment & Deposit Methods")
+                    }
 
-                Divider().background(Color.gray)
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("Account")
+                            .foregroundColor(.white)
+                            .font(.subheadline)
+                            .padding(.horizontal)
 
-                // Transactions Section
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Transactions")
-                        .font(.headline)
-                        .foregroundColor(.white)
-
-                    ProfileRowItem(icon: "dollarsign.circle", label: "Purchases & Sales")
-                    ProfileRowItem(icon: "creditcard", label: "Payment & Deposit Methods")
-                }
-
-                Divider().background(Color.gray)
-
-                // Account Section
-                VStack(alignment: .leading, spacing: 12) {
-                    Text("Account")
-                        .font(.headline)
-                        .foregroundColor(.white)
-
-                    ProfileRowItem(icon: "gearshape", label: "Account Settings")
-
-                    // Blue Logout Button with Icon
-                    Button {
-                        viewModel.logout()
-                    } label: {
-                        HStack {
-                            Image(systemName: "arrowshape.turn.up.left")
-                            Text("Logout")
+                        Button(action: {
+                            showingEditSheet = true
+                        }) {
+                            HStack {
+                                Image(systemName: "gearshape.fill")
+                                    .foregroundColor(.blue)
+                                Text("Account Settings")
+                                    .foregroundColor(.white)
+                                Spacer()
+                            }
+                            .padding()
+                            .background(Color.black)
                         }
-                        .foregroundColor(.blue)
-                        .fontWeight(.semibold)
-                        .padding(.vertical, 8)
+
+                        Button(action: {
+                            viewModel.logout {
+                            }
+                        }) {
+                            HStack {
+                                Image(systemName: "arrow.backward.circle.fill")
+                                    .foregroundColor(.blue)
+                                Text("Logout")
+                                    .foregroundColor(.blue)
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .background(Color.black)
+                        }
                     }
                 }
+                .padding()
             }
-            .padding()
-        }
-        .background(Color.black.ignoresSafeArea())
-        .sheet(isPresented: $showImagePicker) {
-            ImagePicker(selectedImage: $selectedImage)
-        }
-        .alert(isPresented: $showAlert) {
-            Alert(title: Text("Status"), message: Text(errorMessage), dismissButton: .default(Text("OK")))
+            .background(Color.black.ignoresSafeArea())
+            .navigationBarTitle("Profile", displayMode: .inline)
+            .sheet(isPresented: $showingEditSheet) {
+                ProfileEditSection(viewModel: viewModel)
+            }
         }
     }
 }

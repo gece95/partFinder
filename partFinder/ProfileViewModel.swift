@@ -1,9 +1,3 @@
-//
-//  ProfileViewModel.swift
-//  partFinder
-//
-//  Created by Emily marrufo on 4/14/25.
-//
 import SwiftUI
 import FirebaseAuth
 import FirebaseFirestore
@@ -25,9 +19,10 @@ class ProfileViewModel: ObservableObject {
         }
     }
 
-    func uploadProfileImage(_ image: UIImage) {
+    func uploadProfileImage(_ image: UIImage, completion: ((URL?) -> Void)? = nil) {
         guard let uid = Auth.auth().currentUser?.uid,
               let imageData = image.jpegData(compressionQuality: 0.5) else {
+            completion?(nil)
             return
         }
 
@@ -43,7 +38,10 @@ class ProfileViewModel: ObservableObject {
                             "profileImageURL": url.absoluteString
                         ], merge: true)
                     }
+                    completion?(url)
                 }
+            } else {
+                completion?(nil)
             }
         }
     }
@@ -74,4 +72,24 @@ class ProfileViewModel: ObservableObject {
             print("Error signing out: \(error.localizedDescription)")
         }
     }
+
+    // 💯 This is the closure-style method you had working
+    func updateEmail(to newEmail: String, completion: @escaping (Error?) -> Void) {
+        guard let user = Auth.auth().currentUser else {
+            completion(NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "No user logged in"]))
+            return
+        }
+
+        user.updateEmail(to: newEmail) { error in
+            if let error = error {
+                completion(error)
+            } else {
+                DispatchQueue.main.async {
+                    self.userEmail = newEmail
+                }
+                completion(nil)
+            }
+        }
+    }
 }
+
