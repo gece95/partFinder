@@ -3,9 +3,16 @@ import Firebase
 import FirebaseDatabase
 import FirebaseStorage
 import SwiftUI
+<<<<<<< Updated upstream
 
 struct Vehicle: Identifiable, Equatable, Codable, Hashable {
     let id: UUID
+=======
+import Foundation
+// Vehicle infor
+struct Vehicle: Identifiable, Equatable {
+    let id = UUID()
+>>>>>>> Stashed changes
     var make: String
     var model: String
     var trim: String
@@ -34,6 +41,10 @@ struct Vehicle: Identifiable, Equatable, Codable, Hashable {
         hasher.combine(year)
     }
 }
+<<<<<<< Updated upstream
+=======
+//view content
+>>>>>>> Stashed changes
 
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
