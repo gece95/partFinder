@@ -51,13 +51,8 @@ struct ContentView: View {
     @State private var selectedCategoryListings: [Listing] = []
     @State private var showListings = false
     @State private var selectedCategoryLabel: String = ""
-<<<<<<< HEAD
-
     @State private var firebaseListings: [Vehicle] = []
 
-=======
-    
-    
     let years = Array(1980...2025).map { String($0) }
     let makes = ["Ford", "Chevrolet", "Toyota", "Honda"]
     let modelsByMake = [
@@ -81,13 +76,11 @@ struct ContentView: View {
         "Equinox": ["L", "LS", "LT"]
     ]
     
->>>>>>> develop
     let columns = [
         GridItem(.flexible()),
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
-<<<<<<< HEAD
 
     var availableVehicles: [Vehicle] {
         return firebaseListings
@@ -132,9 +125,6 @@ struct ContentView: View {
         }
     }
 
-=======
-    
->>>>>>> develop
     var body: some View {
         BaseView {
             ZStack {
@@ -146,10 +136,6 @@ struct ContentView: View {
                         VStack(spacing: 0) {
                             ScrollView {
                                 HStack {
-<<<<<<< HEAD
-=======
-                                    // City dropdown
->>>>>>> develop
                                     Menu {
                                         ForEach(viewModel.cities, id: \.self) { city in
                                             Button(city) {
@@ -180,11 +166,7 @@ struct ContentView: View {
                                 }
                                 .padding(.horizontal)
                                 .padding(.vertical, 6)
-<<<<<<< HEAD
 
-=======
-                                
->>>>>>> develop
                                 if let zip = locationManager.zipCode {
                                     Text("ZIP Code: \(zip)")
                                         .font(.caption)
@@ -192,7 +174,6 @@ struct ContentView: View {
                                         .padding(.horizontal)
                                         .padding(.bottom, 4)
                                 }
-<<<<<<< HEAD
 
                                 VStack(spacing: 12) {
                                     if !availableYears.isEmpty {
@@ -276,9 +257,7 @@ struct ContentView: View {
                                 .background(Color(.systemGray6))
                                 .cornerRadius(12)
 
-                                if !vehicles.isEmpty {
-=======
-                                
+                                if !vehicles.isEmpty {                
                                 VStack(spacing: 12) {
                                     // Year Picker
                                     Menu {
@@ -301,9 +280,7 @@ struct ContentView: View {
                                         .background(Color(.systemGray6))
                                         .cornerRadius(8)
                                     }
-                                    
-                                    // Make Picker
->>>>>>> develop
+
                                     Menu {
                                         ForEach(makes, id: \.self) { make in
                                             Button(action: {
@@ -462,7 +439,6 @@ struct ContentView: View {
                 }
             }
         }
-<<<<<<< HEAD
         .onAppear {
             fetchVehicleJSONFromFirebase { vehiclesFromDB in
                 firebaseListings = vehiclesFromDB
@@ -482,7 +458,7 @@ struct DropdownLabel: View {
             Spacer()
             Image(systemName: "chevron.down")
                 .foregroundColor(.gray)
-=======
+          
     func saveVehicleToFirebase(_ vehicle: Vehicle) {
         guard !userUID.isEmpty else {
             print("❌ User UID is empty. Cannot save vehicle.")
@@ -536,15 +512,13 @@ struct DropdownLabel: View {
 
             vehicles = loadedVehicles
             print("✅ Loaded \(vehicles.count) vehicles from Firebase.")
->>>>>>> develop
         }
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(8)
     }
     }
-
-<<<<<<< HEAD
+      
 struct CategoryItem: View {
     let icon: String
     let label: String
@@ -562,9 +536,7 @@ struct CategoryItem: View {
             Text(label)
                 .font(.caption)
                 .foregroundColor(.primary)
-=======
-    
-    
+
         struct CategoryItem: View {
             let icon: String
             let label: String
@@ -591,9 +563,9 @@ struct CategoryItem: View {
         }
 /*
 struct ProfileView: View {
-    @AppStorage("userName") var userName = ""
-    @AppStorage("userEmail") var userEmail = ""
     @AppStorage("isLoggedIn") var isLoggedIn = false
+    @AppStorage("userEmail") var userEmail = ""
+    @AppStorage("userName") var userName = ""
 
     var body: some View {
         BaseView {
@@ -614,17 +586,38 @@ struct ProfileView: View {
                         isLoggedIn = false
                         userName = ""
                         userEmail = ""
+        if isLoggedIn {
+            BaseView(title: "Profile", showProfileButton: false) {
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    VStack(spacing: 20) {
+                        Text("Profile")
+                            .font(.title)
+                            .fontWeight(.bold)
+                            .foregroundColor(.blue)
+
+                        Text("\(userEmail)")
+                            .foregroundColor(.white)
+
+                        Button("Logout") {
+                            try? Auth.auth().signOut()
+                            isLoggedIn = false
+                            userName = ""
+                            userEmail = ""
+                        }
+                        .padding()
+                        .background(Color.blue)
+                        .foregroundColor(.black)
+                        .cornerRadius(10)
+
+                        Spacer()
                     }
                     .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.black)
-                    .cornerRadius(10)
-                    
-                    Spacer()
                 }
-                .padding()
             }
->>>>>>> develop
+        } else {
+            
+            AuthView()
         }
         .frame(maxWidth: .infinity)
         .padding()
@@ -642,3 +635,4 @@ struct ContentView_Previews: PreviewProvider {
             .previewDevice("iPhone 12")
     }
 }
+

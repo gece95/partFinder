@@ -49,19 +49,15 @@ struct BaseView<Content: View>: View {
     var title: String
     var showProfileButton: Bool
     var content: Content
-<<<<<<< HEAD
-    
+  
     @AppStorage("isLoggedIn") var isLoggedIn = false
     @AppStorage("userName") var userName = ""
     @AppStorage("userEmail") var userEmail = ""
-    
-=======
 
     @AppStorage("isLoggedIn") var isLoggedIn = false
     @AppStorage("userName") var userName = ""
     @AppStorage("userEmail") var userEmail = ""
 
->>>>>>> develop
     init(title: String = "", showProfileButton: Bool = true, @ViewBuilder content: () -> Content) {
         self.title = title
         self.showProfileButton = showProfileButton
@@ -70,19 +66,16 @@ struct BaseView<Content: View>: View {
 
     var body: some View {
         NavigationStack {
-<<<<<<< HEAD
             VStack(spacing: 0) {  // Ensures no extra spacing
                 content
                     .frame(maxWidth: .infinity, maxHeight: .infinity) // Fills available space
                     .background(Color(.systemBackground)) // Ensure background fills gaps
                 
-=======
             VStack(spacing: 0) {
                 content
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color(.systemBackground))
-
->>>>>>> develop
+              
                 BottomNavBar()
                     .frame(maxWidth: .infinity)
                     .background(Color.black)
@@ -92,11 +85,8 @@ struct BaseView<Content: View>: View {
                 if showProfileButton {
                     ToolbarItem(placement: .navigationBarTrailing) {
                         if isLoggedIn {
-<<<<<<< HEAD
                             NavigationLink(destination: ProfileView()) {
-=======
                             NavigationLink(destination: ProfileView(viewModel: ProfileViewModel())) {
->>>>>>> develop
                                 Text("Profile")
                                     .padding(.horizontal, 12)
                                     .padding(.vertical, 6)
@@ -120,19 +110,16 @@ struct BaseView<Content: View>: View {
             .navigationBarHidden(false)
         }
     }
-<<<<<<< HEAD
-    
+          
     struct BottomNavBar_Previews: PreviewProvider {
         static var previews: some View {
             BottomNavBar()
         }
-=======
 }
 
 struct BottomNavBar_Previews: PreviewProvider {
     static var previews: some View {
         BottomNavBar()
->>>>>>> develop
     }
 }
 
