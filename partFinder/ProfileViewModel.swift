@@ -7,25 +7,25 @@ class ProfileViewModel: ObservableObject {
     @AppStorage("isLoggedIn") var isLoggedIn = true
     @AppStorage("userEmail") var userEmail = ""
     @AppStorage("userName") var userName = ""
-
+    
     @Published var userLocation = "California"
     @Published var profileImageURL = ""
     @Published var profileUIImage: UIImage?
-
+    
     init() {
         if let user = Auth.auth().currentUser {
             self.userEmail = user.email ?? "Unknown"
             fetchProfileImage(for: user.uid)
         }
     }
-
+    
     func uploadProfileImage(_ image: UIImage, completion: ((URL?) -> Void)? = nil) {
         guard let uid = Auth.auth().currentUser?.uid,
               let imageData = image.jpegData(compressionQuality: 0.5) else {
             completion?(nil)
             return
         }
-
+        
         let ref = Storage.storage().reference().child("profile_pictures/\(uid).jpg")
         ref.putData(imageData, metadata: nil) { _, error in
             if error == nil {
@@ -33,7 +33,7 @@ class ProfileViewModel: ObservableObject {
                     if let url = url {
                         self.profileImageURL = url.absoluteString
                         self.profileUIImage = image
-
+                        
                         Firestore.firestore().collection("users").document(uid).setData([
                             "profileImageURL": url.absoluteString
                         ], merge: true)
@@ -45,7 +45,7 @@ class ProfileViewModel: ObservableObject {
             }
         }
     }
-
+    
     private func fetchProfileImage(for uid: String) {
         let ref = Storage.storage().reference().child("profile_pictures/\(uid).jpg")
         ref.downloadURL { url, error in
@@ -60,7 +60,7 @@ class ProfileViewModel: ObservableObject {
             }
         }
     }
-
+    
     func logout(completion: @escaping () -> Void) {
         do {
             try Auth.auth().signOut()
@@ -72,24 +72,22 @@ class ProfileViewModel: ObservableObject {
             print("Error signing out: \(error.localizedDescription)")
         }
     }
-
-    // 💯 This is the closure-style method you had working
     func updateEmail(to newEmail: String, completion: @escaping (Error?) -> Void) {
         guard let user = Auth.auth().currentUser else {
             completion(NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "No user logged in"]))
             return
         }
-
-        user.updateEmail(to: newEmail) { error in
+        
+        user.sendEmailVerification(beforeUpdatingEmail: newEmail) { error in
             if let error = error {
                 completion(error)
             } else {
                 DispatchQueue.main.async {
                     self.userEmail = newEmail
                 }
+                print("Verification email sent to \(newEmail). User must confirm before email is updated.")
                 completion(nil)
             }
         }
     }
 }
-
