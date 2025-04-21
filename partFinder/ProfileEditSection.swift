@@ -18,25 +18,25 @@ struct ProfileEditSection: View {
             }
 
             PhotosPicker("Change Profile Picture", selection: $selectedItem, matching: .images)
-                .onChange(of: selectedItem) { newItem in
-                    if let newItem = newItem {
-                        Task {
-                            do {
-                                if let data = try await newItem.loadTransferable(type: Data.self),
-                                   let uiImage = UIImage(data: data) {
-                                    selectedImage = uiImage
-                                    isUploading = true
-                                    viewModel.uploadProfileImage(uiImage, completion: { url in
-                                        isUploading = false
-                                        print("Uploaded to: \(url?.absoluteString ?? "none")")
-                                    })
-                                }
-                            } catch {
-                                print("Failed to load image data: \(error.localizedDescription)")
+                .onChange(of: selectedItem) {
+                    guard let newItem = selectedItem else { return }
+                    Task {
+                        do {
+                            if let data = try await newItem.loadTransferable(type: Data.self),
+                               let uiImage = UIImage(data: data) {
+                                selectedImage = uiImage
+                                isUploading = true
+                                viewModel.uploadProfileImage(uiImage, completion: { url in
+                                    isUploading = false
+                                    print("Uploaded to: \(url?.absoluteString ?? "none")")
+                                })
                             }
+                        } catch {
+                            print("Failed to load image data: \(error.localizedDescription)")
                         }
                     }
                 }
+
 
             if isUploading {
                 ProgressView("Uploading...")

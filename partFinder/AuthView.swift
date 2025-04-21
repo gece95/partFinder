@@ -168,16 +168,20 @@ struct AuthView: View {
                 message = "\(error.localizedDescription)"
                 isSuccessMessage = false
             } else if let user = result?.user {
-                userEmail = email
+                userEmail = user.email ?? ""
                 userName = user.displayName ?? ""
-                userUID = user.uid  // Save UID for future DB access
-            } else {
-                print("Firebase signIn success — waiting for currentUser to be set...")
-                waitForUser(retries: 10)
+                userUID = user.uid
+                isLoggedIn = true
+                isSuccessMessage = true
+                message = "Login successful!"
+                DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                    dismiss()
+                }
             }
         }
     }
-    
+
+    /*
     func waitForUser(retries: Int) {
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
             if let user = Auth.auth().currentUser {
@@ -196,6 +200,6 @@ struct AuthView: View {
                 message = "Login failed: user not found"
             }
         }
-    }
+    }*/
     
 }
