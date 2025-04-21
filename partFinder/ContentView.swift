@@ -120,7 +120,7 @@ struct ContentView: View {
                 vehicles.append(vehicle)
             }
 
-            print("✅ Successfully loaded \(vehicles.count) vehicles from Realtime DB")
+            print("Successfully loaded \(vehicles.count) vehicles from Realtime DB")
             completion(vehicles)
         }
     }
@@ -201,6 +201,16 @@ struct ContentView: View {
                                                 Text(make)
                                             }
                                         }
+                                        
+                                        Spacer()
+                                        
+                                        Text("partFinder")
+                                            .font(.system(size: 27))
+                                            .frame(maxWidth: .infinity, alignment: .trailing)
+                                            .fontWeight(.bold)
+                                            .foregroundColor(.blue)
+                                        
+                                        Spacer()
                                     } label: {
                                         DropdownLabel(text: newVehicle.make, placeholder: "Make")
                                     }
@@ -259,7 +269,6 @@ struct ContentView: View {
 
                                 if !vehicles.isEmpty {                
                                 VStack(spacing: 12) {
-                                    // Year Picker
                                     Menu {
                                         ForEach(years, id: \.self) { year in
                                             Button(action: {
@@ -304,7 +313,6 @@ struct ContentView: View {
                                         .cornerRadius(8)
                                     }
                                     
-                                    // Model Picker
                                     if let models = modelsByMake[newVehicle.make] {
                                         Menu {
                                             ForEach(models, id: \.self) { model in
@@ -329,7 +337,6 @@ struct ContentView: View {
                                         }
                                     }
                                     
-                                    // Trim Picker
                                     if let trims = trimsByModel[newVehicle.model] {
                                         Menu {
                                             ForEach(trims, id: \.self) { trim in
@@ -513,6 +520,12 @@ struct DropdownLabel: View {
             vehicles = loadedVehicles
             print("✅ Loaded \(vehicles.count) vehicles from Firebase.")
         }
+    }
+        
+    struct CategoryItem: View {
+        let icon: String
+        let label: String
+
         .padding()
         .background(Color(.systemGray6))
         .cornerRadius(8)
@@ -541,26 +554,27 @@ struct CategoryItem: View {
             let icon: String
             let label: String
             
-            var body: some View {
-                VStack(spacing: 8) {
-                    Image(icon)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                        .padding(8)
-                        .background(Color.white)
-                        .cornerRadius(10)
+        var body: some View {
+            VStack(spacing: 8) {
+                Image(icon)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 30, height: 30)
+                    .padding(8)
+                    .background(Color.white)
+                    .cornerRadius(10)
                     
-                    Text(label)
-                        .font(.caption)
-                        .foregroundColor(.primary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color(.systemGray5))
-                .cornerRadius(12)
+                Text(label)
+                    .font(.caption)
+                    .foregroundColor(.primary)
             }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color(.systemGray5))
+            .cornerRadius(12)
         }
+    }
+
 /*
 struct ProfileView: View {
     @AppStorage("isLoggedIn") var isLoggedIn = false
