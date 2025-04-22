@@ -1,3 +1,4 @@
+
 import SwiftUI
 import Firebase
 import FirebaseStorage
@@ -71,9 +72,8 @@ struct VendorsView: View {
                                 Label("Add Images", systemImage: "photo.on.rectangle.angled")
                             }
                             .onChange(of: imageSelections) {
-                                
-                                    selectedImages = []
-                                    Task {
+                                selectedImages = []
+                                Task {
                                     for item in imageSelections {
                                         if let data = try? await item.loadTransferable(type: Data.self),
                                            let uiImage = UIImage(data: data) {
@@ -83,10 +83,23 @@ struct VendorsView: View {
                                 }
                             }
 
+                            // Dropdown for Part Type
+                            Menu {
+                                ForEach(partTypes, id: \.self ) { type in
+                                    Button(type) { selectedType = type }
+                                }
+                            } label: {
+                                dropdownLabel(text: selectedType, placeholder: "Select Part Type")
+                            }
+                            .padding(.horizontal)
+
                             // Text Inputs
                             Group {
                                 TextField("Phone Number", text: $phoneNumber)
-                                    .keyboardType(.phonePad)
+                                    .keyboardType(.numberPad)
+                                    .onChange(of: phoneNumber) { newVal in
+                                        phoneNumber = formatPhoneNumber(newVal)
+                                    }
 
                                 TextEditor(text: $description)
                                     .frame(height: 120)
@@ -100,18 +113,15 @@ struct VendorsView: View {
                             .textFieldStyle(RoundedBorderTextFieldStyle())
                             .padding(.horizontal)
 
-                            // Toggle for Condition
                             Toggle("Used", isOn: $isUsed)
-                            .padding(.horizontal)
+                                .padding(.horizontal)
 
-                            // Error Message
                             if !errorMessage.isEmpty {
                                 Text(errorMessage)
                                     .foregroundColor(.red)
                                     .padding(.horizontal)
                             }
 
-                            // Submit Button
                             Button(action: {
                                 submitListing()
                             }) {
@@ -119,12 +129,11 @@ struct VendorsView: View {
                                     .frame(maxWidth: .infinity)
                                     .padding()
                                     .background(isUploading ? Color.gray : Color.blue)
-                                    .foregroundColor(.black)
+                                    .foregroundColor(.white)
                                     .cornerRadius(10)
                             }
                             .disabled(isUploading)
                             .padding(.horizontal)
-
                         }
                         .padding(.bottom, 32)
                     }
@@ -134,15 +143,28 @@ struct VendorsView: View {
         }
     }
 
+    func dropdownLabel(text: String, placeholder: String) -> some View {
+        HStack {
+            Text(text.isEmpty ? placeholder : text)
+                .foregroundColor(text.isEmpty ? .gray : .primary)
+            Spacer()
+            Image(systemName: "chevron.down")
+                .foregroundColor(.gray)
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
+    }
+
     func submitListing() {
-        // Validation
         guard !phoneNumber.isEmpty,
               !description.isEmpty,
               !price.isEmpty,
               !selectedType.isEmpty,
               !selectedImages.isEmpty,
-              Double(price) != nil else {
-            errorMessage = "Please complete all fields correctly and add at least one image."
+              Double(price) != nil,
+              description.count >= 10 && description.count <= 1000 else {
+            errorMessage = "Please complete all fields correctly."
             return
         }
 
@@ -179,6 +201,17 @@ struct VendorsView: View {
         }
     }
 
+    func formatPhoneNumber(_ number: String) -> String {
+        let digits = number.filter { $0.isNumber }
+        if digits.count >= 10 {
+            let area = digits.prefix(3)
+            let mid = digits.dropFirst(3).prefix(3)
+            let end = digits.dropFirst(6).prefix(4)
+            return "(\(area)) -\(mid)-\(end)"
+        }
+        return digits
+    }
+
     func clearForm() {
         phoneNumber = ""
         description = ""
@@ -204,7 +237,6 @@ struct VendorsView: View {
                         group.leave()
                         return
                     }
-
                     ref.downloadURL { url, _ in
                         if let url = url {
                             uploadedURLs.append(url.absoluteString)
