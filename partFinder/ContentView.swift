@@ -261,20 +261,13 @@ struct ContentView: View {
 
             LazyVGrid(columns: columns, spacing: 20) {
                 ForEach(viewModel.categories) { category in
-                    Button {
-                        if category.label == "Engine" {
-                            selectedCategoryLabel = category.label
-                            selectedCategoryListings = dummyListings.filter { $0.partType == category.label }
-                            showListings = true
-                        }
-                    } label: {
+                    NavigationLink(destination: ListingView(partType: category.label)) {
                         CategoryItem(icon: category.icon, label: category.label)
                     }
                 }
             }
         }
     }
-
     func saveVehicleToFirebase(_ vehicle: Vehicle) {
         guard !userUID.isEmpty else {
             print("❌ User UID is empty. Cannot save vehicle.")

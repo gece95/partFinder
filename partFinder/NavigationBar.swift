@@ -4,7 +4,7 @@ struct BottomNavBar: View {
     var body: some View {
         HStack {
             Spacer()
-            NavigationLink(destination: Text("Vendor View")) { // Placeholder until VendorView is defined
+            NavigationLink(destination: VendorsView()) {
                 VStack(spacing: 4) {
                     Image(systemName: "calendar")
                         .font(.system(size: 20))
