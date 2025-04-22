@@ -4,7 +4,7 @@ import CoreLocation
 import FirebaseAuth
 import FirebaseDatabase
 
-
+//will remove this comment, testing...
 
 struct Vehicle: Identifiable, Equatable {
     var id = UUID()
