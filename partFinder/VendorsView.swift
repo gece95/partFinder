@@ -5,15 +5,8 @@ import FirebaseStorage
 import FirebaseDatabase
 import PhotosUI
 
-struct Posting: Identifiable, Hashable, Codable {
-    var id = UUID()
-    var phoneNumber: String
-    var description: String
-    var price: String
-    var condition: String
-    var typeOfPart: String
-    var imageUrls: [String]
-}
+import Foundation
+
 
 struct VendorsView: View {
     @AppStorage("userUID") var userUID: String = ""
