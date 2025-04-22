@@ -1,10 +1,6 @@
-<<<<<<< HEAD
-
- import SwiftUI
-=======
+import SwiftUI
 import SwiftUI
 import PhotosUI
->>>>>>> develop
 
 struct ProfileView: View {
     @ObservedObject var viewModel: ProfileViewModel
@@ -38,24 +34,25 @@ struct ProfileView: View {
                                     .clipShape(Circle())
                             }
                             .offset(x: -5, y: -5)
-                            .onChange(of: selectedItem) { newItem in
-                                if let newItem = newItem {
-                                    Task {
-                                        do {
-                                            if let data = try await newItem.loadTransferable(type: Data.self),
-                                               let uiImage = UIImage(data: data) {
-                                                isUploading = true
-                                                viewModel.uploadProfileImage(uiImage) { _ in
-                                                    isUploading = false
-                                                }
+                            .onChange(of: selectedItem) {
+                                guard let newItem = selectedItem else { return }
+                                Task {
+                                    do {
+                                        if let data = try await newItem.loadTransferable(type: Data.self),
+                                           let uiImage = UIImage(data: data) {
+                                            isUploading = true
+                                            viewModel.uploadProfileImage(uiImage) { _ in
+                                                isUploading = false
                                             }
-                                        } catch {
-                                            print("Failed to load image data: \(error.localizedDescription)")
                                         }
+                                    } catch {
+                                        print("Failed to load image data: \(error.localizedDescription)")
                                     }
                                 }
                             }
+
                         }
+                    }
 
                         Text(viewModel.userEmail)
                             .font(.headline)
@@ -126,17 +123,11 @@ struct ProfileView: View {
             }
         }
     }
-}
-
-<<<<<<< HEAD
 
 
-struct ProfileView_Previews: PreviewProvider {
+/*struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {
         ProfileView()
     }
 }
-
-
-=======
->>>>>>> develop
+*/

@@ -7,13 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		B143CC912DAEDB3400F37C02 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = B143CC902DAEDB3400F37C02 /* FirebaseFirestore */; };
-		B143CC932DAEF18700F37C02 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = B143CC922DAEF18700F37C02 /* FirebaseStorage */; };
 		CC2101832D6BEA0700A15EF7 /* FirebaseAnalytics in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101822D6BEA0700A15EF7 /* FirebaseAnalytics */; };
 		CC2101852D6BEA0C00A15EF7 /* FirebaseAuth in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101842D6BEA0C00A15EF7 /* FirebaseAuth */; };
 		CC2101872D6BEA1000A15EF7 /* FirebaseDatabase in Frameworks */ = {isa = PBXBuildFile; productRef = CC2101862D6BEA1000A15EF7 /* FirebaseDatabase */; };
-		CCFF4B7E2DAF00100024ED19 /* FirebaseFirestore in Frameworks */ = {isa = PBXBuildFile; productRef = CCFF4B7D2DAF00100024ED19 /* FirebaseFirestore */; };
-		CCFF4B802DAF12BE0024ED19 /* FirebaseStorage in Frameworks */ = {isa = PBXBuildFile; productRef = CCFF4B7F2DAF12BE0024ED19 /* FirebaseStorage */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,22 +35,9 @@
 		5390BE5B2D542ADA00B85CB5 /* partFinderUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = partFinderUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
-/* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
-		CC77743C2DA759D600A0E3DE /* Exceptions for "partFinder" folder in "partFinder" target */ = {
-			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
-			membershipExceptions = (
-				Info.plist,
-			);
-			target = 5390BE402D542AD800B85CB5 /* partFinder */;
-		};
-/* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
-
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		5390BE432D542AD800B85CB5 /* partFinder */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
-			exceptions = (
-				CC77743C2DA759D600A0E3DE /* Exceptions for "partFinder" folder in "partFinder" target */,
-			);
 			path = partFinder;
 			sourceTree = "<group>";
 		};
@@ -76,14 +59,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				CC2101872D6BEA1000A15EF7 /* FirebaseDatabase in Frameworks */,
-				CCFF4B7E2DAF00100024ED19 /* FirebaseFirestore in Frameworks */,
 				CC2101832D6BEA0700A15EF7 /* FirebaseAnalytics in Frameworks */,
-				CCFF4B802DAF12BE0024ED19 /* FirebaseStorage in Frameworks */,
-
-				B143CC912DAEDB3400F37C02 /* FirebaseFirestore in Frameworks */,
-				CC2101832D6BEA0700A15EF7 /* FirebaseAnalytics in Frameworks */,
-				B143CC932DAEF18700F37C02 /* FirebaseStorage in Frameworks */,
-
 				CC2101852D6BEA0C00A15EF7 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -111,7 +87,7 @@
 				5390BE432D542AD800B85CB5 /* partFinder */,
 				5390BE542D542ADA00B85CB5 /* partFinderTests */,
 				5390BE5E2D542ADA00B85CB5 /* partFinderUITests */,
-				B143CC8F2DAEDB3400F37C02 /* Frameworks */,
+				CC2101812D6BEA0700A15EF7 /* Frameworks */,
 				5390BE422D542AD800B85CB5 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -126,7 +102,7 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		B143CC8F2DAEDB3400F37C02 /* Frameworks */ = {
+		CC2101812D6BEA0700A15EF7 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 			);
@@ -156,13 +132,6 @@
 				CC2101822D6BEA0700A15EF7 /* FirebaseAnalytics */,
 				CC2101842D6BEA0C00A15EF7 /* FirebaseAuth */,
 				CC2101862D6BEA1000A15EF7 /* FirebaseDatabase */,
-
-				CCFF4B7D2DAF00100024ED19 /* FirebaseFirestore */,
-				CCFF4B7F2DAF12BE0024ED19 /* FirebaseStorage */,
-
-				B143CC902DAEDB3400F37C02 /* FirebaseFirestore */,
-				B143CC922DAEF18700F37C02 /* FirebaseStorage */,
-
 			);
 			productName = partFinder;
 			productReference = 5390BE412D542AD800B85CB5 /* partFinder.app */;
@@ -185,6 +154,8 @@
 				5390BE542D542ADA00B85CB5 /* partFinderTests */,
 			);
 			name = partFinderTests;
+			packageProductDependencies = (
+			);
 			productName = partFinderTests;
 			productReference = 5390BE512D542ADA00B85CB5 /* partFinderTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -206,6 +177,8 @@
 				5390BE5E2D542ADA00B85CB5 /* partFinderUITests */,
 			);
 			name = partFinderUITests;
+			packageProductDependencies = (
+			);
 			productName = partFinderUITests;
 			productReference = 5390BE5B2D542ADA00B85CB5 /* partFinderUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
@@ -218,7 +191,7 @@
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
 				LastSwiftUpdateCheck = 1620;
-				LastUpgradeCheck = 1630;
+				LastUpgradeCheck = 1620;
 				TargetAttributes = {
 					5390BE402D542AD800B85CB5 = {
 						CreatedOnToolsVersion = 16.2;
@@ -354,7 +327,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = dwarf;
-				DEVELOPMENT_TEAM = 3H7686WHGY;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -418,7 +390,6 @@
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				COPY_PHASE_STRIP = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
-				DEVELOPMENT_TEAM = 3H7686WHGY;
 				ENABLE_NS_ASSERTIONS = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_USER_SCRIPT_SANDBOXING = YES;
@@ -448,6 +419,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"partFinder/Preview Content\"";
+				DEVELOPMENT_TEAM = 3H7686WHGY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -476,6 +448,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"partFinder/Preview Content\"";
+				DEVELOPMENT_TEAM = 3H7686WHGY;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -502,6 +475,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3H7686WHGY;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				MARKETING_VERSION = 1.0;
@@ -520,6 +494,7 @@
 				BUNDLE_LOADER = "$(TEST_HOST)";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3H7686WHGY;
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 18.2;
 				MARKETING_VERSION = 1.0;
@@ -537,6 +512,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3H7686WHGY;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = driveSync.partFinderUITests;
@@ -553,6 +529,7 @@
 			buildSettings = {
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = 3H7686WHGY;
 				GENERATE_INFOPLIST_FILE = YES;
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = driveSync.partFinderUITests;
@@ -617,16 +594,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		B143CC902DAEDB3400F37C02 /* FirebaseFirestore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
-		};
-		B143CC922DAEF18700F37C02 /* FirebaseStorage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseStorage;
-		};
 		CC2101822D6BEA0700A15EF7 /* FirebaseAnalytics */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
@@ -641,16 +608,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
 			productName = FirebaseDatabase;
-		};
-		CCFF4B7D2DAF00100024ED19 /* FirebaseFirestore */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseFirestore;
-		};
-		CCFF4B7F2DAF12BE0024ED19 /* FirebaseStorage */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = CC2101802D6BE3DD00A15EF7 /* XCRemoteSwiftPackageReference "firebase-ios-sdk" */;
-			productName = FirebaseStorage;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
