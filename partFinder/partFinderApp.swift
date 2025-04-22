@@ -1,4 +1,4 @@
-import SwiftUI
+/*import SwiftUI
 import FirebaseCore
 
       
@@ -14,6 +14,33 @@ struct partFinderApp: App {
         // Defines the main app scene
         WindowGroup {
             // Sets ContentView as the initial screen of the app
+            ContentView()
+            
+        }
+    }
+}
+*/
+import SwiftUI
+import FirebaseCore
+import UIKit
+
+// MARK: - AppDelegate for Firebase setup
+class AppDelegate: NSObject, UIApplicationDelegate {
+    func application(_ application: UIApplication,
+                     didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
+        FirebaseApp.configure()
+        return true
+    }
+}
+
+// MARK: - Main App Struct
+@main
+struct partFinderApp: App {
+    // Inject the AppDelegate into SwiftUI app lifecycle
+    @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+
+    var body: some Scene {
+        WindowGroup {
             ContentView()
         }
     }

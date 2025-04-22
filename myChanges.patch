@@ -1,0 +1,80 @@
+diff --cc partFinder/ContentView.swift
+index a4c37fb,2904a42..0000000
+--- a/partFinder/ContentView.swift
++++ b/partFinder/ContentView.swift
+@@@ -322,45 -322,41 +322,66 @@@ struct ContentView: View 
+                  .cornerRadius(12)
+              }
+          }
+- 
++ /*
+  struct ProfileView: View {
+ -    @AppStorage("userName") var userName = ""
+ -    @AppStorage("userEmail") var userEmail = ""
+      @AppStorage("isLoggedIn") var isLoggedIn = false
+ +    @AppStorage("userEmail") var userEmail = ""
+ +    @AppStorage("userName") var userName = ""
+  
+      var body: some View {
+++<<<<<<< HEAD
+ +        if isLoggedIn {
+ +            BaseView(title: "Profile", showProfileButton: false) {
+ +                ZStack {
+ +                    Color.black.ignoresSafeArea()
+ +                    VStack(spacing: 20) {
+ +                        Text("Profile")
+ +                            .font(.title)
+ +                            .fontWeight(.bold)
+ +                            .foregroundColor(.blue)
+ +
+ +                        Text("\(userEmail)")
+ +                            .foregroundColor(.white)
+ +
+ +                        Button("Logout") {
+ +                            try? Auth.auth().signOut()
+ +                            isLoggedIn = false
+ +                            userName = ""
+ +                            userEmail = ""
+ +                        }
+ +                        .padding()
+ +                        .background(Color.blue)
+ +                        .foregroundColor(.black)
+ +                        .cornerRadius(10)
+ +
+ +                        Spacer()
+++=======
++         BaseView {
++             ZStack {
++                Color.black.ignoresSafeArea()
++                 
++                 VStack(spacing: 20) {
++                     Text("Profile")
++                         .font(.title)
++                         .fontWeight(.bold)
++                         .foregroundColor(.blue)
++ 
++                     Text("\(userEmail)")
++                      .foregroundColor(.white)
++                     
++                     Button("Logout") {
++                        try? Auth.auth().signOut()
++                         isLoggedIn = false
++                         userName = ""
++                         userEmail = ""
+++>>>>>>> 56441eb (I am modifying the profile page such as the UI, functionality, the ability to change your profile picure and have firebase save it)
+                      }
+                      .padding()
+ -                    .background(Color.blue)
+ -                    .foregroundColor(.black)
+ -                    .cornerRadius(10)
+ -                    
+ -                    Spacer()
+                  }
+ -                .padding()
+              }
+ +        } else {
+ +            
+ +            AuthView()
+          }
+      }
+  }

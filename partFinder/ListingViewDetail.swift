@@ -1,5 +1,5 @@
+/*
 import Foundation
-// ListingView.swift
 import SwiftUI
 
 struct ListingViewDetail: View {
@@ -51,4 +51,4 @@ struct ListingViewDetail: View {
         .padding(.horizontal)
     }
 }
-
+*/

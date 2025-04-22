@@ -289,21 +289,6 @@ struct ContentView: View {
                                                 .foregroundColor(.gray)
                                         }
                                         .padding(.horizontal)
-                                        
-                                        LazyVGrid(columns: columns, spacing: 20) {
-                                            ForEach(viewModel.categories) { category in
-                                                Button(action: {
-                                                    if category.label == "Engine" {
-                                                        selectedCategoryLabel = category.label
-                                                        selectedCategoryListings = dummyListings.filter { $0.partType == category.label }
-                                                        showListings = true
-                                                    }
-                                                }) {
-                                                    CategoryItem(icon: category.icon, label: category.label)
-                                                }
-                                            }
-                                        }
-                                        .padding(.horizontal)
                                     }
                                     
                                     Spacer().frame(height: geometry.safeAreaInsets.bottom)
@@ -424,45 +409,6 @@ struct ContentView: View {
                 .cornerRadius(12)
             }
         }
-
-struct ProfileView: View {
-    @AppStorage("userName") var userName = ""
-    @AppStorage("userEmail") var userEmail = ""
-    @AppStorage("isLoggedIn") var isLoggedIn = false
-
-    var body: some View {
-        BaseView {
-            ZStack {
-                Color.black.ignoresSafeArea()
-                
-                VStack(spacing: 20) {
-                    Text("Profile")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.blue)
-
-                    Text("\(userEmail)")
-                        .foregroundColor(.white)
-                    
-                    Button("Logout") {
-                        try? Auth.auth().signOut()
-                        isLoggedIn = false
-                        userName = ""
-                        userEmail = ""
-                    }
-                    .padding()
-                    .background(Color.blue)
-                    .foregroundColor(.black)
-                    .cornerRadius(10)
-                    
-                    Spacer()
-                }
-                .padding()
-            }
-        }
-    }
-}
-
 struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         ContentView()
