@@ -14,7 +14,7 @@ struct Posting: Identifiable, Hashable, Codable {
     var imageUrls: [String]
 }
 
-struct vendorView: View {
+struct VendorsView: View {
     @AppStorage("userUID") var userUID: String = ""
 
     @State private var phoneNumber = ""
@@ -233,9 +233,9 @@ struct vendorView: View {
     }
 }
 
-struct vendorView_Previews: PreviewProvider {
+struct VendorsView_Previews: PreviewProvider {
     static var previews: some View {
-        vendorView()
+        VendorsView()
     }
 }
 

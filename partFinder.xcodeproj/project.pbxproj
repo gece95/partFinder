@@ -79,11 +79,9 @@
 				CCFF4B7E2DAF00100024ED19 /* FirebaseFirestore in Frameworks */,
 				CC2101832D6BEA0700A15EF7 /* FirebaseAnalytics in Frameworks */,
 				CCFF4B802DAF12BE0024ED19 /* FirebaseStorage in Frameworks */,
-
 				B143CC912DAEDB3400F37C02 /* FirebaseFirestore in Frameworks */,
 				CC2101832D6BEA0700A15EF7 /* FirebaseAnalytics in Frameworks */,
 				B143CC932DAEF18700F37C02 /* FirebaseStorage in Frameworks */,
-
 				CC2101852D6BEA0C00A15EF7 /* FirebaseAuth in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -156,13 +154,10 @@
 				CC2101822D6BEA0700A15EF7 /* FirebaseAnalytics */,
 				CC2101842D6BEA0C00A15EF7 /* FirebaseAuth */,
 				CC2101862D6BEA1000A15EF7 /* FirebaseDatabase */,
-
 				CCFF4B7D2DAF00100024ED19 /* FirebaseFirestore */,
 				CCFF4B7F2DAF12BE0024ED19 /* FirebaseStorage */,
-
 				B143CC902DAEDB3400F37C02 /* FirebaseFirestore */,
 				B143CC922DAEF18700F37C02 /* FirebaseStorage */,
-
 			);
 			productName = partFinder;
 			productReference = 5390BE412D542AD800B85CB5 /* partFinder.app */;
