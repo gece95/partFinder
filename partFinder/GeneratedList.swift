@@ -1,4 +1,4 @@
-/*//
+//
 //  GeneratedList.swift
 //  partFinder
 //
