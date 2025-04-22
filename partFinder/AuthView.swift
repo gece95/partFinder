@@ -68,7 +68,7 @@ struct AuthView: View {
                 .cornerRadius(10)
                 .padding(.horizontal)
                 
-                Button(isLoginMode ? "Don\'t have an account? Sign Up" : "Already have an account? Login") {
+                Button(isLoginMode ? "Don't have an account? Sign Up" : "Already have an account? Login") {
                     isLoginMode.toggle()
                     message = ""
                 }

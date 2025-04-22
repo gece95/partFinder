@@ -104,6 +104,7 @@ struct ContentView: View {
                                     Spacer()
                                     
                                     Text("partFinder")
+                                        .frame(maxWidth: .infinity, alignment: .trailing)
                                         .font(.headline)
                                         .fontWeight(.bold)
                                         .foregroundColor(.blue)
@@ -401,15 +402,8 @@ struct ContentView: View {
         ref.child("users").child(userUID).child("vehicles").child(vehicle.id.uuidString).removeValue()
         vehicles.removeAll { $0.id == vehicle.id }
     }
-
-    
     
     }
-
-    
-
-    
-    
         struct CategoryItem: View {
             let icon: String
             let label: String
