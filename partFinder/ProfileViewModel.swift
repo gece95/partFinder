@@ -1,93 +1,149 @@
+import Foundation
 import SwiftUI
 import FirebaseAuth
-import FirebaseFirestore
 import FirebaseStorage
 
 class ProfileViewModel: ObservableObject {
-    @AppStorage("isLoggedIn") var isLoggedIn = true
-    @AppStorage("userEmail") var userEmail = ""
-    @AppStorage("userName") var userName = ""
-    
-    @Published var userLocation = "California"
-    @Published var profileImageURL = ""
+    @Published var userEmail: String = ""
+    @Published var userLocation: String = ""
     @Published var profileUIImage: UIImage?
-    
+
     init() {
+        loadUserData()
+    }
+
+    func loadUserData() {
         if let user = Auth.auth().currentUser {
-            self.userEmail = user.email ?? "Unknown"
-            fetchProfileImage(for: user.uid)
+            self.userEmail = user.email ?? ""
         }
     }
-    
-    func uploadProfileImage(_ image: UIImage, completion: ((URL?) -> Void)? = nil) {
-        guard let uid = Auth.auth().currentUser?.uid,
-              let imageData = image.jpegData(compressionQuality: 0.5) else {
-            completion?(nil)
+
+    func uploadProfileImage(_ image: UIImage, completion: @escaping (Bool) -> Void) {
+        guard let imageData = image.jpegData(compressionQuality: 0.4),
+              let userID = Auth.auth().currentUser?.uid else {
+            completion(false)
             return
         }
-        
-        let ref = Storage.storage().reference().child("profile_pictures/\(uid).jpg")
-        ref.putData(imageData, metadata: nil) { _, error in
-            if error == nil {
-                ref.downloadURL { url, _ in
-                    if let url = url {
-                        self.profileImageURL = url.absoluteString
-                        self.profileUIImage = image
-                        
-                        Firestore.firestore().collection("users").document(uid).setData([
-                            "profileImageURL": url.absoluteString
-                        ], merge: true)
-                    }
-                    completion?(url)
-                }
+
+        let storageRef = Storage.storage().reference().child("profile_images/\(userID).jpg")
+
+        storageRef.putData(imageData, metadata: nil) { _, error in
+            if let error = error {
+                print("Image upload failed: \(error.localizedDescription)")
+                completion(false)
             } else {
-                completion?(nil)
+                self.profileUIImage = image
+                completion(true)
             }
         }
     }
-    
-    private func fetchProfileImage(for uid: String) {
-        let ref = Storage.storage().reference().child("profile_pictures/\(uid).jpg")
-        ref.downloadURL { url, error in
-            if let url = url {
-                URLSession.shared.dataTask(with: url) { data, _, _ in
-                    if let data = data, let uiImage = UIImage(data: data) {
-                        DispatchQueue.main.async {
-                            self.profileUIImage = uiImage
-                        }
-                    }
-                }.resume()
-            }
-        }
-    }
-    
+
     func logout(completion: @escaping () -> Void) {
         do {
             try Auth.auth().signOut()
-            isLoggedIn = false
-            userEmail = ""
-            userName = ""
             completion()
         } catch {
-            print("Error signing out: \(error.localizedDescription)")
+            print("Logout failed: \(error.localizedDescription)")
         }
     }
-    func updateEmail(to newEmail: String, completion: @escaping (Error?) -> Void) {
+
+    func updateEmailAndOrPassword(
+        newEmail: String?,
+        newPassword: String?,
+        currentPassword: String,
+        completion: @escaping (String?) -> Void
+    ) {
         guard let user = Auth.auth().currentUser else {
-            completion(NSError(domain: "Auth", code: 0, userInfo: [NSLocalizedDescriptionKey: "No user logged in"]))
+            DispatchQueue.main.async {
+                completion("You must be logged in to update your info.")
+            }
             return
         }
-        
-        user.sendEmailVerification(beforeUpdatingEmail: newEmail) { error in
-            if let error = error {
-                completion(error)
-            } else {
-                DispatchQueue.main.async {
-                    self.userEmail = newEmail
+
+        guard let currentEmail = user.email else {
+            DispatchQueue.main.async {
+                completion("Your current email couldn't be verified.")
+            }
+            return
+        }
+
+        guard user.isEmailVerified else {
+            user.sendEmailVerification { err in
+                if let err = err {
+                    print("Failed to send verification email: \(err.localizedDescription)")
+                } else {
+                    print("Verification email sent to \(currentEmail)")
                 }
-                print("Verification email sent to \(newEmail). User must confirm before email is updated.")
-                completion(nil)
+            }
+            DispatchQueue.main.async {
+                completion("Please verify your current email before updating. We've sent you a verification link.")
+            }
+            return
+        }
+
+        let credential = EmailAuthProvider.credential(withEmail: currentEmail, password: currentPassword)
+        user.reauthenticate(with: credential) { result, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion("Reauthentication failed: \(error.localizedDescription)")
+                }
+                return
+            }
+
+            var results: [String] = []
+            var errors: [String] = []
+            let group = DispatchGroup()
+
+            if let newEmail = newEmail, !newEmail.isEmpty, newEmail != currentEmail {
+                group.enter()
+                user.updateEmail(to: newEmail) { error in
+                    if let error = error as NSError? {
+                        var msg = error.localizedDescription
+                        if error.code == AuthErrorCode.emailAlreadyInUse.rawValue {
+                            msg = "That email is already in use."
+                        } else if error.code == AuthErrorCode.invalidEmail.rawValue {
+                            msg = "Invalid email format."
+                        }
+                        errors.append("Email update failed: \(msg)")
+                    } else {
+                        self.userEmail = newEmail
+                        results.append("Email updated")
+
+                        user.sendEmailVerification { error in
+                            if let error = error {
+                                print("Verification email to new email failed: \(error.localizedDescription)")
+                            } else {
+                                print("Verification sent to new email: \(newEmail)")
+                            }
+                        }
+                    }
+                    group.leave()
+                }
+            }
+
+            if let newPassword = newPassword, !newPassword.isEmpty {
+                group.enter()
+                user.updatePassword(to: newPassword) { error in
+                    if let error = error as NSError? {
+                        errors.append("Password update failed: \(error.localizedDescription)")
+                    } else {
+                        results.append("Password updated")
+                    }
+                    group.leave()
+                }
+            }
+
+            group.notify(queue: .main) {
+                if !errors.isEmpty {
+                    completion(errors.joined(separator: "\n"))
+                } else if results.isEmpty {
+                    completion("Nothing changed.")
+                } else {
+                    let msg = results.joined(separator: " & ")
+                    completion("\(msg). If you updated your email, a verification link was sent.")
+                }
             }
         }
     }
 }
+
