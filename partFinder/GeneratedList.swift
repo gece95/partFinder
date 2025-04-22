@@ -4,7 +4,7 @@
 //
 //  Created by Zoe Hazan on 3/11/25.
 //
-
+/*
 import Foundation
 import SwiftUI
 
@@ -12,13 +12,7 @@ import SwiftUI
 struct PartListingsView: View {
     var partType: String
     @State private var priceFilter: Double = 5000.0
-    
-    // Compute the filtered list separately
-    var filteredListings: [Listing] {
-        dummyListings.filter { listing in
-            listing.partType == partType && listing.price <= priceFilter
-        }
-    }
+
     // Defines the body of the view
     var body: some View {
             // Enables vertical scrolling
@@ -113,3 +107,4 @@ struct PartListingsView: View {
     }
 }
 
+*/

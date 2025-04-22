@@ -102,16 +102,6 @@ struct VendorsView: View {
 
                             // Toggle for Condition
                             Toggle("Used", isOn: $isUsed)
-                                .padding(.horizontal)
-
-                            // Dropdown for Part Type
-                            Menu {
-                                ForEach(partTypes, id: \.self) { type in
-                                    Button(type) { selectedType = type }
-                                }
-                            } label: {
-                                DropdownLabel(text: selectedType, placeholder: "Select Part Type")
-                            }
                             .padding(.horizontal)
 
                             // Error Message
