@@ -1,66 +1,70 @@
 import SwiftUI
-import PhotosUI
 
 struct ProfileEditSection: View {
-    @State private var newEmail: String = ""
-    @State private var selectedItem: PhotosPickerItem? = nil
-    @State private var selectedImage: UIImage? = nil
-    @State private var isUploading: Bool = false
     @ObservedObject var viewModel: ProfileViewModel
+    @State private var newEmail: String = ""
+    @State private var newPassword: String = ""
+    @State private var currentPassword: String = ""
+    @State private var saveMessage: String?
 
     var body: some View {
-        VStack(spacing: 20) {
-            if let image = selectedImage {
-                Image(uiImage: image)
-                    .resizable()
-                    .frame(width: 100, height: 100)
-                    .clipShape(Circle())
-            }
+        ZStack {
+            Color.black.ignoresSafeArea()
 
-            PhotosPicker("Change Profile Picture", selection: $selectedItem, matching: .images)
-                .onChange(of: selectedItem) {
-                    guard let newItem = selectedItem else { return }
-                    Task {
-                        do {
-                            if let data = try await newItem.loadTransferable(type: Data.self),
-                               let uiImage = UIImage(data: data) {
-                                selectedImage = uiImage
-                                isUploading = true
-                                viewModel.uploadProfileImage(uiImage, completion: { url in
-                                    isUploading = false
-                                    print("Uploaded to: \(url?.absoluteString ?? "none")")
-                                })
-                            }
-                        } catch {
-                            print("Failed to load image data: \(error.localizedDescription)")
+            VStack(spacing: 20) {
+                Text("Update Account Info")
+                    .foregroundColor(.white)
+                    .font(.title3)
+                    .padding(.bottom)
+
+                // Current password (required)
+                SecureField("Enter current password", text: $currentPassword)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(10)
+
+                // Optional email update
+                TextField("Enter new email (optional)", text: $newEmail)
+                    .autocapitalization(.none)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(10)
+
+                // Optional password update
+                SecureField("Enter new password (optional)", text: $newPassword)
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(10)
+
+                // Save button
+                Button(action: {
+                    viewModel.updateEmailAndOrPassword(
+                        newEmail: newEmail.isEmpty ? nil : newEmail,
+                        newPassword: newPassword.isEmpty ? nil : newPassword,
+                        currentPassword: currentPassword
+                    ) { message in
+                        DispatchQueue.main.async {
+                            saveMessage = message
                         }
                     }
+                }) {
+                    Text("Save Changes")
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(12)
                 }
 
-
-            if isUploading {
-                ProgressView("Uploading...")
-            }
-
-            TextField("Enter new email", text: $newEmail)
-                .textFieldStyle(RoundedBorderTextFieldStyle())
-                .padding(.horizontal)
-
-            Button("Update Email") {
-                viewModel.updateEmail(to: newEmail) { error in
-                    if let error = error {
-                        print("Email update failed: \(error.localizedDescription)")
-                    } else {
-                        print("Email successfully updated")
-                    }
+                // Feedback message
+                if let message = saveMessage {
+                    Text(message)
+                        .foregroundColor(message.contains("failed") ? .red : .green)
+                        .font(.footnote)
                 }
             }
             .padding()
-            .background(Color.blue)
-            .foregroundColor(.white)
-            .cornerRadius(8)
         }
-        .padding()
     }
 }
 
