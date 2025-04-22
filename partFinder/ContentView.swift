@@ -4,8 +4,6 @@ import CoreLocation
 import FirebaseAuth
 import FirebaseDatabase
 
-//will remove this comment, testing...
-
 struct Vehicle: Identifiable, Equatable {
     var id = UUID()
     var make: String
@@ -23,9 +21,6 @@ struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var locationManager = LocationManager()
-    @State private var showEditVehicleSheet = false
-    @State private var vehicleToEdit: Vehicle? = nil
-
     
     @AppStorage("userUID") var userUID = ""
     @AppStorage("isLoggedIn") var isLoggedIn = false
@@ -267,27 +262,22 @@ struct ContentView: View {
                                 }
 
                                 if let selected = selectedVehicle {
-                                    HStack(spacing: 20) {
-                                        Button(action: {
-                                            vehicleToEdit = selected
-                                            showEditVehicleSheet = true
-                                        }) {
-                                            Label("Edit Vehicle", systemImage: "pencil")
-                                        }
-                                        .buttonStyle(.bordered)
-                                        .tint(.blue)
-
+                                    HStack {
+                                        Spacer()
                                         Button(action: {
                                             deleteVehicleFromFirebase(vehicle: selected)
                                             selectedVehicle = nil
                                         }) {
                                             Label("Delete Vehicle", systemImage: "trash")
+                                                .frame(maxWidth: .infinity)
                                         }
-                                        .buttonStyle(.bordered)
+                                        .buttonStyle(.borderedProminent)
                                         .tint(.red)
+                                        Spacer()
                                     }
                                     .padding(.horizontal)
                                 }
+
                                     
                                     VStack(alignment: .leading) {
                                         HStack {
@@ -311,17 +301,6 @@ struct ContentView: View {
                     }
                 }
             }
-        .sheet(isPresented: $showEditVehicleSheet) {
-            if let vehicle = vehicleToEdit {
-                EditVehicleView(vehicle: vehicle,
-                                onSave: { updated in
-                                    updateVehicleInFirebase(vehicle: updated)
-                                },
-                                onDelete: {
-                                    deleteVehicleFromFirebase(vehicle: vehicle)
-                                })
-            }
-        }
 
         }
     func saveVehicleToFirebase(_ vehicle: Vehicle) {
@@ -402,8 +381,11 @@ struct ContentView: View {
         ref.child("users").child(userUID).child("vehicles").child(vehicle.id.uuidString).removeValue()
         vehicles.removeAll { $0.id == vehicle.id }
     }
+
+    
     
     }
+    
         struct CategoryItem: View {
             let icon: String
             let label: String

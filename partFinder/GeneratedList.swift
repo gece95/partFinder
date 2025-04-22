@@ -1,4 +1,4 @@
-//
+/*//
 //  GeneratedList.swift
 //  partFinder
 //
@@ -105,5 +105,5 @@ struct PartListingsView: View {
             }
         }
     }
-}
-*/
+} */
+
