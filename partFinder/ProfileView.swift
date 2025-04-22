@@ -1,109 +1,166 @@
-/*
- import SwiftUI
+import SwiftUI
+import PhotosUI
+import FirebaseAuth
 
 struct ProfileView: View {
-    @Environment(\.colorScheme) var colorScheme
-    
-    // Dummy user data
-    private let fullName = "Zoe Hazan"
-    private let city = "Los Angeles"
-    private let phoneNumber = "123-456-7890"
-    
-    // Dummy listings
-    private let listings: [Listing] = [
-        Listing(title: "Car Battery", partType: "Battery", make: "Toyota", model: "Corolla", year: "2020", trim: "LE", price: 150.0, description: "A high-quality car battery", sellerFullName: "Zoe Hazan", city: "Los Angeles", phoneNumber: "123-456-7890"),
-        Listing(title: "Brake Pads", partType: "Brakes", make: "Honda", model: "Civic", year: "2018", trim: "EX", price: 80.0, description: "Reliable brake pads for Honda Civic", sellerFullName: "Zoe Hazan", city: "Los Angeles", phoneNumber: "123-456-7890"),
-        Listing(title: "V8 Engine", partType: "Engine", make: "Ford", model: "Mustang", year: "2019", trim: "GT", price: 3500.0, description: "High-performance V8 engine", sellerFullName: "Zoe Hazan", city: "Los Angeles", phoneNumber: "123-456-7890")
-    ]
-    
+    @ObservedObject var viewModel: ProfileViewModel
+    @AppStorage("isLoggedIn") var isLoggedIn = false
+    @State private var showAuthView = false
+    @State private var showPaymentSheet = false
+    @State private var selectedItem: PhotosPickerItem? = nil
+    @State private var showingEditSheet = false
+    @State private var isUploading = false
+
     var body: some View {
-        NavigationStack {
-            BaseView {
-                GeometryReader { geometry in
-                    ZStack(alignment: .bottom) {
-                        (colorScheme == .dark ? Color("DarkBackground") : Color.black)
-                            .edgesIgnoringSafeArea(.all)
-                        
-                        ScrollView {
-                            VStack(spacing: 20) {
-                                // Header (Centered)
-                                Text("My Profile")
-                                    .font(.title2)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(.blue)
-                                    .frame(maxWidth: .infinity, alignment: .center)
-                                    .padding(.top)
-                                
-                                // User Info (Full Width)
-                                VStack(spacing: 10) {
-                                    Text("Name: \(fullName)")
-                                        .font(.headline)
-                                        .foregroundColor(.primary)
-                                    Text("City: \(city)")
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
-                                    Text("Contact: \(phoneNumber)")
-                                        .font(.subheadline)
-                                        .foregroundColor(.gray)
+        NavigationView {
+            ZStack {
+                Color.black.ignoresSafeArea()
+
+                if isLoggedIn {
+                    ScrollView {
+                        VStack(spacing: 16) {
+                            VStack(spacing: 8) {
+                                ZStack(alignment: .bottomTrailing) {
+                                    if let image = viewModel.profileUIImage {
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .aspectRatio(contentMode: .fill)
+                                            .frame(width: 100, height: 100)
+                                            .clipShape(Circle())
+                                    } else {
+                                        Circle()
+                                            .fill(Color.gray.opacity(0.3))
+                                            .frame(width: 100, height: 100)
+                                    }
+
+                                    PhotosPicker(selection: $selectedItem, matching: .images) {
+                                        Image(systemName: "camera.fill")
+                                            .foregroundColor(.white)
+                                            .padding(6)
+                                            .background(Color.blue)
+                                            .clipShape(Circle())
+                                    }
+                                    .offset(x: -5, y: -5)
+                                    .onChange(of: selectedItem) {
+                                        guard let newItem = selectedItem else { return }
+                                        Task {
+                                            do {
+                                                if let data = try await newItem.loadTransferable(type: Data.self),
+                                                   let uiImage = UIImage(data: data) {
+                                                    isUploading = true
+                                                    viewModel.uploadProfileImage(uiImage) { _ in
+                                                        isUploading = false
+                                                    }
+                                                }
+                                            } catch {
+                                                print("Failed to load image data: \(error.localizedDescription)")
+                                            }
+                                        }
+                                    }
                                 }
-                                .padding()
-                                .frame(maxWidth: .infinity) // Stretch across screen
-                                .background(Color(.systemGray6))
-                                .cornerRadius(10)
-                                
-                                // Listings
-                                VStack(alignment: .leading) {
+
+                                Text(viewModel.userEmail)
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+
+                                Text(viewModel.userLocation)
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.black)
+
+                            if isUploading {
+                                ProgressView("Uploading...").padding(.bottom)
+                            }
+
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("Transactions")
+                                    .foregroundColor(.white)
+                                    .font(.subheadline)
+                                    .padding(.horizontal)
+
+                                ProfileRowItem(icon: "cart.fill", text: "Purchases & Sales")
+
+                                // Payment Methods Button
+                                Button(action: {
+                                    showPaymentSheet = true
+                                }) {
+                                    ProfileRowItem(icon: "creditcard.fill", text: "Payment & Deposit Methods")
+                                }
+                            }
+
+                            VStack(alignment: .leading, spacing: 10) {
+                                Text("Account")
+                                    .foregroundColor(.white)
+                                    .font(.subheadline)
+                                    .padding(.horizontal)
+
+                                Button(action: {
+                                    showingEditSheet = true
+                                }) {
                                     HStack {
-                                        Text("Your Listings")
-                                            .font(.headline)
-                                            .foregroundColor(.gray)
+                                        Image(systemName: "gearshape.fill")
+                                            .foregroundColor(.blue)
+                                        Text("Account Settings")
+                                            .foregroundColor(.white)
                                         Spacer()
                                     }
-                                    .padding(.horizontal)
-                                    
-                                    if !listings.isEmpty {
-                                        showMyListings()
-                                    }
+                                    .padding()
+                                    .background(Color.black)
                                 }
-                                
-                                Spacer()
-                                    .frame(height: geometry.safeAreaInsets.bottom)
+
+                                Button(action: {
+                                    viewModel.logout {
+                                        isLoggedIn = false
+                                    }
+                                }) {
+                                    HStack {
+                                        Image(systemName: "arrow.backward.circle.fill")
+                                            .foregroundColor(.blue)
+                                        Text("Logout")
+                                            .foregroundColor(.blue)
+                                    }
+                                    .padding()
+                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                    .background(Color.black)
+                                }
                             }
-                            .padding(.top)
                         }
+                        .padding()
                     }
+                } else {
+                    VStack(spacing: 20) {
+                        Text("Please log in to access your profile")
+                            .foregroundColor(.white)
+                            .font(.headline)
+                            .multilineTextAlignment(.center)
+
+                        Button("Login / Sign Up") {
+                            showAuthView = true
+                        }
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(12)
+                        .padding(.horizontal)
+                    }
+                    .padding()
                 }
             }
-        }
-    }
-    
-    private func showMyListings() -> some View {
-        ForEach(listings) { listing in
-            VStack(alignment: .leading, spacing: 5) {
-                Text(listing.title)
-                    .font(.subheadline)
-                    .foregroundColor(.primary)
-                    .lineLimit(1)
-                Text("\(listing.make) \(listing.model) (\(listing.year)) - $\(listing.price, specifier: "%.2f")")
-                    .font(.caption)
-                    .foregroundColor(.gray)
-                    .lineLimit(1)
+            .navigationBarTitle("Profile", displayMode: .inline)
+            .sheet(isPresented: $showingEditSheet) {
+                ProfileEditSection(viewModel: viewModel)
             }
-            .padding()
-            .frame(maxWidth: .infinity, minHeight: 80, alignment: .leading)
-            .background(Color(.systemGray5))
-            .cornerRadius(10)
-            .padding(.horizontal)
+            .sheet(isPresented: $showAuthView) {
+                AuthView()
+            }
+            .sheet(isPresented: $showPaymentSheet) {
+                PaymentMethodsView()
+            }
         }
     }
 }
 
-
-
-struct ProfileView_Previews: PreviewProvider {
-    static var previews: some View {
-        ProfileView()
-    }
-}
-
-*/
