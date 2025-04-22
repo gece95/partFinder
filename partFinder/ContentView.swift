@@ -4,8 +4,6 @@ import CoreLocation
 import FirebaseAuth
 import FirebaseDatabase
 
-
-
 struct Vehicle: Identifiable, Equatable {
     var id = UUID()
     var make: String
@@ -23,9 +21,6 @@ struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var locationManager = LocationManager()
-    @State private var showEditVehicleSheet = false
-    @State private var vehicleToEdit: Vehicle? = nil
-
     
     @AppStorage("userUID") var userUID = ""
     @AppStorage("isLoggedIn") var isLoggedIn = false
@@ -266,27 +261,22 @@ struct ContentView: View {
                                 }
 
                                 if let selected = selectedVehicle {
-                                    HStack(spacing: 20) {
-                                        Button(action: {
-                                            vehicleToEdit = selected
-                                            showEditVehicleSheet = true
-                                        }) {
-                                            Label("Edit Vehicle", systemImage: "pencil")
-                                        }
-                                        .buttonStyle(.bordered)
-                                        .tint(.blue)
-
+                                    HStack {
+                                        Spacer()
                                         Button(action: {
                                             deleteVehicleFromFirebase(vehicle: selected)
                                             selectedVehicle = nil
                                         }) {
                                             Label("Delete Vehicle", systemImage: "trash")
+                                                .frame(maxWidth: .infinity)
                                         }
-                                        .buttonStyle(.bordered)
+                                        .buttonStyle(.borderedProminent)
                                         .tint(.red)
+                                        Spacer()
                                     }
                                     .padding(.horizontal)
                                 }
+
                                     
                                     VStack(alignment: .leading) {
                                         HStack {
@@ -325,17 +315,6 @@ struct ContentView: View {
                     }
                 }
             }
-        .sheet(isPresented: $showEditVehicleSheet) {
-            if let vehicle = vehicleToEdit {
-                EditVehicleView(vehicle: vehicle,
-                                onSave: { updated in
-                                    updateVehicleInFirebase(vehicle: updated)
-                                },
-                                onDelete: {
-                                    deleteVehicleFromFirebase(vehicle: vehicle)
-                                })
-            }
-        }
 
         }
     func saveVehicleToFirebase(_ vehicle: Vehicle) {
@@ -394,40 +373,6 @@ struct ContentView: View {
             print("✅ Loaded \(vehicles.count) vehicles from Firebase.")
         }
     }
-    
-    
-    func deleteVehicleFromFirebase(_ vehicleID: String) {
-        guard !userUID.isEmpty else { return }
-        let ref = Database.database().reference()
-        ref.child("users").child(userUID).child("vehicles").child(vehicleID).removeValue { error, _ in
-            if let error = error {
-                print("❌ Error deleting: \(error.localizedDescription)")
-            } else {
-                print("✅ Vehicle deleted")
-                loadVehiclesFromFirebase() // Refresh UI
-            }
-        }
-    }
-
-    
-    func updateVehicleInFirebase(vehicleID: String, updatedVehicle: Vehicle) {
-        guard !userUID.isEmpty else { return }
-        let ref = Database.database().reference()
-        let vehicleData = [
-            "make": updatedVehicle.make,
-            "model": updatedVehicle.model,
-            "trim": updatedVehicle.trim,
-            "year": updatedVehicle.year
-        ]
-        ref.child("users").child(userUID).child("vehicles").child(vehicleID).updateChildValues(vehicleData) { error, _ in
-            if let error = error {
-                print("❌ Error updating: \(error.localizedDescription)")
-            } else {
-                print("✅ Vehicle updated")
-                loadVehiclesFromFirebase()
-            }
-        }
-    }
 
     func updateVehicleInFirebase(vehicle: Vehicle) {
         guard !userUID.isEmpty else { return }
@@ -454,10 +399,6 @@ struct ContentView: View {
     
     
     }
-
-    
-
-    
     
         struct CategoryItem: View {
             let icon: String
