@@ -96,29 +96,7 @@ struct ContentView: View {
     @State private var selectedCategoryLabel: String = ""
     @State private var firebaseListings: [Vehicle] = []
 
-    let years = Array(1980...2025).map { String($0) }
-    let makes = ["Ford", "Chevrolet", "Toyota", "Honda"]
-    let modelsByMake = [
-        "Ford": ["F-150", "Mustang", "Explorer"],
-        "Chevrolet": ["Silverado", "Malibu", "Equinox"],
-        "Toyota": ["Camry", "Corolla", "RAV4"],
-        "Honda": ["Civic", "Accord", "CR-V"]
-    ]
-    let trimsByModel = [
-        "Camry": ["LE", "SE", "XLE"],
-        "Corolla": ["L", "LE", "XSE"],
-        "RAV4": ["LE", "XLE", "Limited"],
-        "Civic": ["LX", "Sport", "EX"],
-        "Accord": ["LX", "Sport", "EX-L"],
-        "CR-V": ["LX", "EX", "Touring"],
-        "F-150": ["XL", "XLT", "Lariat"],
-        "Mustang": ["EcoBoost", "GT", "Mach 1"],
-        "Explorer": ["Base", "XLT", "Limited"],
-        "Silverado": ["Work Truck", "LT", "High Country"],
-        "Malibu": ["LS", "RS", "Premier"],
-        "Equinox": ["L", "LS", "LT"]
-    ]
-
+   
     let columns = [
         GridItem(.flexible()),
         GridItem(.flexible()),

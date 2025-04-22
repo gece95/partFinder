@@ -1,123 +1,241 @@
-import Foundation
 import SwiftUI
+import Firebase
+import FirebaseStorage
+import FirebaseDatabase
+import PhotosUI
 
-// Define a struct for the Posting with identifiable properties
-struct Posting: Identifiable, Hashable {
-    // Unique identifier for each vehicle part listing
-    let id = UUID()
-    let phoneNumber: String
-    var Description: String
-    var Price: String
-    var Condition: String
-    var TypeOfPart: String
+struct Posting: Identifiable, Hashable, Codable {
+    var id = UUID()
+    var phoneNumber: String
+    var description: String
+    var price: String
+    var condition: String
+    var typeOfPart: String
+    var imageUrls: [String]
 }
 
 struct vendorView: View {
-    
-    // User input fields for vehicle part details
-    @State private var phoneNumber: String = ""
-    @State private var Description: String = ""
-    @State private var Price: String = ""
-    @State private var Condition: String = ""
-    @State private var TypeOfPart: String = ""
-    @State private var errorMessage: String = "" // Error message that will be displayed if validation fails
-    
-    // Function to check if all required fields are filled in by the user
-    func checking() {
-        // Check if any required field is empty
-        if phoneNumber.isEmpty || Description.isEmpty || Price.isEmpty || Condition.isEmpty || TypeOfPart.isEmpty {
-            errorMessage = "Please fill in all required fields." // Display error message if any field is empty
-        } else {
-            errorMessage = "" // Clear error message if all fields are filled
-            // Proceed with posting submission or any other actions (like saving or sending data)
-            print("All fields are filled, ready for submission!") // This is just a placeholder for actual submission logic
-            // Optionally, you can clear the form fields after successful submission:
-            clearFields()
-        }
-    }
-    
-    // Function to clear all fields after submission
-    func clearFields() {
-        phoneNumber = ""
-        Description = ""
-        Price = ""
-        Condition = ""
-        TypeOfPart = ""
-    }
+    @AppStorage("userUID") var userUID: String = ""
+
+    @State private var phoneNumber = ""
+    @State private var description = ""
+    @State private var price = ""
+    @State private var isUsed = false
+    @State private var selectedType = ""
+    @State private var selectedImages: [UIImage] = []
+    @State private var imageSelections: [PhotosPickerItem] = []
+
+    @State private var errorMessage = ""
+    @State private var isUploading = false
+
+    let partTypes = ["Engine", "Turbocharger", "Fluids", "Gaskets", "Brakes", "Batteries"]
 
     var body: some View {
-        // Use NavigationView to allow for navigation (e.g., in a larger app)
         NavigationView {
             BaseView {
-                // Use VStack to organize the layout vertically with some spacing
-                
-                VStack(spacing: 20) {
-                    
+                VStack(spacing: 12) {
                     Text("Sell")
-                        .font(.title)
-                        .fontWeight(.bold)
-                        .foregroundColor(.blue)
-                    
-                    // Phone Number input field
-                    TextField("Phone-Number", text: $phoneNumber)
-                        .textFieldStyle(RoundedBorderTextFieldStyle()) // Rounded style for the text field
-                        .keyboardType(.phonePad) // Use phone keypad for the phone number input
-                        .padding(.horizontal)
-                    
-                    // Description input field
-                    TextField("Description", text: $Description)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                    
-                    // Price input field
-                    TextField("Price", text: $Price)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .keyboardType(.decimalPad) // Use decimal pad for price input
-                        .padding(.horizontal)
-                    
-                    // Condition input field (e.g., New/Used)
-                    TextField("Condition: New/Used", text: $Condition)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                    
-                    // Type of Part input field
-                    TextField("Type of Part", text: $TypeOfPart)
-                        .textFieldStyle(RoundedBorderTextFieldStyle())
-                        .padding(.horizontal)
-                    
-                    // Show error message if any field is empty
-                    if !errorMessage.isEmpty {
-                        Text(errorMessage)
-                            .foregroundColor(.red) // Make the error message red for visibility
-                            .padding(.top, 10)
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                        .padding(.top, 8)
+                        .frame(maxWidth: .infinity, alignment: .center)
+
+                    ScrollView {
+                        VStack(spacing: 16) {
+
+                            // Images Scroll Section
+                            if !selectedImages.isEmpty {
+                                ScrollView(.horizontal, showsIndicators: false) {
+                                    HStack(spacing: 12) {
+                                        ForEach(selectedImages, id: \.self) { image in
+                                            Image(uiImage: image)
+                                                .resizable()
+                                                .scaledToFill()
+                                                .frame(width: 150, height: 150)
+                                                .clipped()
+                                                .border(Color.gray, width: 1)
+                                                .cornerRadius(10)
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                }
+                            }
+
+                            // Image Picker
+                            PhotosPicker(
+                                selection: $imageSelections,
+                                maxSelectionCount: 5,
+                                matching: .images,
+                                photoLibrary: .shared()
+                            ) {
+                                Label("Add Images", systemImage: "photo.on.rectangle.angled")
+                            }
+                            .onChange(of: imageSelections) {
+                                
+                                    selectedImages = []
+                                    Task {
+                                    for item in imageSelections {
+                                        if let data = try? await item.loadTransferable(type: Data.self),
+                                           let uiImage = UIImage(data: data) {
+                                            selectedImages.append(uiImage)
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Text Inputs
+                            Group {
+                                TextField("Phone Number", text: $phoneNumber)
+                                    .keyboardType(.phonePad)
+
+                                TextEditor(text: $description)
+                                    .frame(height: 120)
+                                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4)))
+                                    .background(Color(.systemGray6))
+                                    .cornerRadius(8)
+
+                                TextField("Price (e.g. 25.00)", text: $price)
+                                    .keyboardType(.decimalPad)
+                            }
+                            .textFieldStyle(RoundedBorderTextFieldStyle())
+                            .padding(.horizontal)
+
+                            // Toggle for Condition
+                            Toggle("Used", isOn: $isUsed)
+                                .padding(.horizontal)
+
+                            // Dropdown for Part Type
+                            Menu {
+                                ForEach(partTypes, id: \.self) { type in
+                                    Button(type) { selectedType = type }
+                                }
+                            } label: {
+                                DropdownLabel(text: selectedType, placeholder: "Select Part Type")
+                            }
+                            .padding(.horizontal)
+
+                            // Error Message
+                            if !errorMessage.isEmpty {
+                                Text(errorMessage)
+                                    .foregroundColor(.red)
+                                    .padding(.horizontal)
+                            }
+
+                            // Submit Button
+                            Button(action: {
+                                submitListing()
+                            }) {
+                                Text(isUploading ? "Submitting..." : "Submit Listing")
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(isUploading ? Color.gray : Color.blue)
+                                    .foregroundColor(.black)
+                                    .cornerRadius(10)
+                            }
+                            .disabled(isUploading)
+                            .padding(.horizontal)
+
+                        }
+                        .padding(.bottom, 32)
                     }
-                    
-                    // Submit Button
-                    Button(action: {
-                        checking() // Call the checking function when the button is tapped
-                    }) {
-                        Text("Submit Listing") // Button text
-                            .padding()
-                            .background(Color.blue) // Blue background color for the button
-                            .foregroundColor(.white) // White text color
-                            .cornerRadius(8) // Rounded corners for the button
-                    }
-                    .padding(.top, 20) // Add some space above the button
                 }
-                .padding() // Add some padding around the VStack
-                .background(Color.black.opacity(0.2)) // Set a light gray background for the form
-                .cornerRadius(12) // Rounded corners for the form container
-                .frame(maxWidth: .infinity, maxHeight: .infinity) // Make the view fill the available space
-                .background(Color.black) // Dark grey background for the entire screen
-                .edgesIgnoringSafeArea(.all) // Make the background color extend to the edges of the screen
+                .padding(.top, 16)
             }
+        }
+    }
+
+    func submitListing() {
+        // Validation
+        guard !phoneNumber.isEmpty,
+              !description.isEmpty,
+              !price.isEmpty,
+              !selectedType.isEmpty,
+              !selectedImages.isEmpty,
+              Double(price) != nil else {
+            errorMessage = "Please complete all fields correctly and add at least one image."
+            return
+        }
+
+        errorMessage = ""
+        isUploading = true
+
+        uploadImagesToFirebase(images: selectedImages) { imageUrls in
+            let newPost = Posting(
+                phoneNumber: phoneNumber,
+                description: description,
+                price: price,
+                condition: isUsed ? "Used" : "New",
+                typeOfPart: selectedType,
+                imageUrls: imageUrls
+            )
+
+            let ref = Database.database().reference()
+            ref.child("listings").child(selectedType.lowercased()).childByAutoId().setValue([
+                "phoneNumber": newPost.phoneNumber,
+                "description": newPost.description,
+                "price": newPost.price,
+                "condition": newPost.condition,
+                "typeOfPart": newPost.typeOfPart,
+                "imageUrls": imageUrls
+            ]) { error, _ in
+                if let error = error {
+                    errorMessage = "Upload failed: \(error.localizedDescription)"
+                } else {
+                    errorMessage = "✅ Listing uploaded successfully!"
+                    clearForm()
+                }
+                isUploading = false
+            }
+        }
+    }
+
+    func clearForm() {
+        phoneNumber = ""
+        description = ""
+        price = ""
+        isUsed = false
+        selectedType = ""
+        selectedImages = []
+    }
+
+    func uploadImagesToFirebase(images: [UIImage], completion: @escaping ([String]) -> Void) {
+        var uploadedURLs: [String] = []
+        let group = DispatchGroup()
+
+        for image in images {
+            group.enter()
+            let imageName = UUID().uuidString + ".jpg"
+            let ref = Storage.storage().reference().child("listing_images/\(imageName)")
+
+            if let imageData = image.jpegData(compressionQuality: 0.8) {
+                ref.putData(imageData, metadata: nil) { _, error in
+                    if let error = error {
+                        print("❌ Error uploading image: \(error)")
+                        group.leave()
+                        return
+                    }
+
+                    ref.downloadURL { url, _ in
+                        if let url = url {
+                            uploadedURLs.append(url.absoluteString)
+                        }
+                        group.leave()
+                    }
+                }
+            } else {
+                group.leave()
+            }
+        }
+
+        group.notify(queue: .main) {
+            completion(uploadedURLs)
         }
     }
 }
 
 struct vendorView_Previews: PreviewProvider {
     static var previews: some View {
-        vendorView() // Preview the vendorView
+        vendorView()
     }
 }
 
