@@ -7,7 +7,7 @@ import FirebaseDatabase
 
 
 struct Vehicle: Identifiable, Equatable {
-    let id = UUID()
+    var id = UUID()
     var make: String
     var model: String
     var trim: String
@@ -23,6 +23,9 @@ struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var locationManager = LocationManager()
+    @State private var showEditVehicleSheet = false
+    @State private var vehicleToEdit: Vehicle? = nil
+
     
     @AppStorage("userUID") var userUID = ""
     @AppStorage("isLoggedIn") var isLoggedIn = false
@@ -235,32 +238,55 @@ struct ContentView: View {
                                     .padding()
                                     .background(Color(.systemGray6))
                                     .cornerRadius(12)
-                                    
-                                    if !vehicles.isEmpty {
-                                        Menu {
-                                            ForEach(vehicles) { vehicle in
-                                                Button(vehicle.displayName) {
-                                                    selectedVehicle = vehicle
-                                                }
+                                
+                                if !vehicles.isEmpty {
+                                    Menu {
+                                        ForEach(vehicles) { vehicle in
+                                            Button(vehicle.displayName) {
+                                                selectedVehicle = vehicle
                                             }
-                                        } label: {
-                                            ZStack {
-                                                RoundedRectangle(cornerRadius: 10)
-                                                    .fill(Color(.systemGray6))
-                                                HStack {
-                                                    Text(selectedVehicle?.displayName ?? "Select Vehicle")
-                                                        .foregroundColor(.primary)
-                                                        .padding(.leading)
-                                                    Spacer()
-                                                    Image(systemName: "chevron.down")
-                                                        .foregroundColor(.gray)
-                                                        .padding(.trailing)
-                                                }
-                                            }
-                                            .frame(height: 45)
-                                            .padding(.horizontal)
                                         }
+                                    } label: {
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(Color(.systemGray6))
+                                            HStack {
+                                                Text(selectedVehicle?.displayName ?? "Select Vehicle")
+                                                    .foregroundColor(.primary)
+                                                    .padding(.leading)
+                                                Spacer()
+                                                Image(systemName: "chevron.down")
+                                                    .foregroundColor(.gray)
+                                                    .padding(.trailing)
+                                            }
+                                        }
+                                        .frame(height: 45)
+                                        .padding(.horizontal)
                                     }
+                                }
+
+                                if let selected = selectedVehicle {
+                                    HStack(spacing: 20) {
+                                        Button(action: {
+                                            vehicleToEdit = selected
+                                            showEditVehicleSheet = true
+                                        }) {
+                                            Label("Edit Vehicle", systemImage: "pencil")
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .tint(.blue)
+
+                                        Button(action: {
+                                            deleteVehicleFromFirebase(vehicle: selected)
+                                            selectedVehicle = nil
+                                        }) {
+                                            Label("Delete Vehicle", systemImage: "trash")
+                                        }
+                                        .buttonStyle(.bordered)
+                                        .tint(.red)
+                                    }
+                                    .padding(.horizontal)
+                                }
                                     
                                     VStack(alignment: .leading) {
                                         HStack {
@@ -299,6 +325,18 @@ struct ContentView: View {
                     }
                 }
             }
+        .sheet(isPresented: $showEditVehicleSheet) {
+            if let vehicle = vehicleToEdit {
+                EditVehicleView(vehicle: vehicle,
+                                onSave: { updated in
+                                    updateVehicleInFirebase(vehicle: updated)
+                                },
+                                onDelete: {
+                                    deleteVehicleFromFirebase(vehicle: vehicle)
+                                })
+            }
+        }
+
         }
     func saveVehicleToFirebase(_ vehicle: Vehicle) {
         guard !userUID.isEmpty else {
@@ -344,9 +382,10 @@ struct ContentView: View {
                    let make = value["make"] as? String,
                    let model = value["model"] as? String,
                    let trim = value["trim"] as? String,
-                   let year = value["year"] as? String {
+                   let year = value["year"] as? String,
+                   let id = UUID(uuidString: snap.key) {
                     
-                    let vehicle = Vehicle(make: make, model: model, trim: trim, year: year)
+                    let vehicle = Vehicle(id: id, make: make, model: model, trim: trim, year: year)
                     loadedVehicles.append(vehicle)
                 }
             }
@@ -355,7 +394,68 @@ struct ContentView: View {
             print("✅ Loaded \(vehicles.count) vehicles from Firebase.")
         }
     }
+    
+    
+    func deleteVehicleFromFirebase(_ vehicleID: String) {
+        guard !userUID.isEmpty else { return }
+        let ref = Database.database().reference()
+        ref.child("users").child(userUID).child("vehicles").child(vehicleID).removeValue { error, _ in
+            if let error = error {
+                print("❌ Error deleting: \(error.localizedDescription)")
+            } else {
+                print("✅ Vehicle deleted")
+                loadVehiclesFromFirebase() // Refresh UI
+            }
+        }
     }
+
+    
+    func updateVehicleInFirebase(vehicleID: String, updatedVehicle: Vehicle) {
+        guard !userUID.isEmpty else { return }
+        let ref = Database.database().reference()
+        let vehicleData = [
+            "make": updatedVehicle.make,
+            "model": updatedVehicle.model,
+            "trim": updatedVehicle.trim,
+            "year": updatedVehicle.year
+        ]
+        ref.child("users").child(userUID).child("vehicles").child(vehicleID).updateChildValues(vehicleData) { error, _ in
+            if let error = error {
+                print("❌ Error updating: \(error.localizedDescription)")
+            } else {
+                print("✅ Vehicle updated")
+                loadVehiclesFromFirebase()
+            }
+        }
+    }
+
+    func updateVehicleInFirebase(vehicle: Vehicle) {
+        guard !userUID.isEmpty else { return }
+        let ref = Database.database().reference()
+        let vehicleData = [
+            "make": vehicle.make,
+            "model": vehicle.model,
+            "trim": vehicle.trim,
+            "year": vehicle.year
+        ]
+        ref.child("users").child(userUID).child("vehicles").child(vehicle.id.uuidString).setValue(vehicleData)
+        if let index = vehicles.firstIndex(where: { $0.id == vehicle.id }) {
+            vehicles[index] = vehicle
+        }
+    }
+
+    func deleteVehicleFromFirebase(vehicle: Vehicle) {
+        guard !userUID.isEmpty else { return }
+        let ref = Database.database().reference()
+        ref.child("users").child(userUID).child("vehicles").child(vehicle.id.uuidString).removeValue()
+        vehicles.removeAll { $0.id == vehicle.id }
+    }
+
+    
+    
+    }
+
+    
 
     
     
