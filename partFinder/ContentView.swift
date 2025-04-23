@@ -1,3 +1,4 @@
+
 import SwiftUI
 import Foundation
 import CoreLocation
@@ -15,7 +16,6 @@ struct Vehicle: Identifiable, Equatable {
         "\(year) \(make) \(model) \(trim)"
     }
 }
-
 enum VehicleAlert: Identifiable {
     case added, deleted
 
@@ -32,31 +32,32 @@ enum VehicleAlert: Identifiable {
         case .deleted: return "Vehicle Deleted"
         }
     }
+struct partCategory: Hashable {
+    let icon: String
+    let label: String
 }
 
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
     @StateObject private var viewModel = HomeViewModel()
     @StateObject private var locationManager = LocationManager()
-    
+
     @AppStorage("userUID") var userUID = ""
     @AppStorage("isLoggedIn") var isLoggedIn = false
     @AppStorage("userName") var userName = ""
     @AppStorage("userEmail") var userEmail = ""
-    
+
     @State private var newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
     @State private var vehicles: [Vehicle] = []
     @State private var selectedVehicle: Vehicle?
-    
+
     @State private var selectedCategoryListings: [Listing] = []
     @State private var showListings = false
     @State private var selectedCategoryLabel: String = ""
+
     
     @State private var activeAlert: VehicleAlert?
 
-
-    
-    
     let years = Array(1980...2025).map { String($0) }
     let makes = ["Ford", "Chevrolet", "Toyota", "Honda"]
     let modelsByMake = [
@@ -79,13 +80,21 @@ struct ContentView: View {
         "Malibu": ["LS", "RS", "Premier"],
         "Equinox": ["L", "LS", "LT"]
     ]
-    
+    let categories = [
+        Category(icon: "engine_icon", label: "Engines"),
+        Category(icon: "battery_icon", label: "Batteries"),
+        Category(icon: "brake_icon", label: "Brakes"),
+        Category(icon: "fluids_icon", label: "Fluids"),
+        Category(icon: "turbo_icon", label: "Turbocharger"),
+        Category(icon: "gasket_icon", label: "Gaskets")
+    ]
+
     let columns = [
         GridItem(.flexible()),
         GridItem(.flexible()),
         GridItem(.flexible())
     ]
-    
+
     var body: some View {
         ZStack {
             GeometryReader { geometry in
@@ -107,6 +116,23 @@ struct ContentView: View {
                                         Button(city) {
                                             locationManager.requestLocation()
                                             viewModel.selectedCity = city
+        BaseView {
+            ZStack {
+                GeometryReader { geometry in
+                    ZStack(alignment: .bottom) {
+                        (colorScheme == .dark ? Color("DarkBackground") : Color.black)
+                            .edgesIgnoringSafeArea(.all)
+
+                        VStack(spacing: 0) {
+                            ScrollView {
+                                HStack {
+                                    Menu {
+                                        ForEach(viewModel.cities, id: \.self) { city in
+                                            Button(city) {
+                                                locationManager.requestLocation()
+                                                viewModel.selectedCity = city
+                                            }
+
                                         }
                                     }
                                 } label: {
@@ -151,6 +177,7 @@ struct ContentView: View {
                                             Text(year)
                                         }
                                     }
+
                                 } label: {
                                     HStack {
                                         Text(newVehicle.year.isEmpty ? "Year" : newVehicle.year)
@@ -250,6 +277,80 @@ struct ContentView: View {
                                     activeAlert = .added
 
                                     
+
+
+                                    Spacer()
+
+                                    Text("partFinder")
+                                        .frame(maxWidth: .infinity, alignment: .trailing)
+                                        .font(.headline)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.blue)
+
+                                    Spacer()
+                                }
+                                .padding(.horizontal)
+                                .padding(.vertical, 6)
+
+                                if let zip = locationManager.zipCode {
+                                    Text("ZIP Code: \(zip)")
+                                        .font(.caption)
+                                        .foregroundColor(.gray)
+                                        .padding(.horizontal)
+                                        .padding(.bottom, 4)
+                                }
+
+                                VStack(spacing: 12) {
+                                    yearPicker
+                                    makePicker
+                                    modelPicker
+                                    trimPicker
+
+                                    Button("Add Vehicle") {
+                                        guard !newVehicle.make.isEmpty,
+                                              !newVehicle.model.isEmpty,
+                                              !newVehicle.year.isEmpty else { return }
+
+                                        vehicles.append(newVehicle)
+                                        selectedVehicle = newVehicle
+                                        saveVehicleToFirebase(newVehicle)
+                                        newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
+                                    }
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.blue)
+                                    .foregroundColor(.white)
+                                    .cornerRadius(10)
+                                }
+                                .padding(.horizontal)
+                                .padding()
+                                .background(Color(.systemGray6))
+                                .cornerRadius(12)
+
+                                if !vehicles.isEmpty {
+                                    Menu {
+                                        ForEach(vehicles) { vehicle in
+                                            Button(vehicle.displayName) {
+                                                selectedVehicle = vehicle
+                                            }
+                                        }
+                                    } label: {
+                                        ZStack {
+                                            RoundedRectangle(cornerRadius: 10)
+                                                .fill(Color(.systemGray6))
+                                            HStack {
+                                                Text(selectedVehicle?.displayName ?? "Select Vehicle")
+                                                    .foregroundColor(.primary)
+                                                    .padding(.leading)
+                                                Spacer()
+                                                Image(systemName: "chevron.down")
+                                                    .foregroundColor(.gray)
+                                                    .padding(.trailing)
+                                            }
+                                        }
+                                        .frame(height: 45)
+                                        .padding(.horizontal)
+                                    }
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding()
@@ -286,7 +387,34 @@ struct ContentView: View {
                                     .frame(height: 45)
                                     .padding(.horizontal)
                                     
+
+                                    .padding(.horizontal)
                                 }
+
+                                VStack(alignment: .leading) {
+                                    HStack {
+                                        Text("Categories")
+                                            .font(.headline)
+                                            .foregroundColor(.gray)
+                                        Spacer()
+                                        Text("Show All")
+                                            .font(.subheadline)
+                                            .foregroundColor(.gray)
+                                    }
+                                    .padding(.horizontal)
+                                }
+
+                                LazyVGrid(columns: columns, spacing: 16) {
+                                    ForEach(categories, id: \.label) { category in
+                                        CategoryItem(icon: category.icon, label: category.label)
+                                    }
+                                }
+                                .padding(.horizontal)
+
+                                Spacer().frame(height: geometry.safeAreaInsets.bottom)
+                            }
+                            .onAppear {
+                                loadVehiclesFromFirebase()
                             }
                             
                             Spacer().frame(height: 24)
@@ -338,6 +466,90 @@ struct ContentView: View {
         }
     }
     
+
+        }
+    }
+
+    var yearPicker: some View {
+        Menu {
+            ForEach(years, id: \.self) { year in
+                Button(action: {
+                    newVehicle.year = year
+                }) {
+                    Text(year)
+                }
+            }
+        } label: {
+            pickerLabel(text: newVehicle.year, placeholder: "Year")
+        }
+    }
+
+    var makePicker: some View {
+        Menu {
+            ForEach(makes, id: \.self) { make in
+                Button(action: {
+                    newVehicle.make = make
+                    newVehicle.model = ""
+                    newVehicle.trim = ""
+                }) {
+                    Text(make)
+                }
+            }
+        } label: {
+            pickerLabel(text: newVehicle.make, placeholder: "Make")
+        }
+    }
+
+    var modelPicker: some View {
+        Group {
+            if let models = modelsByMake[newVehicle.make] {
+                Menu {
+                    ForEach(models, id: \.self) { model in
+                        Button(action: {
+                            newVehicle.model = model
+                            newVehicle.trim = ""
+                        }) {
+                            Text(model)
+                        }
+                    }
+                } label: {
+                    pickerLabel(text: newVehicle.model, placeholder: "Model")
+                }
+            }
+        }
+    }
+
+    var trimPicker: some View {
+        Group {
+            if let trims = trimsByModel[newVehicle.model] {
+                Menu {
+                    ForEach(trims, id: \.self) { trim in
+                        Button(action: {
+                            newVehicle.trim = trim
+                        }) {
+                            Text(trim)
+                        }
+                    }
+                } label: {
+                    pickerLabel(text: newVehicle.trim, placeholder: "Trim")
+                }
+            }
+        }
+    }
+
+    func pickerLabel(text: String, placeholder: String) -> some View {
+        HStack {
+            Text(text.isEmpty ? placeholder : text)
+                .foregroundColor(text.isEmpty ? .gray : .primary)
+            Spacer()
+            Image(systemName: "chevron.down")
+                .foregroundColor(.gray)
+        }
+        .padding()
+        .background(Color(.systemGray6))
+        .cornerRadius(8)
+    }
+
     func saveVehicleToFirebase(_ vehicle: Vehicle) {
         guard !userUID.isEmpty else {
             print("❌ User UID is empty. Cannot save vehicle.")
@@ -351,21 +563,22 @@ struct ContentView: View {
             "year": vehicle.year
         ]
         let path = "users/\(userUID)/vehicles/\(vehicle.id.uuidString)"
-            print("📍 Saving vehicle to: \(path)")
-            print("📦 Vehicle data: \(vehicleData)")
+        print("📍 Saving vehicle to: \(path)")
+        print("📦 Vehicle data: \(vehicleData)")
 
-            ref.child("users")
-                .child(userUID)
-                .child("vehicles")
-                .child(vehicle.id.uuidString)
-                .setValue(vehicleData) { error, _ in
-                    if let error = error {
-                        print("❌ Failed to save vehicle: \(error.localizedDescription)")
-                    } else {
-                        print("✅ Vehicle saved to Firebase")
-                    }
+        ref.child("users")
+            .child(userUID)
+            .child("vehicles")
+            .child(vehicle.id.uuidString)
+            .setValue(vehicleData) { error, _ in
+                if let error = error {
+                    print("❌ Failed to save vehicle: \(error.localizedDescription)")
+                } else {
+                    print("✅ Vehicle saved to Firebase")
                 }
-        }
+            }
+    }
+
     func loadVehiclesFromFirebase() {
         guard !userUID.isEmpty else {
             print("❌ User UID is empty. Cannot load vehicles.")
@@ -384,7 +597,7 @@ struct ContentView: View {
                    let trim = value["trim"] as? String,
                    let year = value["year"] as? String,
                    let id = UUID(uuidString: snap.key) {
-                    
+
                     let vehicle = Vehicle(id: id, make: make, model: model, trim: trim, year: year)
                     loadedVehicles.append(vehicle)
                 }
@@ -395,59 +608,45 @@ struct ContentView: View {
         }
     }
 
-    func updateVehicleInFirebase(vehicle: Vehicle) {
-        guard !userUID.isEmpty else { return }
-        let ref = Database.database().reference()
-        let vehicleData = [
-            "make": vehicle.make,
-            "model": vehicle.model,
-            "trim": vehicle.trim,
-            "year": vehicle.year
-        ]
-        ref.child("users").child(userUID).child("vehicles").child(vehicle.id.uuidString).setValue(vehicleData)
-        if let index = vehicles.firstIndex(where: { $0.id == vehicle.id }) {
-            vehicles[index] = vehicle
-        }
-    }
-
     func deleteVehicleFromFirebase(vehicle: Vehicle) {
         guard !userUID.isEmpty else { return }
         let ref = Database.database().reference()
         ref.child("users").child(userUID).child("vehicles").child(vehicle.id.uuidString).removeValue()
         vehicles.removeAll { $0.id == vehicle.id }
     }
+}
 
-    
-    
-    }
-    
-        struct CategoryItem: View {
-            let icon: String
-            let label: String
-            
-            var body: some View {
-                VStack(spacing: 8) {
-                    Image(icon)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 30, height: 30)
-                        .padding(8)
-                        .background(Color.white)
-                        .cornerRadius(10)
-                    
-                    Text(label)
-                        .font(.caption)
-                        .foregroundColor(.primary)
-                }
-                .frame(maxWidth: .infinity)
-                .padding()
-                .background(Color(.systemGray5))
-                .cornerRadius(12)
-            }
+struct CategoryItem: View {
+    let icon: String
+    let label: String
+
+    var body: some View {
+        VStack(spacing: 8) {
+            Image(icon)
+                .resizable()
+                .scaledToFit()
+                .frame(width: 30, height: 30)
+                .padding(8)
+                .background(Color.white)
+                .cornerRadius(10)
+
+            Text(label)
+                .font(.caption)
+                .foregroundColor(.primary)
         }
 
 struct MainView_Previews: PreviewProvider {
+
+        .frame(maxWidth: .infinity)
+        .padding()
+        .background(Color(.systemGray5))
+        .cornerRadius(12)
+    }
+}
+
+struct ContentView_Previews: PreviewProvider {
     static var previews: some View {
         MainView()
     }
 }
+
