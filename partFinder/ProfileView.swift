@@ -12,14 +12,35 @@ struct ProfileView: View {
     @State private var isUploading = false
     
     var body: some View {
-        BaseView(title: "Profile") {
+        BaseView(title: "") {
                 ZStack {
-                    Color.black.ignoresSafeArea()
+                    
+                    GeometryReader { geometry in
+                        ZStack {
+                            Image("background")
+                                .resizable()
+                                .scaledToFill()
+                                .ignoresSafeArea()
+
+                            
+                            Color.black.opacity(0.8)
+                                .ignoresSafeArea()
+                        }
+                        .ignoresSafeArea()
+                    }
+
                     
                     if isLoggedIn {
                         ScrollView {
                             VStack(spacing: 16) {
                                 VStack(spacing: 8) {
+                                    Text("Profile")
+                                        .font(.title)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.blue)
+                                        .frame(maxWidth: .infinity, alignment: .center)
+                                        .padding(.horizontal)
+                                    
                                     ZStack(alignment: .bottomTrailing) {
                                         if let image = viewModel.profileUIImage {
                                             Image(uiImage: image)
@@ -69,7 +90,9 @@ struct ProfileView: View {
                                 }
                                 .padding()
                                 .frame(maxWidth: .infinity)
-                                .background(Color.black)
+                                .background(Color.white.opacity(0.1))
+                                .cornerRadius(12)
+                                
                                 
                                 if isUploading {
                                     ProgressView("Uploading...").padding(.bottom)
@@ -77,22 +100,45 @@ struct ProfileView: View {
                                 
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text("Transactions")
+                                        .fontWeight(.bold)
                                         .foregroundColor(.white)
                                         .font(.subheadline)
                                         .padding(.horizontal)
-                                    
-                                    ProfileRowItem(icon: "cart.fill", text: "Purchases & Sales")
-                                    
-                                    // Payment Methods Button
+
+                                    HStack {
+                                        Image(systemName: "cart.fill")
+                                            .foregroundColor(.blue)
+                                        Text("Purchases & Sales")
+                                            .foregroundColor(.white)
+                                        Spacer()
+                                    }
+                                    .padding()
+                                    .background(Color.white.opacity(0.1))
+                                    .cornerRadius(10)
+
                                     Button(action: {
                                         showPaymentSheet = true
                                     }) {
-                                        ProfileRowItem(icon: "creditcard.fill", text: "Payment & Deposit Methods")
+                                        HStack {
+                                            Image(systemName: "creditcard.fill")
+                                                .foregroundColor(.blue)
+                                            Text("Payment & Deposit Methods")
+                                                .foregroundColor(.white)
+                                            Spacer()
+                                        }
+                                        .padding()
+                                        .background(Color.white.opacity(0.1))
+                                        .cornerRadius(10)
                                     }
                                 }
+                                .padding()
+                                .background(Color.white.opacity(0.1))
+                                .cornerRadius(12)
+                                
                                 
                                 VStack(alignment: .leading, spacing: 10) {
                                     Text("Account")
+                                        .fontWeight(.bold)
                                         .foregroundColor(.white)
                                         .font(.subheadline)
                                         .padding(.horizontal)
@@ -108,7 +154,8 @@ struct ProfileView: View {
                                             Spacer()
                                         }
                                         .padding()
-                                        .background(Color.black)
+                                        .background(Color.white.opacity(0.1))
+                                        .cornerRadius(10)
                                     }
                                     
                                     Button(action: {
@@ -120,15 +167,19 @@ struct ProfileView: View {
                                             Image(systemName: "arrow.backward.circle.fill")
                                                 .foregroundColor(.blue)
                                             Text("Logout")
+                                                .fontWeight(.bold)
                                                 .foregroundColor(.blue)
+                                            Spacer()
                                         }
                                         .padding()
-                                        .frame(maxWidth: .infinity, alignment: .leading)
-                                        .background(Color.black)
+                                        .background(Color.white.opacity(0.1))
+                                        .cornerRadius(10)
                                     }
                                 }
+                                .padding()
+                                .background(Color.white.opacity(0.1))
+                                .cornerRadius(12)
                             }
-                            .padding()
                         }
                     } else {
                         VStack(spacing: 20) {
@@ -161,4 +212,10 @@ struct ProfileView: View {
                 }
             }
         }
+}
+
+struct ProfileView_Previews: PreviewProvider {
+    static var previews: some View {
+        ProfileView(viewModel: ProfileViewModel())
+    }
 }

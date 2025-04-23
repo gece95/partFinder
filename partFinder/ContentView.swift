@@ -69,10 +69,15 @@ struct ContentView: View {
         BaseView {
             ZStack {
                 GeometryReader { geometry in
+                    Image("background")
+                        .resizable()
+                        .scaledToFill()
+                        .ignoresSafeArea()
+
+                        Color.black.opacity(0.8)
+                            .ignoresSafeArea()
+                    
                     ZStack(alignment: .bottom) {
-                        (colorScheme == .dark ? Color("DarkBackground") : Color.black)
-                            .edgesIgnoringSafeArea(.all)
-                        
                         VStack(spacing: 0) {
                             ScrollView {
                                 HStack {
