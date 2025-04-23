@@ -1,12 +1,9 @@
-
 import SwiftUI
 import Firebase
 import FirebaseStorage
 import FirebaseDatabase
 import PhotosUI
-
 import Foundation
-
 
 struct VendorsView: View {
     @AppStorage("userUID") var userUID: String = ""
@@ -37,7 +34,6 @@ struct VendorsView: View {
                     ScrollView {
                         VStack(spacing: 16) {
 
-                            // Images Scroll Section
                             if !selectedImages.isEmpty {
                                 ScrollView(.horizontal, showsIndicators: false) {
                                     HStack(spacing: 12) {
@@ -55,7 +51,6 @@ struct VendorsView: View {
                                 }
                             }
 
-                            // Image Picker
                             PhotosPicker(
                                 selection: $imageSelections,
                                 maxSelectionCount: 5,
@@ -76,7 +71,6 @@ struct VendorsView: View {
                                 }
                             }
 
-                            // Dropdown for Part Type
                             Menu {
                                 ForEach(partTypes, id: \.self ) { type in
                                     Button(type) { selectedType = type }
@@ -86,7 +80,6 @@ struct VendorsView: View {
                             }
                             .padding(.horizontal)
 
-                            // Text Inputs
                             Group {
                                 TextField("Phone Number", text: $phoneNumber)
                                     .keyboardType(.numberPad)
@@ -175,13 +168,25 @@ struct VendorsView: View {
             )
 
             let ref = Database.database().reference()
+
+            // Save to public category
             ref.child("listings").child(selectedType.lowercased()).childByAutoId().setValue([
                 "phoneNumber": newPost.phoneNumber,
                 "description": newPost.description,
                 "price": newPost.price,
                 "condition": newPost.condition,
                 "typeOfPart": newPost.typeOfPart,
-                "imageUrls": imageUrls
+                "imageUrls": newPost.imageUrls
+            ])
+
+            // Save to user's myListings
+            ref.child("users").child(userUID).child("myListings").childByAutoId().setValue([
+                "phoneNumber": newPost.phoneNumber,
+                "description": newPost.description,
+                "price": newPost.price,
+                "condition": newPost.condition,
+                "typeOfPart": newPost.typeOfPart,
+                "imageUrls": newPost.imageUrls
             ]) { error, _ in
                 if let error = error {
                     errorMessage = "Upload failed: \(error.localizedDescription)"
@@ -253,4 +258,3 @@ struct VendorsView_Previews: PreviewProvider {
         VendorsView()
     }
 }
-

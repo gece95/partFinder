@@ -69,6 +69,8 @@ struct BaseView<Content: View>: View {
     }
 }
 
+
+
 struct BottomNavBar_Previews: PreviewProvider {
     static var previews: some View {
         BottomNavBar()
