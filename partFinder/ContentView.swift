@@ -16,6 +16,23 @@ struct Vehicle: Identifiable, Equatable {
     }
 }
 
+enum VehicleAlert: Identifiable {
+    case added, deleted
+
+    var id: String {
+        switch self {
+        case .added: return "added"
+        case .deleted: return "deleted"
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .added: return "Vehicle Added"
+        case .deleted: return "Vehicle Deleted"
+        }
+    }
+}
 
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
@@ -34,6 +51,10 @@ struct ContentView: View {
     @State private var selectedCategoryListings: [Listing] = []
     @State private var showListings = false
     @State private var selectedCategoryLabel: String = ""
+    
+    @State private var activeAlert: VehicleAlert?
+
+
     
     
     let years = Array(1980...2025).map { String($0) }
@@ -226,6 +247,9 @@ struct ContentView: View {
                                     selectedVehicle = newVehicle
                                     saveVehicleToFirebase(newVehicle)
                                     newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
+                                    activeAlert = .added
+
+                                    
                                 }
                                 .frame(maxWidth: .infinity)
                                 .padding()
@@ -261,8 +285,12 @@ struct ContentView: View {
                                     }
                                     .frame(height: 45)
                                     .padding(.horizontal)
+                                    
                                 }
                             }
+                            
+                            Spacer().frame(height: 24)
+
                             
                             if let selected = selectedVehicle {
                                 HStack {
@@ -270,6 +298,8 @@ struct ContentView: View {
                                     Button(action: {
                                         deleteVehicleFromFirebase(vehicle: selected)
                                         selectedVehicle = nil
+                                        activeAlert = .deleted
+
                                     }) {
                                         Label("Delete Vehicle", systemImage: "trash")
                                             .frame(maxWidth: .infinity)
@@ -280,6 +310,7 @@ struct ContentView: View {
                                 }
                                 .padding(.horizontal)
                             }
+                            
                             
                             
                             VStack(alignment: .leading) {
@@ -299,7 +330,9 @@ struct ContentView: View {
                         }.onAppear {
                             loadVehiclesFromFirebase()
                         }
-                    }
+                    }    }
+                .alert(item: $activeAlert) { alertType in
+                    Alert(title: Text(alertType.message))
                 }
             }
         }
