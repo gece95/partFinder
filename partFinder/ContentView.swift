@@ -1021,6 +1021,11 @@ struct ContentView: View {
 }
 */
 // wait this is the original ^
+
+/*
+ temporarily removed year functionality to be able to pull from firebase json file
+ will be trying to add years into the file then reimpliment
+ */
 import SwiftUI
 import Foundation
 import PhotosUI
@@ -1354,8 +1359,6 @@ struct ContentView: View {
         .background(Color(.systemGray6))
         .cornerRadius(8)
     }
-    
-    // MARK: - Load JSON from Firebase Storage
     
     func loadVehicleDataFromStorage() {
         let storage = Storage.storage()
