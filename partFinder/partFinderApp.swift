@@ -29,14 +29,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         FirebaseApp.configure()
-        
-        // Set black background for tab bar globally
-        let appearance = UITabBar.appearance()
-        appearance.barTintColor = .black
-        appearance.backgroundColor = .black
-        appearance.unselectedItemTintColor = .gray
-        appearance.tintColor = .blue // active tab icon/text color
-        
         return true
     }
 }
@@ -49,7 +41,7 @@ struct partFinderApp: App {
 
     var body: some Scene {
         WindowGroup {
-            MainView()
+            ContentView()
         }
     }
 }
