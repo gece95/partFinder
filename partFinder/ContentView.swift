@@ -1021,6 +1021,11 @@ struct ContentView: View {
 }
 */
 // wait this is the original ^
+
+/*
+ temporarily removed year functionality to be able to pull from firebase json file
+ will be trying to add years into the file then reimpliment
+ */
 import SwiftUI
 import Foundation
 import PhotosUI
@@ -1034,10 +1039,10 @@ struct Vehicle: Identifiable, Equatable {
     var make: String
     var model: String
     var trim: String
-    var year: String
+    //var year: String
 
     var displayName: String {
-        "\(year) \(make) \(model) \(trim)"
+        "\(make) \(model) \(trim)"
     }
 }
 
@@ -1056,7 +1061,7 @@ struct ContentView: View {
     @AppStorage("userName") var userName = ""
     @AppStorage("userEmail") var userEmail = ""
     
-    @State private var newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
+    @State private var newVehicle = Vehicle(make: "", model: "", trim: "")
     @State private var vehicles: [Vehicle] = []
     @State private var selectedVehicle: Vehicle?
     
@@ -1068,7 +1073,7 @@ struct ContentView: View {
     @State private var showListings = false
     @State private var selectedCategoryLabel: String = ""
     
-    let years = Array(1980...2025).map { String($0) }
+   // let years = Array(1980...2025).map { String($0) }
     
     let categories = [
         Category(icon: "engine_icon", label: "Engines"),
@@ -1137,20 +1142,19 @@ struct ContentView: View {
                                 }
                                 
                                 VStack(spacing: 12) {
-                                    yearPicker
+                                   // yearPicker
                                     makePicker
                                     modelPicker
                                     trimPicker
                                     
                                     Button("Add Vehicle") {
                                         guard !newVehicle.make.isEmpty,
-                                              !newVehicle.model.isEmpty,
-                                              !newVehicle.year.isEmpty else { return }
+                                              !newVehicle.model.isEmpty else { return }
                                         
                                         vehicles.append(newVehicle)
                                         selectedVehicle = newVehicle
                                         saveVehicleToFirebase(newVehicle)
-                                        newVehicle = Vehicle(make: "", model: "", trim: "", year: "")
+                                        newVehicle = Vehicle(make: "", model: "", trim: "")
                                     }
                                     .frame(maxWidth: .infinity)
                                     .padding()
@@ -1285,9 +1289,7 @@ struct ContentView: View {
             }
         }
     }
-    
-    // MARK: - Pickers
-    
+    /*
     var yearPicker: some View {
         Menu {
             ForEach(years, id: \.self) { year in
@@ -1297,7 +1299,7 @@ struct ContentView: View {
             pickerLabel(text: newVehicle.year, placeholder: "Year")
         }
     }
-    
+    */
     var makePicker: some View {
         Menu {
             ForEach(makes, id: \.self) { make in
@@ -1358,11 +1360,10 @@ struct ContentView: View {
         .cornerRadius(8)
     }
     
-    // MARK: - Load JSON from Firebase Storage
-    
     func loadVehicleDataFromStorage() {
         let storage = Storage.storage()
-        let ref = storage.reference(withPath: "csv.json")
+        let ref = storage.reference(withPath: "csvjson.json") // adjust based on actual path
+
         
         ref.getData(maxSize: 10 * 1024 * 1024) { data, error in
             if let error = error {
@@ -1412,7 +1413,7 @@ struct ContentView: View {
             "make": vehicle.make,
             "model": vehicle.model,
             "trim": vehicle.trim,
-            "year": vehicle.year
+           // "year": vehicle.year
         ]
         ref.child("users").child(userUID).child("vehicles").child(vehicle.id.uuidString)
             .setValue(vehicleData) { error, _ in
@@ -1438,9 +1439,9 @@ struct ContentView: View {
                    let make = value["make"] as? String,
                    let model = value["model"] as? String,
                    let trim = value["trim"] as? String,
-                   let year = value["year"] as? String,
+                 //  let year = value["year"] as? String,
                    let id = UUID(uuidString: snap.key) {
-                    let vehicle = Vehicle(id: id, make: make, model: model, trim: trim, year: year)
+                    let vehicle = Vehicle(id: id, make: make, model: model, trim: trim)
                     loadedVehicles.append(vehicle)
                 }
             }
