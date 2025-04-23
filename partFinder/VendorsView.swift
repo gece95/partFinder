@@ -31,141 +31,141 @@ struct VendorsView: View {
     let partTypes = ["Engine", "Turbocharger", "Fluids", "Gaskets", "Brakes", "Batteries"]
 
     var body: some View {
-        NavigationView {
-            BaseView {
+        ZStack {
+            // Background Image with Dark Overlay
+            GeometryReader { geometry in
                 ZStack {
-                    // Background Image with Dark Overlay
-                    GeometryReader { geometry in
-                        ZStack {
-                            Image("background")
-                                .resizable()
-                                .scaledToFill()
-                                .ignoresSafeArea()
-
-                            
-                            Color.black.opacity(0.8)
-                                .ignoresSafeArea()
-                        }
+                    Image("background")
+                        .resizable()
+                        .scaledToFill()
                         .ignoresSafeArea()
-                    }
                     
-                    VStack(spacing: 12) {
-                        Text("Sell")
-                            .font(.title)
-                            .fontWeight(.semibold)
-                            .padding(.top, 8)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                            .foregroundColor(.blue)
+                    
+                    Color.black.opacity(0.8)
+                        .ignoresSafeArea()
+                }
+                .ignoresSafeArea()
+            }
+            
+            VStack(spacing: 12) {
+                Text("Sell")
+                    .font(.title)
+                    .fontWeight(.semibold)
+                    .padding(.top, 8)
+                    .frame(maxWidth: .infinity, alignment: .center)
+                    .foregroundColor(.blue)
+                
+                ScrollView {
+                    VStack(spacing: 16) {
                         
-                        ScrollView {
-                            VStack(spacing: 16) {
-                                
-                                // Images Scroll Section
-                                if !selectedImages.isEmpty {
-                                    ScrollView(.horizontal, showsIndicators: false) {
-                                        HStack(spacing: 12) {
-                                            ForEach(selectedImages, id: \.self) { image in
-                                                Image(uiImage: image)
-                                                    .resizable()
-                                                    .scaledToFill()
-                                                    .frame(width: 150, height: 150)
-                                                    .clipped()
-                                                    .border(Color.gray, width: 1)
-                                                    .cornerRadius(10)
-                                            }
-                                        }
-                                        .padding(.horizontal)
+                        // Images Scroll Section
+                        if !selectedImages.isEmpty {
+                            ScrollView(.horizontal, showsIndicators: false) {
+                                HStack(spacing: 12) {
+                                    ForEach(selectedImages, id: \.self) { image in
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 150, height: 150)
+                                            .clipped()
+                                            .border(Color.gray, width: 1)
+                                            .cornerRadius(10)
                                     }
                                 }
-                                
-                                // Image Picker
-                                PhotosPicker(
-                                    selection: $imageSelections,
-                                    maxSelectionCount: 5,
-                                    matching: .images,
-                                    photoLibrary: .shared()
-                                ) {
-                                    Label("Add Images", systemImage: "photo.on.rectangle.angled").foregroundColor(.white)
-                                }
-                                .onChange(of: imageSelections) {
-                                    
-                                    selectedImages = []
-                                    Task {
-                                        for item in imageSelections {
-                                            if let data = try? await item.loadTransferable(type: Data.self),
-                                               let uiImage = UIImage(data: data) {
-                                                selectedImages.append(uiImage)
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                // Text Inputs
-                                Group {
-                                    TextField("Phone Number", text: $phoneNumber)
-                                        .keyboardType(.phonePad)
-                                    
-                                    TextEditor(text: $description)
-                                        .frame(height: 120)
-                                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4)))
-                                        .background(Color(.systemGray6))
-                                        .cornerRadius(8)
-                                    
-                                    TextField("Price (e.g. 25.00)", text: $price)
-                                        .keyboardType(.decimalPad)
-                                }
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
                                 .padding(.horizontal)
-                                
-                                // Toggle for Condition
-                                HStack {
-                                    Text("Condition:")
-                                        .foregroundColor(.white)
-                                        .font(.subheadline)
-                                        .bold()
-
-                                    Spacer()
-
-                                    Toggle(isOn: $isUsed) {
-                                        Text(isUsed ? "Used" : "New")
-                                            .foregroundColor(.white)
-                                            .fontWeight(.semibold)
-                                    }
-                                    .toggleStyle(SwitchToggleStyle(tint: .blue))
-                                }
-                                .padding()
-                                .background(Color.white.opacity(0.1))
-                                .cornerRadius(10)
-                                .padding(.horizontal)
-                                
-                                // Error Message
-                                if !errorMessage.isEmpty {
-                                    Text(errorMessage)
-                                        .foregroundColor(.red)
-                                        .padding(.horizontal)
-                                }
-                                
-                                // Submit Button
-                                Button(action: {
-                                    submitListing()
-                                }) {
-                                    Text(isUploading ? "Submitting..." : "Submit Listing")
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(isUploading ? Color.gray : Color.blue)
-                                        .foregroundColor(.black)
-                                        .cornerRadius(10)
-                                }
-                                .disabled(isUploading)
-                                .padding(.horizontal)
-                                
                             }
-                            .padding(.bottom, 32)
                         }
+                        
+                        // Image Picker
+                        PhotosPicker(
+                            selection: $imageSelections,
+                            maxSelectionCount: 5,
+                            matching: .images,
+                            photoLibrary: .shared()
+                        ) {
+                            Label("Add Images", systemImage: "photo.on.rectangle.angled").foregroundColor(.white)
+                        }
+                        .onChange(of: imageSelections) {
+                            
+                            selectedImages = []
+                            Task {
+                                for item in imageSelections {
+                                    if let data = try? await item.loadTransferable(type: Data.self),
+                                       let uiImage = UIImage(data: data) {
+                                        selectedImages.append(uiImage)
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Text Inputs
+                        Group {
+                            TextField("Phone Number", text: $phoneNumber)
+                                .keyboardType(.phonePad)
+                            
+                            TextEditor(text: $description)
+                                .frame(height: 120)
+                                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4)))
+                                .background(Color(.systemGray6))
+                                .cornerRadius(8)
+                            
+                            TextField("Price (e.g. 25.00)", text: $price)
+                                .keyboardType(.decimalPad)
+                        }
+                        .textFieldStyle(RoundedBorderTextFieldStyle())
+                        .padding(.horizontal)
+                        
+                        Spacer()
+                        
+                        // Toggle for Condition
+                        HStack {
+                            Text("Condition:")
+                                .foregroundColor(.white)
+                                .font(.subheadline)
+                                .bold()
+                            
+                            Spacer()
+                            
+                            Toggle(isOn: $isUsed) {
+                                Text(isUsed ? "Used" : "New")
+                                    .foregroundColor(.white)
+                                    .fontWeight(.semibold)
+                            }
+                            .toggleStyle(SwitchToggleStyle(tint: .blue))
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.1))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                        
+                        // Error Message
+                        if !errorMessage.isEmpty {
+                            Text(errorMessage)
+                                .foregroundColor(.red)
+                                .padding(.horizontal)
+                        }
+                        
+                        Spacer()
+                        
+                        // Submit Button
+                        Button(action: {
+                            submitListing()
+                        }) {
+                            Text(isUploading ? "Submitting..." : "Submit Listing")
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(isUploading ? Color.gray : Color.blue)
+                                .foregroundColor(.black)
+                                .cornerRadius(10)
+                        }
+                        .disabled(isUploading)
+                        .padding(.horizontal)
+                        
                     }
-                    .padding(.top, 16)
+                    .padding(.bottom, 32)
                 }
             }
+            .padding(.top, 16)
         }
     }
 
