@@ -1,4 +1,3 @@
-
 /*
  temporarily removed year functionality to be able to pull from firebase json file
  will be trying to add years into the file then reimpliment
@@ -10,6 +9,7 @@ import FirebaseStorage
 import FirebaseDatabase
 import FirebaseAuth
 import CoreLocation
+
 
 struct Vehicle: Identifiable, Equatable {
     var id = UUID()
@@ -236,20 +236,38 @@ struct ContentView: View {
                                             
                                             ForEach(selectedCategoryListings) { listing in
                                                 VStack(alignment: .leading, spacing: 8) {
-                                                    if let firstImage = listing.imageUrls.first, let url = URL(string: firstImage) {
-                                                        AsyncImage(url: url) { image in
-                                                            image
-                                                                .resizable()
-                                                                .scaledToFill()
-                                                                .frame(height: 200)
-                                                                .clipped()
-                                                                .cornerRadius(12)
-                                                        } placeholder: {
-                                                            ProgressView()
-                                                                .frame(height: 200)
+                                                    if let urlString = listing.imageUrls.first,
+                                                       let url = URL(string: urlString), !urlString.isEmpty {
+
+                                                        AsyncImage(url: url) { phase in
+                                                            switch phase {
+                                                            case .empty:
+                                                                ProgressView().frame(height: 200)
+                                                            case .success(let image):
+                                                                image
+                                                                    .resizable()
+                                                                    .scaledToFill()
+                                                                    .frame(height: 200)
+                                                                    .clipped()
+                                                                    .cornerRadius(12)
+                                                            case .failure:
+                                                                Image(systemName: "photo")
+                                                                    .resizable()
+                                                                    .scaledToFit()
+                                                                    .frame(height: 200)
+                                                                    .foregroundColor(.gray)
+                                                            @unknown default:
+                                                                EmptyView()
+                                                            }
                                                         }
+
+                                                    } else {
+                                                        Text("No image available")
+                                                            .frame(height: 200)
+                                                            .frame(maxWidth: .infinity)
+                                                            .background(Color.gray.opacity(0.2))
+                                                            .cornerRadius(12)
                                                     }
-                                                    
                                                     Text(listing.description)
                                                         .font(.subheadline)
                                                     Text("Condition: \(listing.condition)")
@@ -261,8 +279,7 @@ struct ContentView: View {
                                                     Text("Phone: \(listing.phoneNumber)")
                                                         .font(.footnote)
                                                         .foregroundColor(.secondary)
-                                                    
-                                                    // ✅ Add to Cart button
+
                                                     Button(action: {
                                                         cartManager.addToCart(listing)
                                                     }) {
@@ -288,7 +305,7 @@ struct ContentView: View {
                                 .onAppear {
                                     loadVehiclesFromFirebase()
                                     loadAllListings()
-                                    loadVehicleDataFromStorage() // 👈 New!
+                                    loadVehicleDataFromStorage()
                                 }
                             }
                         }
@@ -539,6 +556,9 @@ struct ContentView: View {
                            let condition = value["condition"] as? String,
                            let type = value["typeOfPart"] as? String,
                            let imageUrls = value["imageUrls"] as? [String] {
+
+                            print("Fetched image URLs: \(imageUrls)")
+
                             let listing = Posting(phoneNumber: phone, description: desc, price: price, condition: condition, typeOfPart: type, imageUrls: imageUrls)
                             allListings.append(listing)
                         }
