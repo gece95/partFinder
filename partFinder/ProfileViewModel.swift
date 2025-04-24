@@ -2,14 +2,61 @@ import Foundation
 import SwiftUI
 import FirebaseAuth
 import FirebaseStorage
+import Firebase
+import FirebaseDatabase
+
+struct Posting: Identifiable, Codable, Hashable {
+    var id = UUID()
+    let phoneNumber: String
+    let description: String
+    let price: String
+    let condition: String
+    let typeOfPart: String
+    let imageUrls: [String]
+}
 
 class ProfileViewModel: ObservableObject {
     @Published var userEmail: String = ""
     @Published var userLocation: String = ""
     @Published var profileUIImage: UIImage?
+    @Published var myListings: [Posting] = []
+
 
     init() {
         loadUserData()
+    }
+ 
+
+    func fetchMyListings(userUID: String) {
+        let ref = Database.database().reference()
+        ref.child("users").child(userUID).child("myListings").observeSingleEvent(of: .value) { snapshot in
+            var fetched: [Posting] = []
+
+            for child in snapshot.children {
+                if let snap = child as? DataSnapshot,
+                   let value = snap.value as? [String: Any],
+                   let phone = value["phoneNumber"] as? String,
+                   let desc = value["description"] as? String,
+                   let price = value["price"] as? String,
+                   let condition = value["condition"] as? String,
+                   let type = value["typeOfPart"] as? String,
+                   let imageUrls = value["imageUrls"] as? [String] {
+                    let post = Posting(
+                        phoneNumber: phone,
+                        description: desc,
+                        price: price,
+                        condition: condition,
+                        typeOfPart: type,
+                        imageUrls: imageUrls
+                    )
+                    fetched.append(post)
+                }
+            }
+
+            DispatchQueue.main.async {
+                self.myListings = fetched
+            }
+        }
     }
 
     func loadUserData() {
@@ -146,4 +193,3 @@ class ProfileViewModel: ObservableObject {
         }
     }
 }
-

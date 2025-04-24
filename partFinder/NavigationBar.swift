@@ -65,36 +65,11 @@ struct BaseView<Content: View>: View {
                     .background(Color.black)
             }
             .navigationTitle(title)
-            .toolbar {
-                if showProfileButton {
-                    ToolbarItem(placement: .navigationBarTrailing) {
-                        Group {
-                            if isLoggedIn {
-                                NavigationLink(destination: ProfileView(viewModel: ProfileViewModel())) {
-                                    Text("Profile")
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(Color.black)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(8)
-                                }
-                            } else {
-                                NavigationLink(destination: AuthView()) {
-                                    Text("Login")
-                                        .padding(.horizontal, 12)
-                                        .padding(.vertical, 6)
-                                        .background(Color.black)
-                                        .foregroundColor(.blue)
-                                        .cornerRadius(8)
-                                }
-                            }
-                        }
-                    }
-                }
-            }
         }
     }
 }
+
+
 
 struct BottomNavBar_Previews: PreviewProvider {
     static var previews: some View {

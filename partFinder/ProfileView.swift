@@ -10,6 +10,7 @@ struct ProfileView: View {
     @State private var selectedItem: PhotosPickerItem? = nil
     @State private var showingEditSheet = false
     @State private var isUploading = false
+    @AppStorage("userUID") var userUID: String = ""
 
     var body: some View {
         NavigationView {
@@ -82,6 +83,35 @@ struct ProfileView: View {
                                     .padding(.horizontal)
 
                                 ProfileRowItem(icon: "cart.fill", text: "Purchases & Sales")
+                                if !viewModel.myListings.isEmpty {
+                                    ForEach(viewModel.myListings) { post in
+                                        VStack(alignment: .leading, spacing: 8) {
+                                            if let imageUrl = post.imageUrls.first, let url = URL(string: imageUrl) {
+                                                AsyncImage(url: url) { image in
+                                                    image.resizable()
+                                                        .scaledToFill()
+                                                        .frame(height: 150)
+                                                        .clipped()
+                                                        .cornerRadius(10)
+                                                } placeholder: {
+                                                    ProgressView()
+                                                        .frame(height: 150)
+                                                }
+                                            }
+
+                                            Text(post.description)
+                                                .foregroundColor(.white)
+                                            Text("Price: $\(post.price)")
+                                                .foregroundColor(.blue)
+                                            Text("Condition: \(post.condition)")
+                                                .foregroundColor(.gray)
+                                        }
+                                        .padding()
+                                        .background(Color(.systemGray6).opacity(0.2))
+                                        .cornerRadius(10)
+                                    }
+                                }
+
 
                                 // Payment Methods Button
                                 Button(action: {
@@ -129,6 +159,9 @@ struct ProfileView: View {
                             }
                         }
                         .padding()
+                    }
+                    .onAppear {
+                        viewModel.fetchMyListings(userUID: userUID)
                     }
                 } else {
                     VStack(spacing: 20) {

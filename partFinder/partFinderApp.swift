@@ -1,30 +1,7 @@
-/*import SwiftUI
-import FirebaseCore
-
-      
-// Marks this struct as the entry point of the application
-@main
-struct partFinderApp: App {
-    // Initializes Firebase when the app launches
-    init() {
-        FirebaseApp.configure()
-        
-    }
-    var body: some Scene {
-        // Defines the main app scene
-        WindowGroup {
-            // Sets ContentView as the initial screen of the app
-            ContentView()
-            
-        }
-    }
-}
-*/
 import SwiftUI
 import FirebaseCore
 import UIKit
 
-// MARK: - AppDelegate for Firebase setup
 class AppDelegate: NSObject, UIApplicationDelegate {
     func application(_ application: UIApplication,
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
@@ -33,15 +10,15 @@ class AppDelegate: NSObject, UIApplicationDelegate {
     }
 }
 
-// MARK: - Main App Struct
 @main
 struct partFinderApp: App {
-    // Inject the AppDelegate into SwiftUI app lifecycle
     @UIApplicationDelegateAdaptor(AppDelegate.self) var delegate
+    @StateObject private var cartManager = CartManager()
 
     var body: some Scene {
         WindowGroup {
             ContentView()
+                .environmentObject(cartManager)
         }
     }
 }
