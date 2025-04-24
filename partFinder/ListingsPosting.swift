@@ -5,7 +5,7 @@
 //  Created by Salma Ramirez on 4/22/25.
 //
 
-
+/*
 import Foundation
 
 struct Posting: Identifiable, Hashable, Codable {
@@ -17,3 +17,4 @@ struct Posting: Identifiable, Hashable, Codable {
     var typeOfPart: String
     var imageUrls: [String]
 }
+*/
