@@ -59,10 +59,10 @@ struct VendorsView: View {
                             ) {
                                 Label("Add Images", systemImage: "photo.on.rectangle.angled")
                             }
-                            .onChange(of: imageSelections) {
+                            .onChange(of: imageSelections) { newSelections in
                                 selectedImages = []
                                 Task {
-                                    for item in imageSelections {
+                                    for item in newSelections {
                                         if let data = try? await item.loadTransferable(type: Data.self),
                                            let uiImage = UIImage(data: data) {
                                             selectedImages.append(uiImage)
@@ -237,6 +237,7 @@ struct VendorsView: View {
                     }
                     ref.downloadURL { url, _ in
                         if let url = url {
+                            print("✅ Uploaded Image URL:", url.absoluteString)
                             uploadedURLs.append(url.absoluteString)
                         }
                         group.leave()

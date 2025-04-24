@@ -5,16 +5,6 @@ import FirebaseStorage
 import Firebase
 import FirebaseDatabase
 
-struct Posting: Identifiable, Codable, Hashable {
-    var id = UUID()
-    let phoneNumber: String
-    let description: String
-    let price: String
-    let condition: String
-    let typeOfPart: String
-    let imageUrls: [String]
-}
-
 class ProfileViewModel: ObservableObject {
     @Published var userEmail: String = ""
     @Published var userLocation: String = ""
