@@ -16,6 +16,7 @@ struct Vehicle: Identifiable, Equatable {
     }
 }
 
+// Alerts for adding/removing vehicles
 enum VehicleAlert: Identifiable {
     case added, deleted
 
