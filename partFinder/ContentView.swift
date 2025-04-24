@@ -22,7 +22,23 @@ struct Vehicle: Identifiable, Equatable {
         "\(make) \(model) \(trim)"
     }
 }
+enum VehicleAlert: Identifiable {
+    case added, deleted
 
+    var id: String {
+        switch self {
+        case .added: return "added"
+        case .deleted: return "deleted"
+        }
+    }
+
+    var message: String {
+        switch self {
+        case .added: return "Vehicle Added"
+        case .deleted: return "Vehicle Deleted"
+        }
+    }
+}
 struct partCategory: Hashable {
     let icon: String
     let label: String
@@ -51,7 +67,6 @@ struct ContentView: View {
     @State private var showListings = false
     @State private var selectedCategoryLabel: String = ""
     
-   // let years = Array(1980...2025).map { String($0) }
     
     let categories = [
         Category(icon: "engine_icon", label: "Engines"),
@@ -415,7 +430,6 @@ struct ContentView: View {
         }
     }
     
-    // 🛠 Keep your loadListings(), loadAllListings(), save/delete vehicle, and CategoryItem struct here...
     
     func saveVehicleToFirebase(_ vehicle: Vehicle) {
         guard !userUID.isEmpty else {
@@ -470,8 +484,6 @@ struct ContentView: View {
         ref.child("users").child(userUID).child("vehicles").child(vehicle.id.uuidString).removeValue()
         vehicles.removeAll { $0.id == vehicle.id }
     }
-    
-    // MARK: - Listing Loaders
     
     func loadListings(for category: String) {
         selectedCategoryLabel = category
@@ -536,8 +548,6 @@ struct ContentView: View {
             selectedCategoryListings = allListings
         }
     }
-    
-    // MARK: - Category UI
     
     struct CategoryItem: View {
         let icon: String
