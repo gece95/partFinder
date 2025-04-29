@@ -11,7 +11,8 @@ struct ProfileView: View {
     @State private var showingEditSheet = false
     @State private var isUploading = false
     @AppStorage("userUID") var userUID: String = ""
-
+    @State private var showListings = false
+    
     var body: some View {
         NavigationView {
             ZStack {
@@ -82,8 +83,12 @@ struct ProfileView: View {
                                     .font(.subheadline)
                                     .padding(.horizontal)
 
-                                ProfileRowItem(icon: "cart.fill", text: "Purchases & Sales")
-                                if !viewModel.myListings.isEmpty {
+                                Button(action: {
+                                    showListings.toggle()
+                                }) {
+                                    ProfileRowItem(icon: "cart.fill", text: "Listings")
+                                }
+                                if showListings && !viewModel.myListings.isEmpty {
                                     ForEach(viewModel.myListings) { post in
                                         VStack(alignment: .leading, spacing: 8) {
                                             if let imageUrl = post.imageUrls.first, let url = URL(string: imageUrl) {
@@ -105,6 +110,30 @@ struct ProfileView: View {
                                                 .foregroundColor(.blue)
                                             Text("Condition: \(post.condition)")
                                                 .foregroundColor(.gray)
+                                            HStack {
+                                                Button(action: {
+                                                    viewModel.selectedListing = post
+                                                    viewModel.showEditSheet = true
+                                                }) {
+                                                    Label("Edit", systemImage: "pencil")
+                                                        .font(.footnote)
+                                                        .foregroundColor(.white)
+                                                        .padding(6)
+                                                        .background(Color.blue)
+                                                        .cornerRadius(6)
+                                                }
+
+                                                Button(action: {
+                                                    viewModel.deleteListing(post)
+                                                }) {
+                                                    Label("Delete", systemImage: "trash")
+                                                        .font(.footnote)
+                                                        .foregroundColor(.white)
+                                                        .padding(6)
+                                                        .background(Color.red)
+                                                        .cornerRadius(6)
+                                                }
+                                            }
                                         }
                                         .padding()
                                         .background(Color(.systemGray6).opacity(0.2))
@@ -112,8 +141,6 @@ struct ProfileView: View {
                                     }
                                 }
 
-
-                                // Payment Methods Button
                                 Button(action: {
                                     showPaymentSheet = true
                                 }) {
@@ -192,6 +219,11 @@ struct ProfileView: View {
             }
             .sheet(isPresented: $showPaymentSheet) {
                 PaymentMethodsView()
+            }
+            .sheet(isPresented: $viewModel.showEditSheet) {
+                if let listing = viewModel.selectedListing {
+                    EditListingView(listing: listing, viewModel: viewModel)
+                }
             }
         }
     }

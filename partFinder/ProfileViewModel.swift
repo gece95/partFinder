@@ -10,12 +10,35 @@ class ProfileViewModel: ObservableObject {
     @Published var userLocation: String = ""
     @Published var profileUIImage: UIImage?
     @Published var myListings: [Posting] = []
+    
+    @Published var selectedListing: Posting? = nil
+    @Published var showEditSheet: Bool = false
+    
 
 
     init() {
         loadUserData()
     }
- 
+    func deleteListing(_ listing: Posting) {
+        guard let userUID = Auth.auth().currentUser?.uid else { return }
+        let ref = Database.database().reference()
+        let category = listing.typeOfPart.lowercased()
+
+        ref.child("listings").child(category).observeSingleEvent(of: .value) { snapshot in
+            for child in snapshot.children {
+                if let snap = child as? DataSnapshot,
+                   let value = snap.value as? [String: Any],
+                   value["description"] as? String == listing.description,
+                   value["phoneNumber"] as? String == listing.phoneNumber {
+                    ref.child("listings").child(category).child(snap.key).removeValue()
+                    DispatchQueue.main.async {
+                        self.myListings.removeAll { $0 == listing }
+                    }
+                    break
+                }
+            }
+        }
+    }
 
     func fetchMyListings(userUID: String) {
         let ref = Database.database().reference()
