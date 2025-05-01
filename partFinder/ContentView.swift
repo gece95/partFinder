@@ -180,6 +180,10 @@ struct ContentView: View {
                                     
                                     if !vehicles.isEmpty {
                                         Menu {
+                                            Button("Select Vehicle") {
+                                                selectedVehicle = nil
+                                            }
+                                            
                                             ForEach(vehicles) { vehicle in
                                                 Button(vehicle.displayName) {
                                                     selectedVehicle = vehicle
