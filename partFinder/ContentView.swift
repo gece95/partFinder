@@ -66,6 +66,8 @@ struct ContentView: View {
     @State private var selectedCategoryListings: [Posting] = []
     @State private var showListings = false
     @State private var selectedCategoryLabel: String = ""
+    @State private var noListingsFound = false
+
     
     enum PriceSortOption: String, CaseIterable {
         case none = "None"
@@ -267,97 +269,98 @@ struct ContentView: View {
                                                 }
                                             } label: {
                                                 HStack {
-                                                    Menu {
-                                                        Section(header: Text("Sort by")) {
-                                                            Picker("Sort by", selection: $selectedSortOption) {
-                                                                ForEach(PriceSortOption.allCases, id: \.self) { option in
-                                                                    Text(option.rawValue).tag(option)
-                                                                }
-                                                            }
-                                                        }
-                                                        Section(header: Text("Filter by Condition")) {
-                                                            Picker("Condition", selection: $selectedCondition) {
-                                                                ForEach(ConditionFilterOption.allCases, id: \.self) { option in
-                                                                    Text(option.rawValue).tag(option)
-                                                                }
-                                                            }
-                                                        }
-                                                        
-                                                    } label: {
-                                                        HStack {
-                                                            Image(systemName: "line.3.horizontal.decrease.circle")
-                                                            Text("Sort & Filter")
-                                                        }
-                                                        .foregroundColor(.blue)
-                                                    }
-                                                    
-                                                    Spacer()
+                                                    Image(systemName: "line.3.horizontal.decrease.circle")
+                                                    Text("Sort & Filter")
                                                 }
-                                                .padding(.horizontal)
-                                            }
-                                            ForEach(sortedListings()) { listing in
-                                                VStack(alignment: .leading, spacing: 8) {
-                                                    if let urlString = listing.imageUrls.first,
-                                                       let url = URL(string: urlString), !urlString.isEmpty {
-
-                                                        AsyncImage(url: url) { phase in
-                                                            switch phase {
-                                                            case .empty:
-                                                                ProgressView().frame(height: 200)
-                                                            case .success(let image):
-                                                                image
-                                                                    .resizable()
-                                                                    .scaledToFill()
-                                                                    .frame(height: 200)
-                                                                    .clipped()
-                                                                    .cornerRadius(12)
-                                                            case .failure:
-                                                                Image(systemName: "photo")
-                                                                    .resizable()
-                                                                    .scaledToFit()
-                                                                    .frame(height: 200)
-                                                                    .foregroundColor(.gray)
-                                                            @unknown default:
-                                                                EmptyView()
-                                                            }
-                                                        }
-
-                                                    } else {
-                                                        Text("No image available")
-                                                            .frame(height: 200)
-                                                            .frame(maxWidth: .infinity)
-                                                            .background(Color.gray.opacity(0.2))
-                                                            .cornerRadius(12)
-                                                    }
-                                                    Text(listing.description)
-                                                        .font(.subheadline)
-                                                    Text("Condition: \(listing.condition)")
-                                                        .font(.caption)
-                                                        .foregroundColor(.gray)
-                                                    Text("Price: $\(listing.price)")
-                                                        .font(.headline)
-                                                        .foregroundColor(.blue)
-                                                    Text("Phone: \(listing.phoneNumber)")
-                                                        .font(.footnote)
-                                                        .foregroundColor(.secondary)
-
-                                                    Button(action: {
-                                                        cartManager.addToCart(listing)
-                                                    }) {
-                                                        Label("Add to Cart", systemImage: "cart.badge.plus")
-                                                            .font(.footnote)
-                                                            .foregroundColor(.white)
-                                                            .padding(6)
-                                                            .background(Color.blue)
-                                                            .cornerRadius(8)
-                                                    }
-                                                }
-                                                .padding()
-                                                .background(Color(.systemGray6))
-                                                .cornerRadius(12)
+                                                .foregroundColor(.blue)
+                                                Spacer()
                                                 .padding(.horizontal)
                                             }
                                             
+                                            if noListingsFound {
+                                                        VStack(spacing: 12) {
+                                                            Text("No listings available for your selected vehicle and part.")
+                                                                .font(.body)
+                                                                .foregroundColor(.gray)
+                                                                .multilineTextAlignment(.center)
+                                                                .padding()
+
+                                                            Button(action: {
+                                                                redirectToExternalVendor()
+                                                            }) {
+                                                                Text("Search Online for \(selectedCategoryLabel)")
+                                                                    .foregroundColor(.white)
+                                                                    .padding()
+                                                                    .frame(maxWidth: .infinity)
+                                                                    .background(Color.blue)
+                                                                    .cornerRadius(10)
+                                                            }
+                                                            .padding(.horizontal)
+                                                        }
+                                            } else {
+                                                ForEach(sortedListings()) { listing in
+                                                    VStack(alignment: .leading, spacing: 8) {
+                                                        if let urlString = listing.imageUrls.first,
+                                                           let url = URL(string: urlString), !urlString.isEmpty {
+                                                            
+                                                            AsyncImage(url: url) { phase in
+                                                                switch phase {
+                                                                case .empty:
+                                                                    ProgressView().frame(height: 200)
+                                                                case .success(let image):
+                                                                    image
+                                                                        .resizable()
+                                                                        .scaledToFill()
+                                                                        .frame(height: 200)
+                                                                        .clipped()
+                                                                        .cornerRadius(12)
+                                                                case .failure:
+                                                                    Image(systemName: "photo")
+                                                                        .resizable()
+                                                                        .scaledToFit()
+                                                                        .frame(height: 200)
+                                                                        .foregroundColor(.gray)
+                                                                @unknown default:
+                                                                    EmptyView()
+                                                                }
+                                                            }
+                                                        } else {
+                                                            Text("No image available")
+                                                                .frame(height: 200)
+                                                                .frame(maxWidth: .infinity)
+                                                                .background(Color.gray.opacity(0.2))
+                                                                .cornerRadius(12)
+                                                        }
+                                                        
+                                                        Text(listing.description)
+                                                            .font(.subheadline)
+                                                        Text("Condition: \(listing.condition)")
+                                                            .font(.caption)
+                                                            .foregroundColor(.gray)
+                                                        Text("Price: $\(listing.price)")
+                                                            .font(.headline)
+                                                            .foregroundColor(.blue)
+                                                        Text("Phone: \(listing.phoneNumber)")
+                                                            .font(.footnote)
+                                                            .foregroundColor(.secondary)
+                                                        
+                                                        Button(action: {
+                                                            cartManager.addToCart(listing)
+                                                        }) {
+                                                            Label("Add to Cart", systemImage: "cart.badge.plus")
+                                                                .font(.footnote)
+                                                                .foregroundColor(.white)
+                                                                .padding(6)
+                                                                .background(Color.blue)
+                                                                .cornerRadius(8)
+                                                        }
+                                                    }
+                                                    .padding()
+                                                    .background(Color(.systemGray6))
+                                                    .cornerRadius(12)
+                                                    .padding(.horizontal)
+                                                }
+                                            }
                                         }
                                     }
                                     
@@ -595,8 +598,27 @@ struct ContentView: View {
                 }
             }
             selectedCategoryListings = fetchedListings
+            noListingsFound = fetchedListings.isEmpty
+
         }
     }
+    
+        func redirectToExternalVendor() {
+            guard let selectedVehicle = selectedVehicle else { return }
+            
+            let make = selectedVehicle.make.replacingOccurrences(of: " ", with: "+")
+            let model = selectedVehicle.model.replacingOccurrences(of: " ", with: "+")
+            let trim = selectedVehicle.trim.replacingOccurrences(of: " ", with: "+")
+            let part = selectedCategoryLabel.replacingOccurrences(of: " ", with: "+")
+            
+            let searchQuery = "\(make)+\(model)+\(trim)+\(part)"
+            let urlString = "https://www.autozone.com/searchresult?searchText=\(searchQuery)"
+            
+            if let url = URL(string: urlString) {
+                UIApplication.shared.open(url)
+            }
+        }
+
     
     func loadAllListings() {
         showListings = true
