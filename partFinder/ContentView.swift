@@ -67,6 +67,21 @@ struct ContentView: View {
     @State private var showListings = false
     @State private var selectedCategoryLabel: String = ""
     
+    enum PriceSortOption: String, CaseIterable {
+        case none = "None"
+        case lowToHigh = "Price: Low to High"
+        case highToLow = "Price: High to Low"
+    }
+
+    @State private var selectedSortOption: PriceSortOption = .none
+    
+    enum ConditionFilterOption: String, CaseIterable {
+        case all = "All"
+        case new = "New"
+        case used = "Used"
+    }
+
+    @State private var selectedCondition: ConditionFilterOption = .all
     
     let categories = [
         Category(icon: "engine_icon", label: "Engines"),
@@ -234,7 +249,53 @@ struct ContentView: View {
                                                 .font(.headline)
                                                 .padding(.horizontal)
                                             
-                                            ForEach(selectedCategoryListings) { listing in
+                                            Menu {
+                                                Section(header: Text("Sort by")) {
+                                                    Picker("Sort by", selection: $selectedSortOption) {
+                                                        ForEach(PriceSortOption.allCases, id: \.self) { option in
+                                                            Text(option.rawValue).tag(option)
+                                                        }
+                                                    }
+                                                }
+                                                
+                                                Section(header: Text("Filter by Condition")) {
+                                                    Picker("Condition", selection: $selectedCondition) {
+                                                        ForEach(ConditionFilterOption.allCases, id: \.self) { option in
+                                                            Text(option.rawValue).tag(option)
+                                                        }
+                                                    }
+                                                }
+                                            } label: {
+                                                HStack {
+                                                    Menu {
+                                                        Section(header: Text("Sort by")) {
+                                                            Picker("Sort by", selection: $selectedSortOption) {
+                                                                ForEach(PriceSortOption.allCases, id: \.self) { option in
+                                                                    Text(option.rawValue).tag(option)
+                                                                }
+                                                            }
+                                                        }
+                                                        Section(header: Text("Filter by Condition")) {
+                                                            Picker("Condition", selection: $selectedCondition) {
+                                                                ForEach(ConditionFilterOption.allCases, id: \.self) { option in
+                                                                    Text(option.rawValue).tag(option)
+                                                                }
+                                                            }
+                                                        }
+                                                        
+                                                    } label: {
+                                                        HStack {
+                                                            Image(systemName: "line.3.horizontal.decrease.circle")
+                                                            Text("Sort & Filter")
+                                                        }
+                                                        .foregroundColor(.blue)
+                                                    }
+                                                    
+                                                    Spacer()
+                                                }
+                                                .padding(.horizontal)
+                                            }
+                                            ForEach(sortedListings()) { listing in
                                                 VStack(alignment: .leading, spacing: 8) {
                                                     if let urlString = listing.imageUrls.first,
                                                        let url = URL(string: urlString), !urlString.isEmpty {
@@ -591,11 +652,27 @@ struct ContentView: View {
             .cornerRadius(12)
         }
     }
+    private func sortedListings() -> [Posting] {
+        var filtered = selectedCategoryListings
+        
+        if selectedCondition == .new {
+            filtered = filtered.filter { $0.condition.lowercased() == "new" }
+        } else if selectedCondition == .used {
+            filtered = filtered.filter { $0.condition.lowercased() == "used" }
+        }
+        switch selectedSortOption {
+        case .lowToHigh:
+            return filtered.sorted { (Double($0.price) ?? 0) < (Double($1.price) ?? 0) }
+        case .highToLow:
+            return filtered.sorted { (Double($0.price) ?? 0) > (Double($1.price) ?? 0) }
+        case .none:
+            return filtered
+        }
+    }
     
     struct ContentView_Previews: PreviewProvider {
         static var previews: some View {
             ContentView()
         }
     }
-    
 }
