@@ -4,44 +4,60 @@ struct CartView: View {
     @EnvironmentObject var cartManager: CartManager
 
     var body: some View {
-        ZStack {
-            Color.black
-                .ignoresSafeArea() 
+        NavigationView {
+            BaseView {
+                ZStack {
+                    Color.black
+                        .ignoresSafeArea()
 
-            ScrollView {
-                VStack(spacing: 16) {
-                    ForEach(cartManager.cartItems) { post in
-                        VStack(alignment: .leading, spacing: 8) {
-                            if let url = URL(string: post.imageUrls.first ?? "") {
-                                AsyncImage(url: url) { image in
-                                    image.resizable()
-                                        .scaledToFill()
-                                        .frame(height: 150)
-                                        .clipped()
-                                        .cornerRadius(10)
-                                } placeholder: {
-                                    ProgressView()
-                                        .frame(height: 150)
+                    ScrollView {
+                        VStack(spacing: 16) {
+                            Text("My Cart")
+                                .font(.title2)
+                                .foregroundColor(.blue)
+                                .padding(.top)
+
+                            if cartManager.cartItems.isEmpty {
+                                Text("Your cart is empty")
+                                    .foregroundColor(.blue)
+                                    .padding(.top, 50)
+                            } else {
+                                ForEach(cartManager.cartItems) { post in
+                                    VStack(alignment: .leading, spacing: 8) {
+                                        if let url = URL(string: post.imageUrls.first ?? "") {
+                                            AsyncImage(url: url) { image in
+                                                image.resizable()
+                                                    .scaledToFill()
+                                                    .frame(height: 150)
+                                                    .clipped()
+                                                    .cornerRadius(10)
+                                            } placeholder: {
+                                                ProgressView()
+                                                    .frame(height: 150)
+                                            }
+                                        }
+
+                                        Text(post.description)
+                                            .foregroundColor(.white)
+                                        Text("Price: $\(post.price)")
+                                            .foregroundColor(.blue)
+                                        Button("Remove") {
+                                            cartManager.removeFromCart(post)
+                                        }
+                                        .foregroundColor(.red)
+                                    }
+                                    .padding()
+                                    .background(Color(.systemGray6).opacity(0.2))
+                                    .cornerRadius(10)
                                 }
                             }
-
-                            Text(post.description)
-                                .foregroundColor(.white)
-                            Text("Price: $\(post.price)")
-                                .foregroundColor(.blue)
-                            Button("Remove") {
-                                cartManager.removeFromCart(post)
-                            }
-                            .foregroundColor(.red)
                         }
                         .padding()
-                        .background(Color(.systemGray6).opacity(0.2))
-                        .cornerRadius(10)
                     }
                 }
-                .padding()
+                .navigationTitle("")
+                .navigationBarHidden(true)
             }
         }
-        .navigationTitle("My Cart")
     }
 }
