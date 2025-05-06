@@ -1,9 +1,3 @@
-//
-//  ImagePicker.swift
-//  partFinder
-//
-//  Created by Emily marrufo on 4/15/25.
-//
 import SwiftUI
 import PhotosUI
 
