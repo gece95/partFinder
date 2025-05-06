@@ -105,8 +105,31 @@ struct VendorsView: View {
                                     .textFieldStyle(RoundedBorderTextFieldStyle())
                                     .padding(.horizontal)
                                     
-                                    Toggle("Used", isOn: $isUsed)
-                                        .padding(.horizontal)
+                                    HStack(spacing: 16) {
+                                        Button(action: {
+                                            isUsed = false
+                                        }) {
+                                            Text("New")
+                                                .frame(maxWidth: .infinity)
+                                                .padding()
+                                                .background(!isUsed ? Color.blue : Color.gray.opacity(0.2))
+                                                .foregroundColor(.white)
+                                                .cornerRadius(10)
+                                        }
+
+                                        Button(action: {
+                                            isUsed = true
+                                        }) {
+                                            Text("Used")
+                                                .frame(maxWidth: .infinity)
+                                                .padding()
+                                                .background(isUsed ? Color.blue : Color.gray.opacity(0.2))
+                                                .foregroundColor(.white)
+                                                .cornerRadius(10)
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                        
                                     
                                     if !errorMessage.isEmpty {
                                         Text(errorMessage)
