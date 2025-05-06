@@ -66,7 +66,7 @@ struct ContentView: View {
     
     @State private var selectedCategoryListings: [Posting] = []
     @State private var showListings = false
-    @State private var selectedCategoryLabel: String = ""
+    @State private var selectedCategoryLabel: String = "All"
     @State private var noListingsFound = false
 
     
@@ -232,9 +232,14 @@ struct ContentView: View {
                                                 .font(.headline)
                                                 .foregroundColor(.gray)
                                             Spacer()
-                                            Text("Show All")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
+                                            Button("Show All Listings") {
+                                                selectedCategoryLabel = "All"
+                                                showListings = true
+                                                loadAllListings()
+                                            }
+                                            .font(.footnote)
+                                            .padding(.horizontal)
+                                            .foregroundColor(.blue)
                                         }
                                         .padding(.horizontal)
                                     }
@@ -577,8 +582,19 @@ struct ContentView: View {
         selectedCategoryLabel = category
         showListings = true
         
+        let firebaseCategoryKeys: [String: String] = [
+            "Engines": "engine",
+            "Batteries": "battery",
+            "Brakes": "brakes",
+            "Fluids": "fluids",
+            "Turbocharger": "turbocharger",
+            "Gaskets": "gasket"
+        ]
+
+        let firebaseKey = firebaseCategoryKeys[category] ?? category.lowercased()
+        
         let ref = Database.database().reference()
-        ref.child("listings").child(category.lowercased()).observeSingleEvent(of: .value) { snapshot in
+        ref.child("listings").child(firebaseKey).observeSingleEvent(of: .value) { snapshot in
             var fetchedListings: [Posting] = []
             
             for child in snapshot.children {
@@ -631,10 +647,11 @@ struct ContentView: View {
         showListings = true
         selectedCategoryLabel = "All"
         selectedCategoryListings = []
-        
+
         let ref = Database.database().reference().child("listings")
         ref.observeSingleEvent(of: .value) { snapshot in
             var allListings: [Posting] = []
+
             for category in snapshot.children {
                 if let categorySnap = category as? DataSnapshot {
                     for child in categorySnap.children {
@@ -647,15 +664,18 @@ struct ContentView: View {
                            let type = value["typeOfPart"] as? String,
                            let imageUrls = value["imageUrls"] as? [String] {
 
-                            print("Fetched image URLs: \(imageUrls)")
-
                             let listing = Posting(phoneNumber: phone, description: desc, price: price, condition: condition, typeOfPart: type, imageUrls: imageUrls)
                             allListings.append(listing)
                         }
                     }
                 }
             }
-            selectedCategoryListings = allListings
+
+            DispatchQueue.main.async {
+                selectedCategoryListings = allListings
+                noListingsFound = allListings.isEmpty
+                print("✅ Loaded \(allListings.count) listings with Show All.")
+            }
         }
     }
     
@@ -683,12 +703,23 @@ struct ContentView: View {
     }
     private func sortedListings() -> [Posting] {
         var filtered = selectedCategoryListings
-        
+        print("Sorting \(filtered.count) listings for display")
+
+        if selectedCategoryLabel != "All", let vehicle = selectedVehicle {
+            filtered = filtered.filter {
+                $0.description.lowercased().contains(vehicle.make.lowercased()) &&
+                $0.description.lowercased().contains(vehicle.model.lowercased()) &&
+                $0.description.lowercased().contains(vehicle.trim.lowercased())
+            }
+            print("Filtered by vehicle: \(filtered.count) listings remain")
+        }
+
         if selectedCondition == .new {
             filtered = filtered.filter { $0.condition.lowercased() == "new" }
         } else if selectedCondition == .used {
             filtered = filtered.filter { $0.condition.lowercased() == "used" }
         }
+
         switch selectedSortOption {
         case .lowToHigh:
             return filtered.sorted { (Double($0.price) ?? 0) < (Double($1.price) ?? 0) }
