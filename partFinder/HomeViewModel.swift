@@ -1,10 +1,3 @@
-
-//  HomeViewModel.swift
-//
-//
-//  Created by Emily marrufo on 3/24/25.
-//
-
 import Foundation
 import SwiftUI
 import Combine
