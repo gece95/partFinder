@@ -29,13 +29,27 @@ struct VendorsView: View {
             BaseView {
                 if isLoggedIn {
                     ZStack {
-                        Color.black.ignoresSafeArea()
+                        GeometryReader { geometry in
+                            ZStack {
+                                Image("background")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .ignoresSafeArea()
+                                
+                                
+                                Color.black.opacity(0.8)
+                                    .ignoresSafeArea()
+                            }
+                            .ignoresSafeArea()
+                        }
+                        
                         VStack(spacing: 12) {
                             Text("Sell")
-                                .font(.title2)
+                                .font(.title)
                                 .fontWeight(.semibold)
                                 .padding(.top, 8)
                                 .frame(maxWidth: .infinity, alignment: .center)
+                                .foregroundColor(.blue)
                             
                             ScrollView {
                                 VStack(spacing: 16) {
@@ -64,6 +78,11 @@ struct VendorsView: View {
                                         photoLibrary: .shared()
                                     ) {
                                         Label("Add Images", systemImage: "photo.on.rectangle.angled")
+                                            .foregroundColor(.white)
+                                            .padding()
+                                            .frame(maxWidth: .infinity)
+                                            .cornerRadius(10)
+                                            .padding(.horizontal)
                                     }
                                     .onChange(of: imageSelections) { newSelections in
                                         selectedImages = []
@@ -129,6 +148,7 @@ struct VendorsView: View {
                                         }
                                     }
                                     .padding(.horizontal)
+                                    Spacer()
                                         
                                     
                                     if !errorMessage.isEmpty {
@@ -146,6 +166,7 @@ struct VendorsView: View {
                                             .background(isUploading ? Color.gray : Color.blue)
                                             .foregroundColor(.white)
                                             .cornerRadius(10)
+                                            .fontWeight(.semibold)
                                     }
                                     .disabled(isUploading)
                                     .padding(.horizontal)
