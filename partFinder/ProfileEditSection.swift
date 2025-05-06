@@ -17,26 +17,22 @@ struct ProfileEditSection: View {
                     .font(.title3)
                     .padding(.bottom)
 
-                // Current password (required)
                 SecureField("Enter current password", text: $currentPassword)
                     .padding()
                     .background(Color.white)
                     .cornerRadius(10)
 
-                // Optional email update
                 TextField("Enter new email (optional)", text: $newEmail)
                     .autocapitalization(.none)
                     .padding()
                     .background(Color.white)
                     .cornerRadius(10)
 
-                // Optional password update
                 SecureField("Enter new password (optional)", text: $newPassword)
                     .padding()
                     .background(Color.white)
                     .cornerRadius(10)
 
-                // Save button
                 Button(action: {
                     viewModel.updateEmailAndOrPassword(
                         newEmail: newEmail.isEmpty ? nil : newEmail,

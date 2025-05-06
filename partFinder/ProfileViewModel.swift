@@ -24,22 +24,37 @@ class ProfileViewModel: ObservableObject {
         let ref = Database.database().reference()
         let category = listing.typeOfPart.lowercased()
 
-        ref.child("listings").child(category).observeSingleEvent(of: .value) { snapshot in
-            for child in snapshot.children {
-                if let snap = child as? DataSnapshot,
-                   let value = snap.value as? [String: Any],
-                   value["description"] as? String == listing.description,
-                   value["phoneNumber"] as? String == listing.phoneNumber {
-                    ref.child("listings").child(category).child(snap.key).removeValue()
-                    DispatchQueue.main.async {
-                        self.myListings.removeAll { $0 == listing }
-                    }
-                    break
-                }
-            }
+        ref.child("listings").child(category).child(listing.id).removeValue()
+
+        ref.child("users").child(userUID).child("myListings").child(listing.id).removeValue()
+
+        DispatchQueue.main.async {
+            self.myListings.removeAll { $0.id == listing.id }
         }
     }
+    func updateListing(listingID: String, category: String, newDescription: String, newPrice: String, newCondition: String) {
+        guard let userUID = Auth.auth().currentUser?.uid else { return }
 
+        let updatedData: [String: Any] = [
+            "description": newDescription,
+            "price": newPrice,
+            "condition": newCondition
+        ]
+
+        let baseRef = Database.database().reference()
+
+        let userRef = baseRef.child("users").child(userUID).child("myListings").child(listingID)
+        let globalRef = baseRef.child("listings").child(category).child(listingID)
+
+        userRef.updateChildValues(updatedData)
+        globalRef.updateChildValues(updatedData)
+
+        if let index = myListings.firstIndex(where: { $0.id == listingID }) {
+            myListings[index].description = newDescription
+            myListings[index].price = newPrice
+            myListings[index].condition = newCondition
+        }
+    }
     func fetchMyListings(userUID: String) {
         let ref = Database.database().reference()
         ref.child("users").child(userUID).child("myListings").observeSingleEvent(of: .value) { snapshot in
@@ -55,6 +70,7 @@ class ProfileViewModel: ObservableObject {
                    let type = value["typeOfPart"] as? String,
                    let imageUrls = value["imageUrls"] as? [String] {
                     let post = Posting(
+                        id: snap.key,  // <-- capture Firebase key
                         phoneNumber: phone,
                         description: desc,
                         price: price,

@@ -18,3 +18,4 @@ class HomeViewModel: ObservableObject {
         Category(icon: "gasket_icon", label: "Gaskets")
     ]
 }
+

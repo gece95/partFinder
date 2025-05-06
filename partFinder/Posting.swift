@@ -1,11 +1,11 @@
 import Foundation
 
-struct Posting: Identifiable, Codable, Hashable {
-    var id = UUID()
-    let phoneNumber: String
-    let description: String
-    let price: String
-    let condition: String
-    let typeOfPart: String
-    let imageUrls: [String]
+struct Posting: Identifiable, Equatable {
+    var id: String
+    var phoneNumber: String
+    var description: String
+    var price: String
+    var condition: String
+    var typeOfPart: String
+    var imageUrls: [String]
 }

@@ -236,6 +236,7 @@ struct VendorsView: View {
 
         uploadImagesToFirebase(images: selectedImages) { imageUrls in
             let newPost = Posting(
+                id: UUID().uuidString, 
                 phoneNumber: phoneNumber,
                 description: description,
                 price: price,
