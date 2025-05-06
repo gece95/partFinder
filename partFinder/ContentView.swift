@@ -60,6 +60,11 @@ struct ContentView: View {
     @State private var vehicles: [Vehicle] = []
     @State private var selectedVehicle: Vehicle?
     
+    @State private var activeAlert: VehicleAlert?
+    @State private var showDeleteConfirmation = false
+    @State private var vehiclePendingDeletion: Vehicle?
+
+    
     @State private var makes: [String] = []
     @State private var modelsByMake: [String: [String]] = [:]
     @State private var trimsByModel: [String: [String]] = [:]
@@ -110,8 +115,8 @@ struct ContentView: View {
                             .resizable()
                             .scaledToFill()
                             .ignoresSafeArea()
-                            Color.black.opacity(0.8)
-                                                     .ignoresSafeArea()
+                        Color.black.opacity(0.8)
+                            .ignoresSafeArea()
                         ZStack(alignment: .bottom) {
                             
                             
@@ -173,6 +178,7 @@ struct ContentView: View {
                                             selectedVehicle = newVehicle
                                             saveVehicleToFirebase(newVehicle)
                                             newVehicle = Vehicle(make: "", model: "", trim: "")
+                                            activeAlert = .added
                                         }
                                         .frame(maxWidth: .infinity)
                                         .padding()
@@ -219,8 +225,8 @@ struct ContentView: View {
                                         HStack {
                                             Spacer()
                                             Button(action: {
-                                                deleteVehicleFromFirebase(vehicle: selected)
-                                                selectedVehicle = nil
+                                                vehiclePendingDeletion = selected
+                                                showDeleteConfirmation = true
                                             }) {
                                                 Label("Delete Vehicle", systemImage: "trash")
                                                     .frame(maxWidth: .infinity)
@@ -290,29 +296,29 @@ struct ContentView: View {
                                                 }
                                                 .foregroundColor(.blue)
                                                 Spacer()
-                                                .padding(.horizontal)
+                                                    .padding(.horizontal)
                                             }
                                             
                                             if noListingsFound {
-                                                        VStack(spacing: 12) {
-                                                            Text("No listings available for your selected vehicle and part.")
-                                                                .font(.body)
-                                                                .foregroundColor(.gray)
-                                                                .multilineTextAlignment(.center)
-                                                                .padding()
-
-                                                            Button(action: {
-                                                                redirectToExternalVendor()
-                                                            }) {
-                                                                Text("Search Online for \(selectedCategoryLabel)")
-                                                                    .foregroundColor(.white)
-                                                                    .padding()
-                                                                    .frame(maxWidth: .infinity)
-                                                                    .background(Color.blue)
-                                                                    .cornerRadius(10)
-                                                            }
-                                                            .padding(.horizontal)
-                                                        }
+                                                VStack(spacing: 12) {
+                                                    Text("No listings available for your selected vehicle and part.")
+                                                        .font(.body)
+                                                        .foregroundColor(.gray)
+                                                        .multilineTextAlignment(.center)
+                                                        .padding()
+                                                    
+                                                    Button(action: {
+                                                        redirectToExternalVendor()
+                                                    }) {
+                                                        Text("Search Online for \(selectedCategoryLabel)")
+                                                            .foregroundColor(.white)
+                                                            .padding()
+                                                            .frame(maxWidth: .infinity)
+                                                            .background(Color.blue)
+                                                            .cornerRadius(10)
+                                                    }
+                                                    .padding(.horizontal)
+                                                }
                                             } else {
                                                 ForEach(sortedListings()) { listing in
                                                     VStack(alignment: .leading, spacing: 8) {
@@ -388,6 +394,21 @@ struct ContentView: View {
                                     loadVehicleDataFromStorage()
                                 }
                             }
+                        }
+                        .alert(item: $activeAlert) { alertType in
+                            Alert(title: Text(alertType.message))
+                        }
+                        .alert("Are you sure you want to delete this vehicle?", isPresented: $showDeleteConfirmation, presenting: vehiclePendingDeletion) { vehicle in
+                            Button("Delete", role: .destructive) {
+                                deleteVehicleFromFirebase(vehicle: vehicle)
+                                if selectedVehicle == vehicle {
+                                    selectedVehicle = nil
+                                }
+                                activeAlert = .deleted
+                            }
+                            Button("Cancel", role: .cancel) { }
+                        } message: { _ in
+                            Text("This action cannot be undone.")
                         }
                     }
                 }
