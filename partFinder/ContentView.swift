@@ -607,7 +607,15 @@ struct ContentView: View {
                    let type = value["typeOfPart"] as? String,
                    let imageUrls = value["imageUrls"] as? [String] {
                     
-                    let listing = Posting(phoneNumber: phone, description: desc, price: price, condition: condition, typeOfPart: type, imageUrls: imageUrls)
+                    let listing = Posting(
+                        id: snap.key,
+                        phoneNumber: phone,
+                        description: desc,
+                        price: price,
+                        condition: condition,
+                        typeOfPart: type,
+                        imageUrls: imageUrls
+                    )
                     
                     if let vehicle = selectedVehicle {
                         if desc.lowercased().contains(vehicle.make.lowercased()) &&
@@ -664,7 +672,15 @@ struct ContentView: View {
                            let type = value["typeOfPart"] as? String,
                            let imageUrls = value["imageUrls"] as? [String] {
 
-                            let listing = Posting(phoneNumber: phone, description: desc, price: price, condition: condition, typeOfPart: type, imageUrls: imageUrls)
+                            let listing = Posting(
+                                id: snap.key,
+                                phoneNumber: phone,
+                                description: desc,
+                                price: price,
+                                condition: condition,
+                                typeOfPart: type,
+                                imageUrls: imageUrls
+                            )
                             allListings.append(listing)
                         }
                     }
