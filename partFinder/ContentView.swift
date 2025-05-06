@@ -22,6 +22,7 @@ struct Vehicle: Identifiable, Equatable {
         "\(make) \(model) \(trim)"
     }
 }
+
 enum VehicleAlert: Identifiable {
     case added, deleted
 
@@ -395,6 +396,8 @@ struct ContentView: View {
                 }
             }
         }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true)
     }
     /*
     var yearPicker: some View {

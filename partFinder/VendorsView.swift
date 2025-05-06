@@ -17,6 +17,7 @@ struct VendorsView: View {
     @State private var selectedType = ""
     @State private var selectedImages: [UIImage] = []
     @State private var imageSelections: [PhotosPickerItem] = []
+    @State private var showAuthView = false
 
     @State private var errorMessage = ""
     @State private var isUploading = false
@@ -129,28 +130,32 @@ struct VendorsView: View {
                     }
                     .padding(.top, 16)
                 } else {
-                    // ❌ Show this if the user is not logged in
                     VStack(spacing: 20) {
-                        Image(systemName: "lock.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(.blue)
-                        
-                        Text("You must be logged in to post a listing.")
-                            .font(.title3)
-                            .multilineTextAlignment(.center)
+                        Text("Please log in to post a listing.")
                             .foregroundColor(.white)
-                        
-                        Text("Please log in or sign up to access this feature.")
-                            .foregroundColor(.gray)
-                            .font(.subheadline)
+                            .font(.headline)
                             .multilineTextAlignment(.center)
+
+                        Button("Login / Sign Up") {
+                            showAuthView = true
+                        }
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(12)
+                        .padding(.horizontal)
                     }
                     .padding()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.black.ignoresSafeArea())
                 }
             }
+        }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true)
+        .sheet(isPresented: $showAuthView) {
+            AuthView()
         }
     }
 
