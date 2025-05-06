@@ -15,217 +15,222 @@ struct ProfileView: View {
     
     var body: some View {
         NavigationView {
-            ZStack {
-                Color.black.ignoresSafeArea()
-
-                if isLoggedIn {
-                    ScrollView {
-                        VStack(spacing: 16) {
-                            VStack(spacing: 8) {
-                                ZStack(alignment: .bottomTrailing) {
-                                    if let image = viewModel.profileUIImage {
-                                        Image(uiImage: image)
-                                            .resizable()
-                                            .aspectRatio(contentMode: .fill)
-                                            .frame(width: 100, height: 100)
-                                            .clipShape(Circle())
-                                    } else {
-                                        Circle()
-                                            .fill(Color.gray.opacity(0.3))
-                                            .frame(width: 100, height: 100)
+            BaseView{
+                ZStack {
+                    Color.black.ignoresSafeArea()
+                    
+                    if isLoggedIn {
+                        ScrollView {
+                            VStack(spacing: 16) {
+                                VStack(spacing: 8) {
+                                    ZStack(alignment: .bottomTrailing) {
+                                        if let image = viewModel.profileUIImage {
+                                            Image(uiImage: image)
+                                                .resizable()
+                                                .aspectRatio(contentMode: .fill)
+                                                .frame(width: 100, height: 100)
+                                                .clipShape(Circle())
+                                        } else {
+                                            Circle()
+                                                .fill(Color.gray.opacity(0.3))
+                                                .frame(width: 100, height: 100)
+                                        }
+                                        
+                                        PhotosPicker(selection: $selectedItem, matching: .images) {
+                                            Image(systemName: "camera.fill")
+                                                .foregroundColor(.white)
+                                                .padding(6)
+                                                .background(Color.blue)
+                                                .clipShape(Circle())
+                                        }
+                                        .offset(x: -5, y: -5)
+                                        .onChange(of: selectedItem) {
+                                            guard let newItem = selectedItem else { return }
+                                            Task {
+                                                do {
+                                                    if let data = try await newItem.loadTransferable(type: Data.self),
+                                                       let uiImage = UIImage(data: data) {
+                                                        isUploading = true
+                                                        viewModel.uploadProfileImage(uiImage) { _ in
+                                                            isUploading = false
+                                                        }
+                                                    }
+                                                } catch {
+                                                    print("Failed to load image data: \(error.localizedDescription)")
+                                                }
+                                            }
+                                        }
                                     }
-
-                                    PhotosPicker(selection: $selectedItem, matching: .images) {
-                                        Image(systemName: "camera.fill")
-                                            .foregroundColor(.white)
-                                            .padding(6)
-                                            .background(Color.blue)
-                                            .clipShape(Circle())
+                                    
+                                    Text(viewModel.userEmail)
+                                        .font(.headline)
+                                        .foregroundColor(.white)
+                                    
+                                    Text(viewModel.userLocation)
+                                        .font(.subheadline)
+                                        .foregroundColor(.gray)
+                                }
+                                .padding()
+                                .frame(maxWidth: .infinity)
+                                .background(Color.black)
+                                
+                                if isUploading {
+                                    ProgressView("Uploading...").padding(.bottom)
+                                }
+                                
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("Transactions")
+                                        .foregroundColor(.white)
+                                        .font(.subheadline)
+                                        .padding(.horizontal)
+                                    
+                                    Button(action: {
+                                        showListings.toggle()
+                                    }) {
+                                        ProfileRowItem(icon: "cart.fill", text: "Listings")
                                     }
-                                    .offset(x: -5, y: -5)
-                                    .onChange(of: selectedItem) {
-                                        guard let newItem = selectedItem else { return }
-                                        Task {
-                                            do {
-                                                if let data = try await newItem.loadTransferable(type: Data.self),
-                                                   let uiImage = UIImage(data: data) {
-                                                    isUploading = true
-                                                    viewModel.uploadProfileImage(uiImage) { _ in
-                                                        isUploading = false
+                                    if showListings && !viewModel.myListings.isEmpty {
+                                        ForEach(viewModel.myListings) { post in
+                                            VStack(alignment: .leading, spacing: 8) {
+                                                if let imageUrl = post.imageUrls.first, let url = URL(string: imageUrl) {
+                                                    AsyncImage(url: url) { image in
+                                                        image.resizable()
+                                                            .scaledToFill()
+                                                            .frame(height: 150)
+                                                            .clipped()
+                                                            .cornerRadius(10)
+                                                    } placeholder: {
+                                                        ProgressView()
+                                                            .frame(height: 150)
                                                     }
                                                 }
-                                            } catch {
-                                                print("Failed to load image data: \(error.localizedDescription)")
+                                                
+                                                Text(post.description)
+                                                    .foregroundColor(.white)
+                                                Text("Price: $\(post.price)")
+                                                    .foregroundColor(.blue)
+                                                Text("Condition: \(post.condition)")
+                                                    .foregroundColor(.gray)
+                                                HStack {
+                                                    Button(action: {
+                                                        viewModel.selectedListing = post
+                                                        viewModel.showEditSheet = true
+                                                    }) {
+                                                        Label("Edit", systemImage: "pencil")
+                                                            .font(.footnote)
+                                                            .foregroundColor(.white)
+                                                            .padding(6)
+                                                            .background(Color.blue)
+                                                            .cornerRadius(6)
+                                                    }
+                                                    
+                                                    Button(action: {
+                                                        viewModel.deleteListing(post)
+                                                    }) {
+                                                        Label("Delete", systemImage: "trash")
+                                                            .font(.footnote)
+                                                            .foregroundColor(.white)
+                                                            .padding(6)
+                                                            .background(Color.red)
+                                                            .cornerRadius(6)
+                                                    }
+                                                }
                                             }
+                                            .padding()
+                                            .background(Color(.systemGray6).opacity(0.2))
+                                            .cornerRadius(10)
                                         }
                                     }
+                                    
+                                    Button(action: {
+                                        showPaymentSheet = true
+                                    }) {
+                                        ProfileRowItem(icon: "creditcard.fill", text: "Payment & Deposit Methods")
+                                    }
                                 }
-
-                                Text(viewModel.userEmail)
-                                    .font(.headline)
-                                    .foregroundColor(.white)
-
-                                Text(viewModel.userLocation)
-                                    .font(.subheadline)
-                                    .foregroundColor(.gray)
-                            }
-                            .padding()
-                            .frame(maxWidth: .infinity)
-                            .background(Color.black)
-
-                            if isUploading {
-                                ProgressView("Uploading...").padding(.bottom)
-                            }
-
-                            VStack(alignment: .leading, spacing: 10) {
-                                Text("Transactions")
-                                    .foregroundColor(.white)
-                                    .font(.subheadline)
-                                    .padding(.horizontal)
-
-                                Button(action: {
-                                    showListings.toggle()
-                                }) {
-                                    ProfileRowItem(icon: "cart.fill", text: "Listings")
-                                }
-                                if showListings && !viewModel.myListings.isEmpty {
-                                    ForEach(viewModel.myListings) { post in
-                                        VStack(alignment: .leading, spacing: 8) {
-                                            if let imageUrl = post.imageUrls.first, let url = URL(string: imageUrl) {
-                                                AsyncImage(url: url) { image in
-                                                    image.resizable()
-                                                        .scaledToFill()
-                                                        .frame(height: 150)
-                                                        .clipped()
-                                                        .cornerRadius(10)
-                                                } placeholder: {
-                                                    ProgressView()
-                                                        .frame(height: 150)
-                                                }
-                                            }
-
-                                            Text(post.description)
-                                                .foregroundColor(.white)
-                                            Text("Price: $\(post.price)")
+                                
+                                VStack(alignment: .leading, spacing: 10) {
+                                    Text("Account")
+                                        .foregroundColor(.white)
+                                        .font(.subheadline)
+                                        .padding(.horizontal)
+                                    
+                                    Button(action: {
+                                        showingEditSheet = true
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "gearshape.fill")
                                                 .foregroundColor(.blue)
-                                            Text("Condition: \(post.condition)")
-                                                .foregroundColor(.gray)
-                                            HStack {
-                                                Button(action: {
-                                                    viewModel.selectedListing = post
-                                                    viewModel.showEditSheet = true
-                                                }) {
-                                                    Label("Edit", systemImage: "pencil")
-                                                        .font(.footnote)
-                                                        .foregroundColor(.white)
-                                                        .padding(6)
-                                                        .background(Color.blue)
-                                                        .cornerRadius(6)
-                                                }
-
-                                                Button(action: {
-                                                    viewModel.deleteListing(post)
-                                                }) {
-                                                    Label("Delete", systemImage: "trash")
-                                                        .font(.footnote)
-                                                        .foregroundColor(.white)
-                                                        .padding(6)
-                                                        .background(Color.red)
-                                                        .cornerRadius(6)
-                                                }
-                                            }
+                                            Text("Account Settings")
+                                                .foregroundColor(.white)
+                                            Spacer()
                                         }
                                         .padding()
-                                        .background(Color(.systemGray6).opacity(0.2))
-                                        .cornerRadius(10)
+                                        .background(Color.black)
                                     }
-                                }
-
-                                Button(action: {
-                                    showPaymentSheet = true
-                                }) {
-                                    ProfileRowItem(icon: "creditcard.fill", text: "Payment & Deposit Methods")
+                                    
+                                    Button(action: {
+                                        viewModel.logout {
+                                            isLoggedIn = false
+                                        }
+                                    }) {
+                                        HStack {
+                                            Image(systemName: "arrow.backward.circle.fill")
+                                                .foregroundColor(.blue)
+                                            Text("Logout")
+                                                .foregroundColor(.blue)
+                                        }
+                                        .padding()
+                                        .frame(maxWidth: .infinity, alignment: .leading)
+                                        .background(Color.black)
+                                    }
                                 }
                             }
-
-                            VStack(alignment: .leading, spacing: 10) {
-                                Text("Account")
-                                    .foregroundColor(.white)
-                                    .font(.subheadline)
-                                    .padding(.horizontal)
-
-                                Button(action: {
-                                    showingEditSheet = true
-                                }) {
-                                    HStack {
-                                        Image(systemName: "gearshape.fill")
-                                            .foregroundColor(.blue)
-                                        Text("Account Settings")
-                                            .foregroundColor(.white)
-                                        Spacer()
-                                    }
-                                    .padding()
-                                    .background(Color.black)
-                                }
-
-                                Button(action: {
-                                    viewModel.logout {
-                                        isLoggedIn = false
-                                    }
-                                }) {
-                                    HStack {
-                                        Image(systemName: "arrow.backward.circle.fill")
-                                            .foregroundColor(.blue)
-                                        Text("Logout")
-                                            .foregroundColor(.blue)
-                                    }
-                                    .padding()
-                                    .frame(maxWidth: .infinity, alignment: .leading)
-                                    .background(Color.black)
-                                }
-                            }
+                            .padding()
                         }
-                        .padding()
-                    }
-                    .onAppear {
-                        viewModel.fetchMyListings(userUID: userUID)
-                    }
-                } else {
-                    VStack(spacing: 20) {
-                        Text("Please log in to access your profile")
+                        .onAppear {
+                            viewModel.fetchMyListings(userUID: userUID)
+                        }
+                    } else {
+                        VStack(spacing: 20) {
+                            Text("Please log in to access your profile")
+                                .foregroundColor(.white)
+                                .font(.headline)
+                                .multilineTextAlignment(.center)
+                            
+                            Button("Login / Sign Up") {
+                                showAuthView = true
+                            }
                             .foregroundColor(.white)
-                            .font(.headline)
-                            .multilineTextAlignment(.center)
-
-                        Button("Login / Sign Up") {
-                            showAuthView = true
+                            .padding()
+                            .frame(maxWidth: .infinity)
+                            .background(Color.blue)
+                            .cornerRadius(12)
+                            .padding(.horizontal)
                         }
-                        .foregroundColor(.white)
                         .padding()
-                        .frame(maxWidth: .infinity)
-                        .background(Color.blue)
-                        .cornerRadius(12)
-                        .padding(.horizontal)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
-                    .padding()
                 }
-            }
-            .navigationBarTitle("Profile", displayMode: .inline)
-            .sheet(isPresented: $showingEditSheet) {
-                ProfileEditSection(viewModel: viewModel)
-            }
-            .sheet(isPresented: $showAuthView) {
-                AuthView()
-            }
-            .sheet(isPresented: $showPaymentSheet) {
-                PaymentMethodsView()
-            }
-            .sheet(isPresented: $viewModel.showEditSheet) {
-                if let listing = viewModel.selectedListing {
-                    EditListingView(listing: listing, viewModel: viewModel)
+                .navigationBarTitle("Profile", displayMode: .inline)
+                .sheet(isPresented: $showingEditSheet) {
+                    ProfileEditSection(viewModel: viewModel)
+                }
+                .sheet(isPresented: $showAuthView) {
+                    AuthView()
+                }
+                .sheet(isPresented: $showPaymentSheet) {
+                    PaymentMethodsView()
+                }
+                .sheet(isPresented: $viewModel.showEditSheet) {
+                    if let listing = viewModel.selectedListing {
+                        EditListingView(listing: listing, viewModel: viewModel)
+                    }
                 }
             }
         }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true)
     }
 }
 

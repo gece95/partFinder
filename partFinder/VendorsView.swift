@@ -17,6 +17,7 @@ struct VendorsView: View {
     @State private var selectedType = ""
     @State private var selectedImages: [UIImage] = []
     @State private var imageSelections: [PhotosPickerItem] = []
+    @State private var showAuthView = false
 
     @State private var errorMessage = ""
     @State private var isUploading = false
@@ -27,130 +28,160 @@ struct VendorsView: View {
         NavigationView {
             BaseView {
                 if isLoggedIn {
-                    VStack(spacing: 12) {
-                        Text("Sell")
-                            .font(.title2)
-                            .fontWeight(.semibold)
-                            .padding(.top, 8)
-                            .frame(maxWidth: .infinity, alignment: .center)
-                        
-                        ScrollView {
-                            VStack(spacing: 16) {
-                                
-                                if !selectedImages.isEmpty {
-                                    ScrollView(.horizontal, showsIndicators: false) {
-                                        HStack(spacing: 12) {
-                                            ForEach(selectedImages, id: \.self) { image in
-                                                Image(uiImage: image)
-                                                    .resizable()
-                                                    .scaledToFill()
-                                                    .frame(width: 150, height: 150)
-                                                    .clipped()
-                                                    .border(Color.gray, width: 1)
-                                                    .cornerRadius(10)
+                    ZStack {
+                        Color.black.ignoresSafeArea()
+                        VStack(spacing: 12) {
+                            Text("Sell")
+                                .font(.title2)
+                                .fontWeight(.semibold)
+                                .padding(.top, 8)
+                                .frame(maxWidth: .infinity, alignment: .center)
+                            
+                            ScrollView {
+                                VStack(spacing: 16) {
+                                    
+                                    if !selectedImages.isEmpty {
+                                        ScrollView(.horizontal, showsIndicators: false) {
+                                            HStack(spacing: 12) {
+                                                ForEach(selectedImages, id: \.self) { image in
+                                                    Image(uiImage: image)
+                                                        .resizable()
+                                                        .scaledToFill()
+                                                        .frame(width: 150, height: 150)
+                                                        .clipped()
+                                                        .border(Color.gray, width: 1)
+                                                        .cornerRadius(10)
+                                                }
+                                            }
+                                            .padding(.horizontal)
+                                        }
+                                    }
+                                    
+                                    PhotosPicker(
+                                        selection: $imageSelections,
+                                        maxSelectionCount: 5,
+                                        matching: .images,
+                                        photoLibrary: .shared()
+                                    ) {
+                                        Label("Add Images", systemImage: "photo.on.rectangle.angled")
+                                    }
+                                    .onChange(of: imageSelections) { newSelections in
+                                        selectedImages = []
+                                        Task {
+                                            for item in newSelections {
+                                                if let data = try? await item.loadTransferable(type: Data.self),
+                                                   let uiImage = UIImage(data: data) {
+                                                    selectedImages.append(uiImage)
+                                                }
                                             }
                                         }
-                                        .padding(.horizontal)
                                     }
-                                }
-                                
-                                PhotosPicker(
-                                    selection: $imageSelections,
-                                    maxSelectionCount: 5,
-                                    matching: .images,
-                                    photoLibrary: .shared()
-                                ) {
-                                    Label("Add Images", systemImage: "photo.on.rectangle.angled")
-                                }
-                                .onChange(of: imageSelections) { newSelections in
-                                    selectedImages = []
-                                    Task {
-                                        for item in newSelections {
-                                            if let data = try? await item.loadTransferable(type: Data.self),
-                                               let uiImage = UIImage(data: data) {
-                                                selectedImages.append(uiImage)
-                                            }
-                                        }
-                                    }
-                                }
-                                
-                                Menu {
-                                    ForEach(partTypes, id: \.self ) { type in
-                                        Button(type) { selectedType = type }
-                                    }
-                                } label: {
-                                    dropdownLabel(text: selectedType, placeholder: "Select Part Type")
-                                }
-                                .padding(.horizontal)
-                                
-                                Group {
-                                    TextField("Phone Number", text: $phoneNumber)
-                                        .keyboardType(.numberPad)
-                                        .onChange(of: phoneNumber) { newVal in
-                                            phoneNumber = formatPhoneNumber(newVal)
-                                        }
                                     
-                                    TextEditor(text: $description)
-                                        .frame(height: 120)
-                                        .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4)))
-                                        .background(Color(.systemGray6))
-                                        .cornerRadius(8)
-                                    
-                                    TextField("Price (e.g. 25.00)", text: $price)
-                                        .keyboardType(.decimalPad)
-                                }
-                                .textFieldStyle(RoundedBorderTextFieldStyle())
-                                .padding(.horizontal)
-                                
-                                Toggle("Used", isOn: $isUsed)
+                                    Menu {
+                                        ForEach(partTypes, id: \.self ) { type in
+                                            Button(type) { selectedType = type }
+                                        }
+                                    } label: {
+                                        dropdownLabel(text: selectedType, placeholder: "Select Part Type")
+                                    }
                                     .padding(.horizontal)
-                                
-                                if !errorMessage.isEmpty {
-                                    Text(errorMessage)
-                                        .foregroundColor(.red)
-                                        .padding(.horizontal)
+                                    
+                                    Group {
+                                        TextField("Phone Number", text: $phoneNumber)
+                                            .keyboardType(.numberPad)
+                                            .onChange(of: phoneNumber) { newVal in
+                                                phoneNumber = formatPhoneNumber(newVal)
+                                            }
+                                        
+                                        TextEditor(text: $description)
+                                            .frame(height: 120)
+                                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color.gray.opacity(0.4)))
+                                            .background(Color(.systemGray6))
+                                            .cornerRadius(8)
+                                        
+                                        TextField("Price (e.g. 25.00)", text: $price)
+                                            .keyboardType(.decimalPad)
+                                    }
+                                    .textFieldStyle(RoundedBorderTextFieldStyle())
+                                    .padding(.horizontal)
+                                    
+                                    HStack(spacing: 16) {
+                                        Button(action: {
+                                            isUsed = false
+                                        }) {
+                                            Text("New")
+                                                .frame(maxWidth: .infinity)
+                                                .padding()
+                                                .background(!isUsed ? Color.blue : Color.gray.opacity(0.2))
+                                                .foregroundColor(.white)
+                                                .cornerRadius(10)
+                                        }
+
+                                        Button(action: {
+                                            isUsed = true
+                                        }) {
+                                            Text("Used")
+                                                .frame(maxWidth: .infinity)
+                                                .padding()
+                                                .background(isUsed ? Color.blue : Color.gray.opacity(0.2))
+                                                .foregroundColor(.white)
+                                                .cornerRadius(10)
+                                        }
+                                    }
+                                    .padding(.horizontal)
+                                        
+                                    
+                                    if !errorMessage.isEmpty {
+                                        Text(errorMessage)
+                                            .foregroundColor(.red)
+                                            .padding(.horizontal)
+                                    }
+                                    
+                                    Button(action: {
+                                        submitListing()
+                                    }) {
+                                        Text(isUploading ? "Submitting..." : "Submit Listing")
+                                            .frame(maxWidth: .infinity)
+                                            .padding()
+                                            .background(isUploading ? Color.gray : Color.blue)
+                                            .foregroundColor(.white)
+                                            .cornerRadius(10)
+                                    }
+                                    .disabled(isUploading)
+                                    .padding(.horizontal)
                                 }
-                                
-                                Button(action: {
-                                    submitListing()
-                                }) {
-                                    Text(isUploading ? "Submitting..." : "Submit Listing")
-                                        .frame(maxWidth: .infinity)
-                                        .padding()
-                                        .background(isUploading ? Color.gray : Color.blue)
-                                        .foregroundColor(.white)
-                                        .cornerRadius(10)
-                                }
-                                .disabled(isUploading)
-                                .padding(.horizontal)
+                                .padding(.bottom, 32)
                             }
-                            .padding(.bottom, 32)
                         }
+                        .padding(.top, 16)
                     }
-                    .padding(.top, 16)
                 } else {
-                    // ❌ Show this if the user is not logged in
                     VStack(spacing: 20) {
-                        Image(systemName: "lock.fill")
-                            .resizable()
-                            .frame(width: 50, height: 50)
-                            .foregroundColor(.blue)
-                        
-                        Text("You must be logged in to post a listing.")
-                            .font(.title3)
-                            .multilineTextAlignment(.center)
+                        Text("Please log in to post a listing.")
                             .foregroundColor(.white)
-                        
-                        Text("Please log in or sign up to access this feature.")
-                            .foregroundColor(.gray)
-                            .font(.subheadline)
+                            .font(.headline)
                             .multilineTextAlignment(.center)
+
+                        Button("Login / Sign Up") {
+                            showAuthView = true
+                        }
+                        .foregroundColor(.white)
+                        .padding()
+                        .frame(maxWidth: .infinity)
+                        .background(Color.blue)
+                        .cornerRadius(12)
+                        .padding(.horizontal)
                     }
                     .padding()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.black.ignoresSafeArea())
                 }
             }
+        }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true)
+        .sheet(isPresented: $showAuthView) {
+            AuthView()
         }
     }
 
