@@ -47,7 +47,7 @@ struct partCategory: Hashable {
 
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
-    @StateObject private var viewModel = HomeViewModel()
+   // @StateObject private var viewModel = HomeViewModel()
     @StateObject private var locationManager = LocationManager()
     @EnvironmentObject var cartManager: CartManager
     
@@ -122,47 +122,15 @@ struct ContentView: View {
                             
                             VStack(spacing: 0) {
                                 ScrollView {
-                                    HStack {
-                                        Menu {
-                                            ForEach(viewModel.cities, id: \.self) { city in
-                                                Button(city) {
-                                                    locationManager.requestLocation()
-                                                    viewModel.selectedCity = city
-                                                }
-                                            }
-                                        } label: {
-                                            HStack {
-                                                Image(systemName: "line.3.horizontal.decrease.circle")
-                                                    .font(.title2)
-                                                    .foregroundColor(.gray)
-                                                Text(viewModel.selectedCity)
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.gray)
-                                            }
-                                            .font(.subheadline)
-                                        }
-                                        
-                                        Spacer()
-                                        
+                                    VStack(spacing: 2) {
                                         Text("partFinder")
                                             .font(.title)
-                                            .frame(maxWidth: .infinity, alignment: .trailing)
-                                            .font(.headline)
                                             .fontWeight(.bold)
                                             .foregroundColor(.blue)
-                                        
-                                        Spacer()
+                                            .frame(maxWidth: .infinity, alignment: .center)
                                     }
                                     .padding(.horizontal)
-                                    .padding(.vertical, 6)
-                                    
-                                    if let zip = locationManager.zipCode {
-                                        Text("ZIP Code: \(zip)")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                            .padding(.horizontal)
-                                            .padding(.bottom, 4)
-                                    }
+                                    .padding(.vertical, 2)
                                     
                                     VStack(spacing: 12) {
                                         // yearPicker
