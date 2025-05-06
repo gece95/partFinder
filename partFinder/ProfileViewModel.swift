@@ -33,26 +33,27 @@ class ProfileViewModel: ObservableObject {
         }
     }
     func updateListing(listingID: String, category: String, newDescription: String, newPrice: String, newCondition: String) {
-        let ref = Database.database().reference()
-        let updates: [String: Any] = [
+        guard let userUID = Auth.auth().currentUser?.uid else { return }
+
+        let updatedData: [String: Any] = [
             "description": newDescription,
             "price": newPrice,
             "condition": newCondition
         ]
 
-        ref.child("listings").child(category).child(listingID).updateChildValues(updates)
+        let baseRef = Database.database().reference()
 
-        if let userUID = Auth.auth().currentUser?.uid {
-            ref.child("users").child(userUID).child("myListings").child(listingID).updateChildValues(updates)
-        }
+        let userRef = baseRef.child("users").child(userUID).child("myListings").child(listingID)
+        let globalRef = baseRef.child("listings").child(category).child(listingID)
+
+        userRef.updateChildValues(updatedData)
+        globalRef.updateChildValues(updatedData)
 
         if let index = myListings.firstIndex(where: { $0.id == listingID }) {
             myListings[index].description = newDescription
             myListings[index].price = newPrice
             myListings[index].condition = newCondition
         }
-
-        print("Listing updated")
     }
     func fetchMyListings(userUID: String) {
         let ref = Database.database().reference()
