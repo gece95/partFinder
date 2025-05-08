@@ -10,13 +10,21 @@ struct ProfileEditSection: View {
     var body: some View {
         BaseView{
             ZStack {
-                Color.black.ignoresSafeArea()
+                GeometryReader { geometry in
+                    Image("background")
+                        .resizable()
+                        .scaledToFill()
+                        .ignoresSafeArea()
+                    Color.black.opacity(0.8)
+                        .ignoresSafeArea()
+                }
                 
                 VStack(spacing: 20) {
                     Text("Update Account Info")
                         .foregroundColor(.white)
-                        .font(.title3)
+                        .font(.title2)
                         .padding(.bottom)
+                        .fontWeight(.bold)
                     
                     SecureField("Enter current password", text: $currentPassword)
                         .padding()
@@ -51,6 +59,7 @@ struct ProfileEditSection: View {
                             .frame(maxWidth: .infinity)
                             .background(Color.blue)
                             .cornerRadius(12)
+                            .fontWeight(.bold)
                     }
                     
                     if let message = saveMessage {

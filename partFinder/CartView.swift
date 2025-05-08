@@ -10,12 +10,20 @@ struct CartView: View {
         NavigationView {
             BaseView {
                 ZStack {
-                    Color.black.ignoresSafeArea()
+                    GeometryReader { geometry in
+                        Image("background")
+                            .resizable()
+                            .scaledToFill()
+                            .ignoresSafeArea()
+                        Color.black.opacity(0.8)
+                            .ignoresSafeArea()
+                    }
 
                     ScrollView {
                         VStack(spacing: 16) {
                             Text("My Cart")
                                 .font(.title2)
+                                .fontWeight(.bold)
                                 .foregroundColor(.blue)
                                 .padding(.top)
 

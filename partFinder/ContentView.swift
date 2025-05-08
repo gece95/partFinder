@@ -630,14 +630,9 @@ struct ContentView: View {
     }
     
         func redirectToExternalVendor() {
-            guard let selectedVehicle = selectedVehicle else { return }
-            
-            let make = selectedVehicle.make.replacingOccurrences(of: " ", with: "+")
-            let model = selectedVehicle.model.replacingOccurrences(of: " ", with: "+")
-            let trim = selectedVehicle.trim.replacingOccurrences(of: " ", with: "+")
             let part = selectedCategoryLabel.replacingOccurrences(of: " ", with: "+")
             
-            let searchQuery = "\(make)+\(model)+\(trim)+\(part)"
+            let searchQuery = "\(part)"
             let urlString = "https://www.autozone.com/searchresult?searchText=\(searchQuery)"
             
             if let url = URL(string: urlString) {
