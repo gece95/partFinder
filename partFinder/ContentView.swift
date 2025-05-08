@@ -211,7 +211,7 @@ struct ContentView: View {
                                             Text("Categories")
                                                 .font(.headline)
                                                 .foregroundColor(.gray)
-                                            Spacer()
+                                            /*Spacer()
                                             Button("Show All Listings") {
                                                 selectedCategoryLabel = "All"
                                                 showListings = true
@@ -219,7 +219,7 @@ struct ContentView: View {
                                             }
                                             .font(.footnote)
                                             .padding(.horizontal)
-                                            .foregroundColor(.blue)
+                                            .foregroundColor(.blue)*/
                                         }
                                         .padding(.horizontal)
                                     }
