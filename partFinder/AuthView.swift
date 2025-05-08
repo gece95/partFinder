@@ -18,7 +18,14 @@ struct AuthView: View {
 
     var body: some View {
         ZStack {
-            Color.black.ignoresSafeArea()
+            GeometryReader { geometry in
+                Image("background")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                Color.black.opacity(0.8)
+                    .ignoresSafeArea()
+            }
             
             VStack(spacing: 20) {
                 Text(isLoginMode ? "Login" : "Create Account")

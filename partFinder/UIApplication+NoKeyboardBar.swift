@@ -1,10 +1,3 @@
-//
-//  UIApplication+NoKeyboardBar.swift
-//  partFinder
-//
-//  Created by Emily marrufo on 4/21/25.
-//
-
 import UIKit
 
 extension UIApplication {

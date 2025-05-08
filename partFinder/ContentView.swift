@@ -22,6 +22,7 @@ struct Vehicle: Identifiable, Equatable {
         "\(make) \(model) \(trim)"
     }
 }
+
 enum VehicleAlert: Identifiable {
     case added, deleted
 
@@ -46,7 +47,7 @@ struct partCategory: Hashable {
 
 struct ContentView: View {
     @Environment(\.colorScheme) var colorScheme
-    @StateObject private var viewModel = HomeViewModel()
+   // @StateObject private var viewModel = HomeViewModel()
     @StateObject private var locationManager = LocationManager()
     @EnvironmentObject var cartManager: CartManager
     
@@ -59,14 +60,36 @@ struct ContentView: View {
     @State private var vehicles: [Vehicle] = []
     @State private var selectedVehicle: Vehicle?
     
+    @State private var activeAlert: VehicleAlert?
+    @State private var showDeleteConfirmation = false
+    @State private var vehiclePendingDeletion: Vehicle?
+
+    
     @State private var makes: [String] = []
     @State private var modelsByMake: [String: [String]] = [:]
     @State private var trimsByModel: [String: [String]] = [:]
     
     @State private var selectedCategoryListings: [Posting] = []
     @State private var showListings = false
-    @State private var selectedCategoryLabel: String = ""
+    @State private var selectedCategoryLabel: String = "All"
+    @State private var noListingsFound = false
+
     
+    enum PriceSortOption: String, CaseIterable {
+        case none = "None"
+        case lowToHigh = "Price: Low to High"
+        case highToLow = "Price: High to Low"
+    }
+
+    @State private var selectedSortOption: PriceSortOption = .none
+    
+    enum ConditionFilterOption: String, CaseIterable {
+        case all = "All"
+        case new = "New"
+        case used = "Used"
+    }
+
+    @State private var selectedCondition: ConditionFilterOption = .all
     
     let categories = [
         Category(icon: "engine_icon", label: "Engines"),
@@ -88,52 +111,26 @@ struct ContentView: View {
             BaseView {
                 ZStack {
                     GeometryReader { geometry in
+                        Image("background")
+                            .resizable()
+                            .scaledToFill()
+                            .ignoresSafeArea()
+                        Color.black.opacity(0.8)
+                            .ignoresSafeArea()
                         ZStack(alignment: .bottom) {
-                            (colorScheme == .dark ? Color("DarkBackground") : Color.black)
-                                .edgesIgnoringSafeArea(.all)
+                            
                             
                             VStack(spacing: 0) {
                                 ScrollView {
-                                    HStack {
-                                        Menu {
-                                            ForEach(viewModel.cities, id: \.self) { city in
-                                                Button(city) {
-                                                    locationManager.requestLocation()
-                                                    viewModel.selectedCity = city
-                                                }
-                                            }
-                                        } label: {
-                                            HStack {
-                                                Image(systemName: "line.3.horizontal.decrease.circle")
-                                                    .font(.title2)
-                                                    .foregroundColor(.gray)
-                                                Text(viewModel.selectedCity)
-                                                    .font(.subheadline)
-                                                    .foregroundColor(.gray)
-                                            }
-                                            .font(.subheadline)
-                                        }
-                                        
-                                        Spacer()
-                                        
+                                    VStack(spacing: 2) {
                                         Text("partFinder")
-                                            .frame(maxWidth: .infinity, alignment: .trailing)
-                                            .font(.headline)
+                                            .font(.title)
                                             .fontWeight(.bold)
                                             .foregroundColor(.blue)
-                                        
-                                        Spacer()
+                                            .frame(maxWidth: .infinity, alignment: .center)
                                     }
                                     .padding(.horizontal)
-                                    .padding(.vertical, 6)
-                                    
-                                    if let zip = locationManager.zipCode {
-                                        Text("ZIP Code: \(zip)")
-                                            .font(.caption)
-                                            .foregroundColor(.gray)
-                                            .padding(.horizontal)
-                                            .padding(.bottom, 4)
-                                    }
+                                    .padding(.vertical, 2)
                                     
                                     VStack(spacing: 12) {
                                         // yearPicker
@@ -149,6 +146,7 @@ struct ContentView: View {
                                             selectedVehicle = newVehicle
                                             saveVehicleToFirebase(newVehicle)
                                             newVehicle = Vehicle(make: "", model: "", trim: "")
+                                            activeAlert = .added
                                         }
                                         .frame(maxWidth: .infinity)
                                         .padding()
@@ -163,6 +161,10 @@ struct ContentView: View {
                                     
                                     if !vehicles.isEmpty {
                                         Menu {
+                                            Button("Select Vehicle") {
+                                                selectedVehicle = nil
+                                            }
+                                            
                                             ForEach(vehicles) { vehicle in
                                                 Button(vehicle.displayName) {
                                                     selectedVehicle = vehicle
@@ -191,8 +193,8 @@ struct ContentView: View {
                                         HStack {
                                             Spacer()
                                             Button(action: {
-                                                deleteVehicleFromFirebase(vehicle: selected)
-                                                selectedVehicle = nil
+                                                vehiclePendingDeletion = selected
+                                                showDeleteConfirmation = true
                                             }) {
                                                 Label("Delete Vehicle", systemImage: "trash")
                                                     .frame(maxWidth: .infinity)
@@ -210,9 +212,14 @@ struct ContentView: View {
                                                 .font(.headline)
                                                 .foregroundColor(.gray)
                                             Spacer()
-                                            Text("Show All")
-                                                .font(.subheadline)
-                                                .foregroundColor(.gray)
+                                            Button("Show All Listings") {
+                                                selectedCategoryLabel = "All"
+                                                showListings = true
+                                                loadAllListings()
+                                            }
+                                            .font(.footnote)
+                                            .padding(.horizontal)
+                                            .foregroundColor(.blue)
                                         }
                                         .padding(.horizontal)
                                     }
@@ -234,69 +241,116 @@ struct ContentView: View {
                                                 .font(.headline)
                                                 .padding(.horizontal)
                                             
-                                            ForEach(selectedCategoryListings) { listing in
-                                                VStack(alignment: .leading, spacing: 8) {
-                                                    if let urlString = listing.imageUrls.first,
-                                                       let url = URL(string: urlString), !urlString.isEmpty {
-
-                                                        AsyncImage(url: url) { phase in
-                                                            switch phase {
-                                                            case .empty:
-                                                                ProgressView().frame(height: 200)
-                                                            case .success(let image):
-                                                                image
-                                                                    .resizable()
-                                                                    .scaledToFill()
-                                                                    .frame(height: 200)
-                                                                    .clipped()
-                                                                    .cornerRadius(12)
-                                                            case .failure:
-                                                                Image(systemName: "photo")
-                                                                    .resizable()
-                                                                    .scaledToFit()
-                                                                    .frame(height: 200)
-                                                                    .foregroundColor(.gray)
-                                                            @unknown default:
-                                                                EmptyView()
-                                                            }
+                                            Menu {
+                                                Section(header: Text("Sort by")) {
+                                                    Picker("Sort by", selection: $selectedSortOption) {
+                                                        ForEach(PriceSortOption.allCases, id: \.self) { option in
+                                                            Text(option.rawValue).tag(option)
                                                         }
-
-                                                    } else {
-                                                        Text("No image available")
-                                                            .frame(height: 200)
-                                                            .frame(maxWidth: .infinity)
-                                                            .background(Color.gray.opacity(0.2))
-                                                            .cornerRadius(12)
-                                                    }
-                                                    Text(listing.description)
-                                                        .font(.subheadline)
-                                                    Text("Condition: \(listing.condition)")
-                                                        .font(.caption)
-                                                        .foregroundColor(.gray)
-                                                    Text("Price: $\(listing.price)")
-                                                        .font(.headline)
-                                                        .foregroundColor(.blue)
-                                                    Text("Phone: \(listing.phoneNumber)")
-                                                        .font(.footnote)
-                                                        .foregroundColor(.secondary)
-
-                                                    Button(action: {
-                                                        cartManager.addToCart(listing)
-                                                    }) {
-                                                        Label("Add to Cart", systemImage: "cart.badge.plus")
-                                                            .font(.footnote)
-                                                            .foregroundColor(.white)
-                                                            .padding(6)
-                                                            .background(Color.blue)
-                                                            .cornerRadius(8)
                                                     }
                                                 }
-                                                .padding()
-                                                .background(Color(.systemGray6))
-                                                .cornerRadius(12)
-                                                .padding(.horizontal)
+                                                
+                                                Section(header: Text("Filter by Condition")) {
+                                                    Picker("Condition", selection: $selectedCondition) {
+                                                        ForEach(ConditionFilterOption.allCases, id: \.self) { option in
+                                                            Text(option.rawValue).tag(option)
+                                                        }
+                                                    }
+                                                }
+                                            } label: {
+                                                HStack {
+                                                    Image(systemName: "line.3.horizontal.decrease.circle")
+                                                    Text("Sort & Filter")
+                                                }
+                                                .foregroundColor(.blue)
+                                                Spacer()
+                                                    .padding(.horizontal)
                                             }
                                             
+                                            if noListingsFound {
+                                                VStack(spacing: 12) {
+                                                    Text("No listings available for your selected vehicle and part.")
+                                                        .font(.body)
+                                                        .foregroundColor(.gray)
+                                                        .multilineTextAlignment(.center)
+                                                        .padding()
+                                                    
+                                                    Button(action: {
+                                                        redirectToExternalVendor()
+                                                    }) {
+                                                        Text("Search Online for \(selectedCategoryLabel)")
+                                                            .foregroundColor(.white)
+                                                            .padding()
+                                                            .frame(maxWidth: .infinity)
+                                                            .background(Color.blue)
+                                                            .cornerRadius(10)
+                                                    }
+                                                    .padding(.horizontal)
+                                                }
+                                            } else {
+                                                ForEach(sortedListings()) { listing in
+                                                    VStack(alignment: .leading, spacing: 8) {
+                                                        if let urlString = listing.imageUrls.first,
+                                                           let url = URL(string: urlString), !urlString.isEmpty {
+                                                            
+                                                            AsyncImage(url: url) { phase in
+                                                                switch phase {
+                                                                case .empty:
+                                                                    ProgressView().frame(height: 200)
+                                                                case .success(let image):
+                                                                    image
+                                                                        .resizable()
+                                                                        .scaledToFill()
+                                                                        .frame(height: 200)
+                                                                        .clipped()
+                                                                        .cornerRadius(12)
+                                                                case .failure:
+                                                                    Image(systemName: "photo")
+                                                                        .resizable()
+                                                                        .scaledToFit()
+                                                                        .frame(height: 200)
+                                                                        .foregroundColor(.gray)
+                                                                @unknown default:
+                                                                    EmptyView()
+                                                                }
+                                                            }
+                                                        } else {
+                                                            Text("No image available")
+                                                                .frame(height: 200)
+                                                                .frame(maxWidth: .infinity)
+                                                                .background(Color.gray.opacity(0.2))
+                                                                .cornerRadius(12)
+                                                        }
+                                                        
+                                                        Text(listing.description)
+                                                            .font(.subheadline)
+                                                        Text("Condition: \(listing.condition)")
+                                                            .font(.caption)
+                                                            .foregroundColor(.gray)
+                                                        Text("Price: $\(listing.price)")
+                                                            .font(.headline)
+                                                            .foregroundColor(.blue)
+                                                        Text("Phone: \(listing.phoneNumber)")
+                                                            .font(.footnote)
+                                                            .foregroundColor(.secondary)
+                                                        
+                                                        Button(action: {
+                                                            cartManager.addToCart(listing)
+                                                        }) {
+                                                            Label("Add to Cart", systemImage: "cart.badge.plus")
+                                                                .font(.footnote)
+                                                                .foregroundColor(.white)
+                                                                .padding(6)
+                                                                .background(Color.blue)
+                                                                .cornerRadius(8)
+                                                        }
+                                                    }
+                                                    .padding()
+                                                    .background(Color(.systemGray6))
+                                                    .cornerRadius(12)
+                                                    .padding(.horizontal)
+                                                }
+                                            }
                                         }
                                     }
                                     
@@ -308,6 +362,21 @@ struct ContentView: View {
                                     loadVehicleDataFromStorage()
                                 }
                             }
+                        }
+                        .alert(item: $activeAlert) { alertType in
+                            Alert(title: Text(alertType.message))
+                        }
+                        .alert("Are you sure you want to delete this vehicle?", isPresented: $showDeleteConfirmation, presenting: vehiclePendingDeletion) { vehicle in
+                            Button("Delete", role: .destructive) {
+                                deleteVehicleFromFirebase(vehicle: vehicle)
+                                if selectedVehicle == vehicle {
+                                    selectedVehicle = nil
+                                }
+                                activeAlert = .deleted
+                            }
+                            Button("Cancel", role: .cancel) { }
+                        } message: { _ in
+                            Text("This action cannot be undone.")
                         }
                     }
                 }
@@ -334,6 +403,8 @@ struct ContentView: View {
                 }
             }
         }
+        .navigationBarBackButtonHidden(true)
+        .navigationBarHidden(true)
     }
     /*
     var yearPicker: some View {
@@ -506,8 +577,19 @@ struct ContentView: View {
         selectedCategoryLabel = category
         showListings = true
         
+        let firebaseCategoryKeys: [String: String] = [
+            "Engines": "engine",
+            "Batteries": "battery",
+            "Brakes": "brakes",
+            "Fluids": "fluids",
+            "Turbocharger": "turbocharger",
+            "Gaskets": "gasket"
+        ]
+
+        let firebaseKey = firebaseCategoryKeys[category] ?? category.lowercased()
+        
         let ref = Database.database().reference()
-        ref.child("listings").child(category.lowercased()).observeSingleEvent(of: .value) { snapshot in
+        ref.child("listings").child(firebaseKey).observeSingleEvent(of: .value) { snapshot in
             var fetchedListings: [Posting] = []
             
             for child in snapshot.children {
@@ -520,7 +602,15 @@ struct ContentView: View {
                    let type = value["typeOfPart"] as? String,
                    let imageUrls = value["imageUrls"] as? [String] {
                     
-                    let listing = Posting(phoneNumber: phone, description: desc, price: price, condition: condition, typeOfPart: type, imageUrls: imageUrls)
+                    let listing = Posting(
+                        id: snap.key,
+                        phoneNumber: phone,
+                        description: desc,
+                        price: price,
+                        condition: condition,
+                        typeOfPart: type,
+                        imageUrls: imageUrls
+                    )
                     
                     if let vehicle = selectedVehicle {
                         if desc.lowercased().contains(vehicle.make.lowercased()) &&
@@ -534,17 +624,32 @@ struct ContentView: View {
                 }
             }
             selectedCategoryListings = fetchedListings
+            noListingsFound = fetchedListings.isEmpty
+
         }
     }
+    
+        func redirectToExternalVendor() {
+            let part = selectedCategoryLabel.replacingOccurrences(of: " ", with: "+")
+            
+            let searchQuery = "\(part)"
+            let urlString = "https://www.autozone.com/searchresult?searchText=\(searchQuery)"
+            
+            if let url = URL(string: urlString) {
+                UIApplication.shared.open(url)
+            }
+        }
+
     
     func loadAllListings() {
         showListings = true
         selectedCategoryLabel = "All"
         selectedCategoryListings = []
-        
+
         let ref = Database.database().reference().child("listings")
         ref.observeSingleEvent(of: .value) { snapshot in
             var allListings: [Posting] = []
+
             for category in snapshot.children {
                 if let categorySnap = category as? DataSnapshot {
                     for child in categorySnap.children {
@@ -557,15 +662,26 @@ struct ContentView: View {
                            let type = value["typeOfPart"] as? String,
                            let imageUrls = value["imageUrls"] as? [String] {
 
-                            print("Fetched image URLs: \(imageUrls)")
-
-                            let listing = Posting(phoneNumber: phone, description: desc, price: price, condition: condition, typeOfPart: type, imageUrls: imageUrls)
+                            let listing = Posting(
+                                id: snap.key,
+                                phoneNumber: phone,
+                                description: desc,
+                                price: price,
+                                condition: condition,
+                                typeOfPart: type,
+                                imageUrls: imageUrls
+                            )
                             allListings.append(listing)
                         }
                     }
                 }
             }
-            selectedCategoryListings = allListings
+
+            DispatchQueue.main.async {
+                selectedCategoryListings = allListings
+                noListingsFound = allListings.isEmpty
+                print("✅ Loaded \(allListings.count) listings with Show All.")
+            }
         }
     }
     
@@ -591,11 +707,38 @@ struct ContentView: View {
             .cornerRadius(12)
         }
     }
-    
-    struct ContentView_Previews: PreviewProvider {
-        static var previews: some View {
-            ContentView()
+    private func sortedListings() -> [Posting] {
+        var filtered = selectedCategoryListings
+        print("Sorting \(filtered.count) listings for display")
+
+        if selectedCategoryLabel != "All", let vehicle = selectedVehicle {
+            filtered = filtered.filter {
+                $0.description.lowercased().contains(vehicle.make.lowercased()) &&
+                $0.description.lowercased().contains(vehicle.model.lowercased()) &&
+                $0.description.lowercased().contains(vehicle.trim.lowercased())
+            }
+            print("Filtered by vehicle: \(filtered.count) listings remain")
+        }
+
+        if selectedCondition == .new {
+            filtered = filtered.filter { $0.condition.lowercased() == "new" }
+        } else if selectedCondition == .used {
+            filtered = filtered.filter { $0.condition.lowercased() == "used" }
+        }
+
+        switch selectedSortOption {
+        case .lowToHigh:
+            return filtered.sorted { (Double($0.price) ?? 0) < (Double($1.price) ?? 0) }
+        case .highToLow:
+            return filtered.sorted { (Double($0.price) ?? 0) > (Double($1.price) ?? 0) }
+        case .none:
+            return filtered
         }
     }
-    
+}
+
+struct ContentView_Previews: PreviewProvider {
+    static var previews: some View {
+        ContentView()
+    }
 }

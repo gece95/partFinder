@@ -1,11 +1,4 @@
-
-//  HomeViewModel.swift
-//
-//
-//  Created by Emily marrufo on 3/24/25.
-//
-
-import Foundation
+/*import Foundation
 import SwiftUI
 import Combine
 
@@ -25,3 +18,5 @@ class HomeViewModel: ObservableObject {
         Category(icon: "gasket_icon", label: "Gaskets")
     ]
 }
+
+*/
