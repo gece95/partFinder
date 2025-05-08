@@ -12,6 +12,7 @@ struct ResetPasswordView: View {
                 Text("Reset Password")
                     .font(.title)
                     .bold()
+                    .foregroundColor(.white)
 
                 TextField("Enter your email", text: $email)
                     .keyboardType(.emailAddress)
@@ -44,6 +45,7 @@ struct ResetPasswordView: View {
                 Spacer()
             }
             .padding()
+            .background(Color.black.ignoresSafeArea()) // Set background to black
         }
     }
 }

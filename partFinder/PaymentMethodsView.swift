@@ -30,12 +30,20 @@ struct PaymentMethodsView: View {
         NavigationView{
             BaseView{
                 ZStack {
-                    Color.black.ignoresSafeArea()
+                    GeometryReader { geometry in
+                        Image("background")
+                            .resizable()
+                            .scaledToFill()
+                            .ignoresSafeArea()
+                        Color.black.opacity(0.8)
+                            .ignoresSafeArea()
+                    }
                     
                     ScrollView {
                         VStack(spacing: 20) {
                             Text("Payment Methods")
                                 .font(.title2)
+                                .fontWeight(.bold)
                                 .foregroundColor(.white)
                             
                             if !savedCards.isEmpty {
@@ -78,6 +86,7 @@ struct PaymentMethodsView: View {
                                     Text("Save Card")
                                         .foregroundColor(.white)
                                         .padding()
+                                        .fontWeight(.bold)
                                         .frame(maxWidth: .infinity)
                                         .background(Color.blue)
                                         .cornerRadius(10)

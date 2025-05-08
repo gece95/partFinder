@@ -178,9 +178,24 @@ struct VendorsView: View {
                     }
                 } else {
                     VStack(spacing: 20) {
+                        GeometryReader { geometry in
+                            ZStack {
+                                Image("background")
+                                    .resizable()
+                                    .scaledToFill()
+                                    .ignoresSafeArea()
+                                
+                                
+                                Color.black.opacity(0.8)
+                                    .ignoresSafeArea()
+                            }
+                            .ignoresSafeArea()
+                        }
+                        
                         Text("Please log in to post a listing.")
                             .foregroundColor(.white)
                             .font(.headline)
+                            .fontWeight(.bold)
                             .multilineTextAlignment(.center)
 
                         Button("Login / Sign Up") {
